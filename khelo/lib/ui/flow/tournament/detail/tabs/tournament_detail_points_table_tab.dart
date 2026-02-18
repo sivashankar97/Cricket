@@ -68,7 +68,7 @@ class TournamentDetailPointsTableTab extends ConsumerWidget {
             columns: headers
                 .map((title) => _dataColumn(
                       context,
-                      title: title,
+                      title: title.toString(),
                       width: (title == headers.first)
                           ? context.mediaQuerySize.width * 0.4
                           : context.mediaQuerySize.width * 0.07,

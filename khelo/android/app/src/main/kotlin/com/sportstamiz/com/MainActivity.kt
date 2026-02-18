@@ -1,4 +1,4 @@
-package com.canopas.khelo
+package com.sportstamiz.com
 
 import io.flutter.embedding.android.FlutterActivity
 

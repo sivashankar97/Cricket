@@ -50,15 +50,16 @@ class NotificationHandler {
   }
 
   Future<void> _initLocalNotifications(BuildContext context) async {
-    _flutterLocalNotificationsPlugin.initialize(
-      const InitializationSettings(
-          android: AndroidInitializationSettings('khelo_logo'),
-          iOS: DarwinInitializationSettings(
-            requestAlertPermission: false,
-            requestBadgePermission: false,
-            requestSoundPermission: false,
-          )),
-      onDidReceiveNotificationResponse: (response) {
+    await _flutterLocalNotificationsPlugin.initialize(
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('khelo_logo'),
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
+      ),
+      onDidReceiveNotificationResponse: (NotificationResponse response) {
         if (response.payload != null) {
           _onTapNotification(context, jsonDecode(response.payload!));
         }
@@ -66,18 +67,18 @@ class NotificationHandler {
     );
   }
 
-  void showLocalNotification(RemoteMessage event) {
+  Future<void> showLocalNotification(RemoteMessage event) async {
     final notification = event.notification;
     final data = event.data;
     final title = notification?.title;
     final body = notification?.body;
 
     if (title != null && body != null) {
-      _flutterLocalNotificationsPlugin.show(
-          DateTime.now().microsecondsSinceEpoch ~/ 1000000,
-          title,
-          body,
-          NotificationDetails(
+      await _flutterLocalNotificationsPlugin.show(
+          id: DateTime.now().microsecondsSinceEpoch ~/ 1000000,
+          title: title,
+          body: body,
+          notificationDetails: NotificationDetails(
               android: AndroidNotificationDetails(
             _androidChannel.id,
             _androidChannel.name,

@@ -96,12 +96,12 @@ class TournamentDetailMatchesTab extends ConsumerWidget {
         context: context,
         items: filterOptions
             .map((option) => BottomSheetAction(
-                  title: option,
+                  title: option.toString(),
                   enabled: matchFiltered != option,
                   showCheck: matchFiltered == option,
                   onTap: () {
                     context.pop();
-                    onTap(option);
+                    onTap(option.toString());
                   },
                 ))
             .toList());

@@ -89,7 +89,7 @@ class TournamentDetailStatsTab extends ConsumerWidget {
           columns: headers
               .map((title) => _dataColumn(
                     context,
-                    title: title,
+                    title: title.toString(),
                     width: (title == headers.first)
                         ? context.mediaQuerySize.width * 0.45
                         : context.mediaQuerySize.width * 0.1,
