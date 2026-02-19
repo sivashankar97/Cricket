@@ -112,11 +112,16 @@ class _UserStatScreenState extends ConsumerState<UserStatScreen>
   }
 
   Widget _content(BuildContext context, UserStatViewState state) {
-    final testStats = state.userStats
-            ?.firstWhere((element) => element.type == UserStatType.test) ??
+    final testStats = state.userStats?.firstWhere(
+          (element) => element.type == UserStatType.test,
+          orElse: () => UserStat(), // fallback if no match
+        ) ??
         UserStat();
-    final otherStats = state.userStats
-            ?.firstWhere((element) => element.type == UserStatType.other) ??
+
+    final otherStats = state.userStats?.firstWhere(
+          (element) => element.type == UserStatType.other,
+          orElse: () => UserStat(),
+        ) ??
         UserStat();
 
     return Expanded(

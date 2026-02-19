@@ -74,6 +74,7 @@ dependencies:
   cloud_firestore: ^6.1.2
   firebase_crashlytics: ^5.0.7
   firebase_messaging: ^16.1.1
+  firebase_app_check: any
 
   # state management
   flutter_riverpod: ^2.6.1

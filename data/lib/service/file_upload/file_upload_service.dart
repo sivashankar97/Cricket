@@ -19,10 +19,18 @@ class FileUploadService {
     final file = File(filePath);
     if (await file.exists()) {
       try {
-        final snapshot =
-            await _firebaseStorage.ref().child(uploadPath).putFile(file);
-        final downloadUrl = await snapshot.ref.getDownloadURL();
-        return downloadUrl;
+        final ref = _firebaseStorage.ref().child(uploadPath);
+        try {
+          final snapshot = await ref.putFile(file);
+          final downloadUrl = await snapshot.ref.getDownloadURL();
+          return downloadUrl;
+        } catch (e) {
+          // Log the path and error, then retry once as a fresh upload
+          print('FileUploadService: upload failed for path $uploadPath -> $e');
+          final snapshot = await ref.putFile(file);
+          final downloadUrl = await snapshot.ref.getDownloadURL();
+          return downloadUrl;
+        }
       } catch (error, stack) {
         throw AppError.fromError(error, stack);
       }
