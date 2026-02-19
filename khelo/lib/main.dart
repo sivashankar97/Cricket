@@ -1,5 +1,6 @@
 import 'package:data/storage/provider/preferences_provider.dart';
 import 'package:data/utils/constant/firestore_constant.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -24,6 +25,13 @@ Future<ProviderContainer> _initContainer() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  if (!kDebugMode) {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: AndroidProvider.playIntegrity,
+      appleProvider: AppleProvider.deviceCheck,
+    );
+  }
 
   DataConfig.init(
     DataConfig(
