@@ -1,3 +1,8 @@
+// Fix for Node 25 compatibility
+if (!global.SlowBuffer) {
+  global.SlowBuffer = Buffer;
+}
+
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {value: true});
@@ -92,3 +97,11 @@ exports.fiveMinuteCron = (0, scheduler.onSchedule)({timeZone: exports.TIMEZONE, 
 });
 
 exports.apiv1 = (0, callable.onRequest)({region: REGION, concurrency: 100, cors: true}, expressApp);
+
+// For local development, run as standalone server
+if (require.main === module) {
+  const port = process.env.PORT || 8000;
+  expressApp.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
