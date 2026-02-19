@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
 import '../../extensions/string_extensions.dart';
@@ -187,6 +187,113 @@ class AuthService {
       await _userService.deleteUser();
       _currentUserNotifier.state = null;
       await _auth.currentUser?.delete();
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Sign in with Google
+  Future<void> signInWithGoogle() async {
+    try {
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) return; // User cancelled sign-in
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential =
+          await _auth.signInWithCredential(credential);
+
+      await _onGoogleSignInSuccess(userCredential);
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Sign in with Email
+  Future<void> signInWithEmail(String email, String password) async {
+    try {
+      final UserCredential userCredential =
+          await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      await _onEmailSignInSuccess(userCredential);
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Sign up with Email
+  Future<void> signUpWithEmail(String email, String password) async {
+    try {
+      final UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      await _onEmailSignInSuccess(userCredential);
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Handle Google sign-in success
+  Future<void> _onGoogleSignInSuccess(UserCredential credential) async {
+    try {
+      if (credential.user == null) {
+        _currentUserNotifier.state = null;
+        _userSessionNotifier.state = null;
+        return;
+      }
+
+      final (user, session) = await _userService.upsertUser(
+        uid: credential.user!.uid,
+        phone: credential.user!.email ?? '',
+      );
+
+      _currentUserNotifier.state = user.toJsonString();
+      _userSessionNotifier.state = session.toJsonString();
+
+      final deviceToken = await FirebaseMessaging.instance.getToken();
+      if (deviceToken != null) {
+        await registerDevice(deviceToken);
+      }
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Handle Email sign-in success
+  Future<void> _onEmailSignInSuccess(UserCredential credential) async {
+    try {
+      if (credential.user == null) {
+        _currentUserNotifier.state = null;
+        _userSessionNotifier.state = null;
+        return;
+      }
+
+      final (user, session) = await _userService.upsertUser(
+        uid: credential.user!.uid,
+        phone: credential.user!.email ?? '',
+      );
+
+      _currentUserNotifier.state = user.toJsonString();
+      _userSessionNotifier.state = session.toJsonString();
+
+      final deviceToken = await FirebaseMessaging.instance.getToken();
+      if (deviceToken != null) {
+        await registerDevice(deviceToken);
+      }
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
