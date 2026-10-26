@@ -4,6 +4,11 @@ import 'package:flutter/services.dart';
 import '../extensions/context_extensions.dart';
 import 'app_text_style.dart';
 
+/// iOS HIG–style text field.
+///
+/// Default border type is now [AppTextFieldBorderType.outline] with a rounded
+/// gray fill (like iOS grouped row inputs). The underline style is retained for
+/// backward compat but is rarely used in iOS-first designs.
 class AppTextField extends StatelessWidget {
   final String? label;
   final TextStyle? labelStyle;
@@ -31,6 +36,7 @@ class AppTextField extends StatelessWidget {
   final Function(String)? onChanged;
   final Function(String)? onSubmitted;
   final bool autoFocus;
+  final bool obscureText;
   final TextInputType? keyboardType;
   final FocusNode? focusNode;
   final TextAlign textAlign;
@@ -55,9 +61,10 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.onChanged,
     this.onSubmitted,
-    this.borderType = AppTextFieldBorderType.underline,
+    // iOS default: rounded outline with filled gray background
+    this.borderType = AppTextFieldBorderType.outline,
     this.borderColor,
-    this.borderWidth = 1,
+    this.borderWidth = 0,
     this.textInputAction,
     this.borderRadius,
     this.hintText,
@@ -68,6 +75,7 @@ class AppTextField extends StatelessWidget {
     this.isDense,
     this.isCollapsed,
     this.autoFocus = false,
+    this.obscureText = false,
     this.keyboardType,
     this.focusNode,
     this.inputFormatters,
@@ -80,6 +88,8 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.colorScheme;
+
     if (label == null) {
       return _textField(context);
     }
@@ -90,113 +100,126 @@ class AppTextField extends StatelessWidget {
         Text(
           label!,
           style: labelStyle ??
-              AppTextStyle.body2.copyWith(
-                color: context.colorScheme.textDisabled,
+              AppTextStyle.caption.copyWith(
+                color: cs.textSecondary,
+                fontWeight: FontWeight.w500,
               ),
         ),
         if (borderType == AppTextFieldBorderType.outline)
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
         _textField(context),
       ],
     );
   }
 
-  Widget _textField(BuildContext context) => Material(
-        color: Colors.transparent,
-        borderRadius: borderRadius,
-        child: TextField(
-          controller: controller,
-          onChanged: onChanged,
-          enabled: enabled,
-          maxLines: maxLines,
-          minLines: minLines,
-          inputFormatters: inputFormatters,
-          textCapitalization: textCapitalization,
-          expands: expands,
-          textInputAction: textInputAction,
-          autofocus: autoFocus,
-          keyboardType: keyboardType,
-          focusNode: focusNode,
-          onSubmitted: onSubmitted,
-          textAlign: textAlign,
-          style: style ??
-              AppTextStyle.subtitle2.copyWith(
-                color: context.colorScheme.textPrimary,
-              ),
-          onTapOutside: onTapOutside ??
-              (event) {
-                FocusManager.instance.primaryFocus?.unfocus();
-              },
-          buildCounter: (context,
-                  {required currentLength,
-                  required isFocused,
-                  required maxLength}) =>
-              const SizedBox(),
-          maxLength: maxLength,
-          decoration: InputDecoration(
-            prefixIcon: prefixIcon,
-            isDense: isDense,
-            isCollapsed: isCollapsed,
-            errorText: errorText,
-            errorStyle: errorStyle ??
-                AppTextStyle.caption.copyWith(color: context.colorScheme.alert),
-            hintText: hintText,
-            hintStyle: hintStyle,
-            fillColor: backgroundColor,
-            suffixIcon: suffixIcon,
-            prefixIconConstraints: prefixIconConstraints,
-            filled: backgroundColor != null,
-            focusedBorder: _border(context, true),
-            enabledBorder: _border(context, false),
-            focusedErrorBorder: _border(context, true, isError: true),
-            errorBorder: _border(context, false, isError: true),
-            contentPadding: contentPadding ??
-                (borderType == AppTextFieldBorderType.outline
-                    ? const EdgeInsets.all(12)
-                    : null),
-          ),
-        ),
-      );
+  Widget _textField(BuildContext context) {
+    final cs = context.colorScheme;
+    // iOS-style rounded fill when no explicit background is provided
+    final fillColor = backgroundColor ?? cs.containerLowOnSurface;
 
-  InputBorder _border(BuildContext context, bool focused,
-      {bool isError = false}) {
+    return Material(
+      color: Colors.transparent,
+      borderRadius: borderRadius ?? BorderRadius.circular(10),
+      child: TextField(
+        controller: controller,
+        onChanged: onChanged,
+        enabled: enabled,
+        maxLines: maxLines,
+        minLines: minLines,
+        inputFormatters: inputFormatters,
+        textCapitalization: textCapitalization,
+        expands: expands,
+        textInputAction: textInputAction,
+        autofocus: autoFocus,
+        obscureText: obscureText,
+        keyboardType: keyboardType,
+        focusNode: focusNode,
+        onSubmitted: onSubmitted,
+        textAlign: textAlign,
+        style: style ??
+            AppTextStyle.subtitle2.copyWith(
+              color: cs.textPrimary,
+            ),
+        onTapOutside: onTapOutside ??
+            (event) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            },
+        buildCounter: (
+          context, {
+          required currentLength,
+          required isFocused,
+          required maxLength,
+        }) =>
+            const SizedBox(),
+        maxLength: maxLength,
+        decoration: InputDecoration(
+          prefixIcon: prefixIcon,
+          isDense: isDense,
+          isCollapsed: isCollapsed,
+          errorText: errorText,
+          errorStyle: errorStyle ??
+              AppTextStyle.caption.copyWith(color: cs.alert),
+          hintText: hintText,
+          hintStyle: hintStyle ??
+              AppTextStyle.subtitle3.copyWith(color: cs.textDisabled),
+          fillColor: fillColor,
+          suffixIcon: suffixIcon,
+          prefixIconConstraints: prefixIconConstraints,
+          filled: true,
+          focusedBorder: _border(context, true),
+          enabledBorder: _border(context, false),
+          focusedErrorBorder: _border(context, true, isError: true),
+          errorBorder: _border(context, false, isError: true),
+          contentPadding: contentPadding ??
+              (borderType == AppTextFieldBorderType.outline
+                  ? const EdgeInsets.symmetric(horizontal: 14, vertical: 12)
+                  : null),
+        ),
+      ),
+    );
+  }
+
+  InputBorder _border(
+    BuildContext context,
+    bool focused, {
+    bool isError = false,
+  }) {
+    final cs = context.colorScheme;
     switch (borderType) {
       case AppTextFieldBorderType.none:
-        return const UnderlineInputBorder(
-          borderSide: BorderSide.none,
-        );
+        return const UnderlineInputBorder(borderSide: BorderSide.none);
       case AppTextFieldBorderType.outline:
         return OutlineInputBorder(
-          borderRadius: borderRadius ?? BorderRadius.circular(8),
-          borderSide: BorderSide(
-            color: isError
-                ? context.colorScheme.alert
-                : focused
-                    ? borderColor?.focusColor ?? context.colorScheme.primary
-                    : borderColor?.unFocusColor ?? context.colorScheme.outline,
-            width: borderWidth,
-          ),
+          borderRadius: borderRadius ?? BorderRadius.circular(10),
+          borderSide: isError
+              ? BorderSide(color: cs.alert, width: 1)
+              // iOS fields show a visible blue border only when focused
+              : focused
+                  ? BorderSide(
+                      color: borderColor?.focusColor ?? cs.primary,
+                      width: 1.5,
+                    )
+                  : BorderSide(
+                      color: borderColor?.unFocusColor ?? Colors.transparent,
+                      width: 0,
+                    ),
         );
       case AppTextFieldBorderType.underline:
         return UnderlineInputBorder(
           borderSide: BorderSide(
             color: isError
-                ? context.colorScheme.alert
+                ? cs.alert
                 : focused
-                    ? borderColor?.focusColor ?? context.colorScheme.primary
-                    : borderColor?.unFocusColor ?? context.colorScheme.outline,
-            width: borderWidth,
+                    ? borderColor?.focusColor ?? cs.primary
+                    : borderColor?.unFocusColor ?? cs.outline,
+            width: borderWidth > 0 ? borderWidth : 0.5,
           ),
         );
     }
   }
 }
 
-enum AppTextFieldBorderType {
-  none,
-  outline,
-  underline,
-}
+enum AppTextFieldBorderType { none, outline, underline }
 
 class BorderColor {
   Color? focusColor;

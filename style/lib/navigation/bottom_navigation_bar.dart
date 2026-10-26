@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../extensions/context_extensions.dart';
 import '../text/app_text_style.dart';
+import '../theme/shadows.dart';
 
 typedef TabTapMethodBuilder = void Function(
     BuildContext context, void Function(int) onTabTap);
@@ -60,14 +61,11 @@ class _AppBottomNavigationBarState extends State<AppBottomNavigationBar> {
     final colors = context.colorScheme;
     return Container(
       decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: context.colorScheme.outline,
-            width: 1,
-          ),
-        ),
+        color: colors.surface,
+        boxShadow: colors.bottomBarShadow,
       ),
       child: BottomNavigationBar(
+        elevation: 0,
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         unselectedItemColor: colors.textDisabled,

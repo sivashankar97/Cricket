@@ -1,5 +1,5 @@
 {
-  "app_title": "Khelo",
+  "app_title": "Sports Tamil",
   "@_COMMON": {
   },
   "common_none_title": "None",
@@ -132,7 +132,31 @@
   "sign_in_phone_number_placeholder": "00000 00000",
   "sign_in_get_otp_btn_text": "Get OTP",
   "sign_in_invalid_phone_number_text": "Please enter valid phone number",
-
+  "sign_in_options_title": "Sign in",
+  "sign_in_options_description": "Choose how you want to sign in.",
+  "sign_in_email_option": "Continue with email",
+  "sign_in_whatsapp_option": "Continue with WhatsApp",
+  "sign_in_whatsapp_unavailable": "WhatsApp sign-in is not configured yet. A verified WhatsApp number and sign-in service are required.",
+  "sign_in_email_title": "Sign in with email",
+  "sign_in_email_description": "Enter your email and we’ll send you a one-time code.",
+  "sign_in_email_code_title": "Check your email",
+  "sign_in_email_code_description": "Enter the 6-digit code sent to {email}.",
+  "@sign_in_email_code_description": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "sign_in_email_placeholder": "Email",
+  "sign_in_email_code_placeholder": "000000",
+  "sign_in_send_code": "Send code",
+  "sign_in_verify_code": "Verify code",
+  "sign_in_resend_code": "Resend code",
+  "sign_in_change_email": "Use a different email",
+  "sign_in_email_bridge_pending": "Your email code is verified, but app sign-in is not enabled until the secure Firebase auth bridge is configured.",
+  "sign_in_required_title": "Sign in to continue",
+  "sign_in_required_description": "Sign in to see your matches, teams, stats, and profile.",
   "otp_verification_verification_title": "Verification code",
   "otp_verification_incorrect_otp_error_text": "*Please enter correct OTP",
   "otp_verification_verify_placeholder": "0 0 0 0 0 0",
@@ -346,9 +370,22 @@
   "add_team_member_details_title": "Details",
   "add_team_member_search_placeholder_text": "Search member name",
   "add_team_member_empty_title": "Your cricket crew awaits!",
-  "add_team_member_empty_description_text": "The pitch is set, but you need your players. Find them with a quick search.",
+  "add_team_member_empty_description_text": "Search for players already on Sports Tamil, or create a new player with just a name — no app account needed.",
   "add_team_member_search_no_result_title": "Oops! No User Found",
-  "add_team_member_search_description_text": "It seems we don't have anyone by that name. Give another name a go!",
+  "add_team_member_search_description_text": "No one on Sports Tamil by that name. Create them as a new player and add them right away.",
+  "add_team_member_create_player_title": "New player",
+  "add_team_member_create_player_description": "Add a player who doesn't use Sports Tamil. Only the name is required.",
+  "add_team_member_create_player_name": "Player name",
+  "add_team_member_create_player_phone": "Phone number (optional)",
+  "add_team_member_create_player_button": "Create player",
+  "add_team_member_create_named_player": "Create \"{name}\"",
+  "@add_team_member_create_named_player": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "add_team_member_added_text": "ADDED",
   "add_team_member_already_added": "Member already added",
   "add_team_member_verify_error_text": "Please enter correct digits",
@@ -401,6 +438,24 @@
   "add_match_pitch_type_astroturf_title": "Astroturf",
   "add_match_pitch_type_matting_title": "Matting",
   "add_match_match_officials_title": "Match Officials",
+  "match_rules_title": "Match Rules",
+  "match_rules_balls_per_over_title": "Balls per over",
+  "match_rules_balls_per_over_summary": "{count}-ball overs",
+  "@match_rules_balls_per_over_summary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "match_rules_wide_runs_title": "Runs for a wide",
+  "match_rules_no_ball_runs_title": "Runs for a no-ball",
+  "match_rules_wide_rebowl_title": "Re-bowl wides",
+  "match_rules_wide_rebowl_description": "When off, a wide counts as one of the balls in the over",
+  "match_rules_free_hit_title": "Free hit after no-ball",
+  "match_rules_free_hit_description": "The next ball after a no-ball can only be a run out",
+  "match_rules_last_man_standing_title": "Last man standing",
+  "match_rules_last_man_standing_description": "The last batter can keep batting alone",
   "add_match_officials_umpires_title": "Umpires",
   "add_match_officials_scorers_title": "Scorers",
   "add_match_officials_live_streamers_title": "Live Streamers",
@@ -833,6 +888,14 @@
   "score_board_batsman_title": "batsMan",
   "score_board_bowler_title": "bowler",
   "score_board_change_striker_title": "Change striker",
+  "score_board_free_hit_text": "FREE HIT",
+  "score_board_edit_match_title": "Edit match details",
+  "score_board_replace_player_title": "Replace player",
+  "score_board_replace_player_description": "Swap a Playing XI player who hasn't batted, bowled or fielded yet",
+  "score_board_replace_team_title": "Team",
+  "score_board_replace_out_title": "Player going out",
+  "score_board_replace_in_title": "Player coming in",
+  "score_board_replace_no_player_text": "No eligible players",
   "score_board_option_end_match": "End match",
   "score_board_option_handover_scoring": "Handover scoring",
   "score_board_handover_scoring_empty_title": "Handover scoring control",
@@ -958,7 +1021,7 @@
   "profile_setting_scan_to_play_text": "Scan to play!",
   "profile_setting_scan_to_play_description": "This QR code allows you to easily add the player to the team.",
   "profile_setting_use_scanner_description": "Use your phone camera or a QR code app to scan the code above and easily add the player to the team.",
-  "profile_setting_share_app_message": "Elevate your cricket scoring game with Khelo! 🏏\n\nEffortlessly score matches, track stats, and manage your teams.\n\n👉 Download Now:\n📱 Android: {androidLink}\n🍎 iOS: {iosLink}\n\nStart scoring smarter today!",
+  "profile_setting_share_app_message": "Elevate your cricket scoring game with Sports Tamil! 🏏\n\nEffortlessly score matches, track stats, and manage your teams.\n\n👉 Download Now:\n📱 Android: {androidLink}\n🍎 iOS: {iosLink}\n\nStart scoring smarter today!",
   "@profile_setting_share_app_message" : {
     "placeholders": {
         "androidLink": {

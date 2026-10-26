@@ -8,6 +8,7 @@ import 'package:khelo/components/error_screen.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/flow/stats/user_stat/user_stat_view_model.dart';
 import 'package:khelo/ui/flow/team/user_detail/component/user_detail_fielding_content.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
@@ -92,6 +93,7 @@ class _UserStatScreenState extends ConsumerState<UserStatScreen>
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: List.generate(
@@ -101,7 +103,7 @@ class _UserStatScreenState extends ConsumerState<UserStatScreen>
             child: TabButton(
               tabs[index],
               onTap: () {
-                _controller.jumpToPage(index);
+                _controller.animateToTab(index);
               },
               selected: index == _selectedTab,
             ),

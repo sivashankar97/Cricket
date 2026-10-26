@@ -56,6 +56,7 @@ class MatchModel with _$MatchModel {
     String? toss_winner_id,
     String? current_playing_team_id,
     RevisedTarget? revised_target,
+    @Default(MatchRules()) MatchRules rules,
     @TimeStampJsonConverter() DateTime? updated_at,
   }) = _MatchModel;
 
@@ -85,6 +86,83 @@ class MatchSetting with _$MatchSetting {
     SnapshotOptions? options,
   ) =>
       MatchSetting.fromJson(snapshot.data()!);
+}
+
+class MatchRules {
+  final int balls_per_over;
+  final int wide_runs;
+  final bool wide_rebowl;
+  final int no_ball_runs;
+  final bool free_hit;
+  final bool last_man_standing;
+
+  const MatchRules({
+    this.balls_per_over = 6,
+    this.wide_runs = 1,
+    this.wide_rebowl = true,
+    this.no_ball_runs = 1,
+    this.free_hit = true,
+    this.last_man_standing = false,
+  });
+
+  static const ballsPerOverOptions = [4, 5, 6, 8];
+  static const wideRunOptions = [0, 1, 2];
+  static const noBallRunOptions = [1, 2];
+
+  factory MatchRules.fromJson(Map<dynamic, dynamic> json) => MatchRules(
+        balls_per_over: (json['balls_per_over'] as num?)?.toInt() ?? 6,
+        wide_runs: (json['wide_runs'] as num?)?.toInt() ?? 1,
+        wide_rebowl: json['wide_rebowl'] as bool? ?? true,
+        no_ball_runs: (json['no_ball_runs'] as num?)?.toInt() ?? 1,
+        free_hit: json['free_hit'] as bool? ?? true,
+        last_man_standing: json['last_man_standing'] as bool? ?? false,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'balls_per_over': balls_per_over,
+        'wide_runs': wide_runs,
+        'wide_rebowl': wide_rebowl,
+        'no_ball_runs': no_ball_runs,
+        'free_hit': free_hit,
+        'last_man_standing': last_man_standing,
+      };
+
+  MatchRules copyWith({
+    int? balls_per_over,
+    int? wide_runs,
+    bool? wide_rebowl,
+    int? no_ball_runs,
+    bool? free_hit,
+    bool? last_man_standing,
+  }) =>
+      MatchRules(
+        balls_per_over: balls_per_over ?? this.balls_per_over,
+        wide_runs: wide_runs ?? this.wide_runs,
+        wide_rebowl: wide_rebowl ?? this.wide_rebowl,
+        no_ball_runs: no_ball_runs ?? this.no_ball_runs,
+        free_hit: free_hit ?? this.free_hit,
+        last_man_standing: last_man_standing ?? this.last_man_standing,
+      );
+
+  @override
+  bool operator ==(Object other) =>
+      other is MatchRules &&
+      other.balls_per_over == balls_per_over &&
+      other.wide_runs == wide_runs &&
+      other.wide_rebowl == wide_rebowl &&
+      other.no_ball_runs == no_ball_runs &&
+      other.free_hit == free_hit &&
+      other.last_man_standing == last_man_standing;
+
+  @override
+  int get hashCode => Object.hash(
+        balls_per_over,
+        wide_runs,
+        wide_rebowl,
+        no_ball_runs,
+        free_hit,
+        last_man_standing,
+      );
 }
 
 @freezed
@@ -204,8 +282,11 @@ extension DataMatchModel on MatchModel {
           ? element.team.id != toss_winner_id
           : element.team.id == toss_winner_id,
     );
-    final overRemained =
-        number_of_over.toDouble().remove(secondInningTeam.over.toBalls());
+    final bpo = rules.balls_per_over;
+    final overRemained = number_of_over.toDouble().remove(
+          secondInningTeam.over.toBalls(ballsPerOver: bpo),
+          ballsPerOver: bpo,
+        );
 
     return match_status == MatchStatus.running &&
         current_playing_team_id == secondInningTeam.team.id &&
@@ -367,7 +448,8 @@ extension SingleMatchTeamStatExtension on MatchModel {
         : 0.0;
 
     final matchOvers = team.over;
-    final updatedOvers = totalOvers.add(matchOvers.toBalls());
+    final updatedOvers = totalOvers
+        .add(matchOvers.toBalls(ballsPerOver: rules.balls_per_over));
 
     return TeamStat(
       played: currentStat.played + 1,

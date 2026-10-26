@@ -9,6 +9,7 @@ import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/flow/team/detail/components/primer_progress_bar.dart';
 import 'package:khelo/ui/flow/team/detail/team_detail_view_model.dart';
 import 'package:style/extensions/context_extensions.dart';
+import 'package:style/theme/shadows.dart';
 import 'package:style/text/app_text_style.dart';
 
 class TeamDetailStatContent extends ConsumerWidget {
@@ -76,9 +77,7 @@ class TeamDetailStatContent extends ConsumerWidget {
   Widget _teamStatsView(BuildContext context, TeamStat stat) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-          border: Border.all(color: context.colorScheme.outline),
-          borderRadius: BorderRadius.circular(16)),
+      decoration: context.colorScheme.cardDecoration(),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

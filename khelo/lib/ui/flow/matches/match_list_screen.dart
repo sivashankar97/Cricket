@@ -52,10 +52,10 @@ class _MatchListScreenState extends ConsumerState<MatchListScreen>
     MatchListViewNotifier notifier,
     MatchListViewState state,
   ) {
-    if (state.loading) {
+    if (state.loading && state.matches.isEmpty) {
       return const Center(child: AppProgressIndicator());
     }
-    if (state.error != null) {
+    if (state.error != null && state.matches.isEmpty) {
       return ErrorScreen(
         error: state.error,
         onRetryTap: notifier.loadMatches,
@@ -65,7 +65,7 @@ class _MatchListScreenState extends ConsumerState<MatchListScreen>
     return (state.matches.isNotEmpty)
         ? ListView.separated(
             padding: context.mediaQueryPadding + const EdgeInsets.all(16),
-            itemCount: state.matches.length + 1,
+            itemCount: state.matches.length + (notifier.hasMore ? 1 : 0),
             separatorBuilder: (context, index) => const SizedBox(height: 16),
             itemBuilder: (context, index) {
               if (index < state.matches.length) {
@@ -90,7 +90,7 @@ class _MatchListScreenState extends ConsumerState<MatchListScreen>
                 );
               }
               return OnVisibleCallback(
-                onVisible: () => runPostFrame(notifier.loadMatches),
+                onVisible: () => runPostFrame(notifier.loadMore),
                 child: (state.loading && state.matches.isNotEmpty)
                     ? const Center(child: AppProgressIndicator())
                     : const SizedBox(),

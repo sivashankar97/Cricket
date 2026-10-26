@@ -32,6 +32,7 @@ class BallScoreModel with _$BallScoreModel {
     String? wicket_taker_id,
     required bool is_four,
     required bool is_six,
+    bool? legal_delivery,
     DateTime? time,
     @TimeStampJsonConverter() DateTime? score_time,
   }) = _BallScoreModel;
@@ -79,6 +80,18 @@ enum WicketType {
   final int value;
 
   const WicketType(this.value);
+
+  bool get isCreditedToBowler => switch (this) {
+        WicketType.bowled ||
+        WicketType.caught ||
+        WicketType.caughtBehind ||
+        WicketType.caughtAndBowled ||
+        WicketType.lbw ||
+        WicketType.stumped ||
+        WicketType.hitWicket =>
+          true,
+        _ => false,
+      };
 }
 
 @JsonEnum(valueField: "value")
@@ -173,6 +186,7 @@ class OverSummary with _$OverSummary {
     @Default(ExtraSummary()) ExtraSummary extrasSummary,
     @Default(0) int totalRuns,
     @Default(0) int totalWickets,
+    @Default(6) int ballsPerOver,
   }) = _OverSummary;
 }
 
@@ -231,6 +245,7 @@ extension BallScoreModelData on BallScoreModel? {
     if (this == null) {
       return null;
     }
+    if (this!.legal_delivery != null) return this!.legal_delivery;
     return this!.extras_type != ExtrasType.penaltyRun &&
         this!.extras_type != ExtrasType.noBall &&
         this!.extras_type != ExtrasType.wide &&
@@ -245,12 +260,13 @@ extension OverSummaryMetaData on OverSummary {
       runs == 0 &&
       wickets == 0 &&
       extras == 0 &&
-      balls.lastOrNull?.ball_number == 6 &&
+      balls.lastOrNull?.ball_number == ballsPerOver &&
       (balls.lastOrNull?.isLegalDelivery() ?? false);
 
   double get overCount {
-    final int totalBalls = ((overNumber - 1) * 6) + legalDeliveriesCount;
-    return totalBalls.toOvers();
+    final int totalBalls =
+        ((overNumber - 1) * ballsPerOver) + legalDeliveriesCount;
+    return totalBalls.toOvers(ballsPerOver: ballsPerOver);
   }
 
   int get legalDeliveriesCount =>
@@ -291,13 +307,7 @@ extension OverSummaryMetaData on OverSummary {
     final runsConceded = bowler.runsConceded - runsInOver;
     final maiden = bowler.maiden - (isMaiden ? 1 : 0);
     final wicketsInOver = balls
-        .where(
-          (element) =>
-              element.wicket_type != null &&
-              element.wicket_type != WicketType.retired &&
-              element.wicket_type != WicketType.retiredHurt &&
-              element.wicket_type != WicketType.timedOut,
-        )
+        .where((element) => element.wicket_type?.isCreditedToBowler ?? false)
         .length;
     final wickets = bowler.wicket - wicketsInOver;
     final noBallInOver = balls
@@ -308,7 +318,8 @@ extension OverSummaryMetaData on OverSummary {
         balls.where((element) => element.extras_type == ExtrasType.wide).length;
     final wideBalls = bowler.wideBalls - wideBallInOver;
 
-    final overDelivered = bowler.overDelivered.remove(legalDeliveriesCount);
+    final overDelivered = bowler.overDelivered
+        .remove(legalDeliveriesCount, ballsPerOver: ballsPerOver);
     return bowler.copyWith(
       wideBalls: wideBalls,
       runsConceded: runsConceded,
@@ -369,6 +380,7 @@ extension OverSummaryMetaData on OverSummary {
       bowler: bowler.addBall(
         ball,
         isMaidenWithoutTheBall: runs == 0 && wickets == 0 && extras == 0,
+        ballsPerOver: ballsPerOver,
       ),
       outPlayers: outPlayersList,
       striker: configuredStriker,
@@ -420,7 +432,11 @@ extension OverSummaryMetaData on OverSummary {
       totalWickets: totalWicketCount,
       extrasSummary: extraSummaryDetail,
       balls: ballScores,
-      bowler: bowler.removeBall(ball, isMaidenIncludingBall: isMaiden),
+      bowler: bowler.removeBall(
+        ball,
+        isMaidenIncludingBall: isMaiden,
+        ballsPerOver: ballsPerOver,
+      ),
       outPlayers: outPlayersList,
       striker: lastBall?.batsman_id == configuredStriker.player.id
           ? configuredStriker
@@ -440,14 +456,12 @@ extension BowlerSummaryMetaData on BowlerSummary {
   BowlerSummary addBall(
     BallScoreModel ball, {
     required bool isMaidenWithoutTheBall,
+    int ballsPerOver = 6,
   }) {
     if (ball.bowler_id != player.id) {
       return this;
     }
-    final wicketCount = ball.wicket_type != null &&
-            ball.wicket_type != WicketType.retired &&
-            ball.wicket_type != WicketType.retiredHurt &&
-            ball.wicket_type != WicketType.timedOut
+    final wicketCount = (ball.wicket_type?.isCreditedToBowler ?? false)
         ? wicket + 1
         : wicket;
 
@@ -458,7 +472,7 @@ extension BowlerSummaryMetaData on BowlerSummary {
         ball.extras_type == ExtrasType.wide ? wideBalls + 1 : wideBalls;
 
     final overDeliverCount = (ball.isLegalDelivery() ?? false)
-        ? overDelivered.add(1)
+        ? overDelivered.add(1, ballsPerOver: ballsPerOver)
         : overDelivered;
 
     final runCount = ball.extras_type == null ||
@@ -468,7 +482,7 @@ extension BowlerSummaryMetaData on BowlerSummary {
         : runsConceded;
 
     final maidenCount = isMaidenWithoutTheBall &&
-            ball.ball_number == 6 &&
+            ball.ball_number == ballsPerOver &&
             (ball.isLegalDelivery() ?? false) &&
             ball.extras_type == null &&
             ball.wicket_type == null &&
@@ -489,14 +503,12 @@ extension BowlerSummaryMetaData on BowlerSummary {
   BowlerSummary removeBall(
     BallScoreModel ball, {
     required bool isMaidenIncludingBall,
+    int ballsPerOver = 6,
   }) {
     if (ball.bowler_id != player.id) {
       return this;
     }
-    final wicketCount = ball.wicket_type != null &&
-            ball.wicket_type != WicketType.retired &&
-            ball.wicket_type != WicketType.retiredHurt &&
-            ball.wicket_type != WicketType.timedOut
+    final wicketCount = (ball.wicket_type?.isCreditedToBowler ?? false)
         ? wicket - 1
         : wicket;
 
@@ -507,7 +519,7 @@ extension BowlerSummaryMetaData on BowlerSummary {
         ball.extras_type == ExtrasType.wide ? wideBalls - 1 : wideBalls;
 
     final overDeliverCount = (ball.isLegalDelivery() ?? false)
-        ? overDelivered.remove(1)
+        ? overDelivered.remove(1, ballsPerOver: ballsPerOver)
         : overDelivered;
 
     final runCount = ball.extras_type == null ||
@@ -517,7 +529,7 @@ extension BowlerSummaryMetaData on BowlerSummary {
         : runsConceded;
 
     final maidenCount = isMaidenIncludingBall &&
-            ball.ball_number == 6 &&
+            ball.ball_number == ballsPerOver &&
             (ball.isLegalDelivery() ?? false) &&
             ball.extras_type == null &&
             ball.wicket_type == null &&
@@ -538,6 +550,7 @@ extension BowlerSummaryMetaData on BowlerSummary {
 
 extension BatsmanSummaryMetaData on BatsmanSummary {
   double get strikeRate {
+    if (ballFaced == 0) return 0;
     return double.parse(((runs / ballFaced) * 100).toStringAsFixed(1));
   }
 
@@ -755,13 +768,7 @@ extension BallScoreList on List<BallScoreModel> {
     final deliveries = where((element) => element.bowler_id == currentUserId);
 
     final wicketTaken = deliveries
-        .where(
-          (element) =>
-              element.wicket_type != null &&
-              element.wicket_type != WicketType.retired &&
-              element.wicket_type != WicketType.retiredHurt &&
-              element.wicket_type != WicketType.timedOut,
-        )
+        .where((element) => element.wicket_type?.isCreditedToBowler ?? false)
         .length;
 
     final bowledBallCount = deliveries

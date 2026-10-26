@@ -1,4 +1,5 @@
 import 'package:data/api/user/user_models.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
@@ -35,8 +36,8 @@ class _CompleteProfileProgressState
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.only(top: 24),
         decoration: BoxDecoration(
-          border: Border.all(color: context.colorScheme.outline),
-          borderRadius: BorderRadius.circular(16),
+          color: context.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -87,10 +88,11 @@ class _CompleteProfileProgressState
       child: Row(
         children: [
           Icon(
-            Icons.check_circle_rounded,
+            CupertinoIcons.circle,
+            size: 18,
             color: context.colorScheme.containerHigh,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Text(
             title,
             style: AppTextStyle.body1.copyWith(

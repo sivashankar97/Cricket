@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:style/extensions/context_extensions.dart';
 
+/// iOS-style Cupertino navigation bar with no bottom separator.
+///
+/// Uses a frosted-glass-like translucent background by default (matching
+/// native iOS navigation bar behaviour). Supports leading, middle, trailing.
 class CustomCupertinoNavigationBar extends StatelessWidget
     implements ObstructingPreferredSizeWidget {
   final Widget? leading;
@@ -26,33 +30,45 @@ class CustomCupertinoNavigationBar extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+    final isDark = context.brightness == Brightness.dark;
     SystemChrome.setSystemUIOverlayStyle(
-      context.brightness == Brightness.dark
-          ? SystemUiOverlayStyle.light
-          : SystemUiOverlayStyle.dark,
+      isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     );
+
+    // iOS nav bar background: slightly translucent white / dark
+    final bgColor = backgroundColor ??
+        (isDark
+            ? const Color(0xF0000000) // 94% opaque true-black
+            : const Color(0xF2F9F9F9)); // ~95% opaque white
 
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
-        border: null,
+        color: bgColor,
+        // iOS uses a hairline separator at the bottom — no elevation
+        border: Border(
+          bottom: BorderSide(
+            color: context.colorScheme.outline,
+            width: 0.5,
+          ),
+        ),
       ),
       child: SafeArea(
-          bottom: false,
-          child: SizedBox(
-            height: kMinInteractiveDimension,
-            child: NavigationToolbar(
-              leading: leadingWidget(context),
-              middle: middleWidget(context),
-              trailing: trailingWidget(),
-              middleSpacing: 6.0,
-            ),
-          )),
+        bottom: false,
+        child: SizedBox(
+          height: kMinInteractiveDimension,
+          child: NavigationToolbar(
+            leading: _leading(context),
+            middle: _middle(context),
+            trailing: _trailing(),
+            middleSpacing: 6.0,
+          ),
+        ),
+      ),
     );
   }
 
-  Widget leadingWidget(BuildContext context) {
+  Widget _leading(BuildContext context) {
     if (automaticallyImplyLeading && Navigator.of(context).canPop()) {
       return CupertinoNavigationBarBackButton(
         previousPageTitle: previousPageTitle,
@@ -63,14 +79,14 @@ class CustomCupertinoNavigationBar extends StatelessWidget
     return const SizedBox();
   }
 
-  Widget middleWidget(BuildContext context) {
+  Widget _middle(BuildContext context) {
     return DefaultTextStyle(
       style: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
       child: middle ?? const SizedBox(),
     );
   }
 
-  Widget trailingWidget() {
+  Widget _trailing() {
     return (trailing != null)
         ? Padding(
             padding: const EdgeInsets.only(left: 8.0),

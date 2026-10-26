@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:data/api/team/team_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +15,9 @@ import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/team/detail/components/team_detail_member_content.dart';
 import 'package:khelo/ui/flow/team/detail/team_detail_view_model.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/button/action_button.dart';
+import 'package:style/platform.dart';
 import 'package:style/button/more_option_button.dart';
 import 'package:style/button/secondary_button.dart';
 import 'package:style/button/tab_button.dart';
@@ -88,7 +88,7 @@ class _TeamDetailScreenState extends ConsumerState<TeamDetailScreen> {
           actionButton(
             context,
             icon: Icon(
-              Platform.isIOS ? Icons.share : Icons.share_outlined,
+              isIOS ? Icons.share : Icons.share_outlined,
               size: 20,
               color: context.colorScheme.textPrimary,
             ),
@@ -176,6 +176,7 @@ class _TeamDetailScreenState extends ConsumerState<TeamDetailScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: List.generate(
@@ -185,7 +186,7 @@ class _TeamDetailScreenState extends ConsumerState<TeamDetailScreen> {
             child: TabButton(
               tabs[index],
               onTap: () {
-                _controller.jumpToPage(index);
+                _controller.animateToTab(index);
               },
               selected: index == _selectedTab,
             ),

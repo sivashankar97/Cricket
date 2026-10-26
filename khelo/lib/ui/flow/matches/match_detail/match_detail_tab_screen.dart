@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/components/app_page.dart';
@@ -9,7 +8,9 @@ import 'package:khelo/domain/extensions/widget_extension.dart';
 import 'package:khelo/main.dart';
 import 'package:khelo/ui/flow/matches/match_detail/match_detail_tab_view_model.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/button/action_button.dart';
+import 'package:style/platform.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 
@@ -60,7 +61,7 @@ class _MatchDetailTabScreenState extends ConsumerState<MatchDetailTabScreen> {
         actionButton(
           context,
           icon: Icon(
-            Platform.isIOS ? Icons.share : Icons.share_outlined,
+            isIOS ? CupertinoIcons.share : Icons.share_outlined,
             size: 20,
             color: context.colorScheme.textPrimary,
           ),
@@ -112,6 +113,7 @@ class _MatchDetailTabScreenState extends ConsumerState<MatchDetailTabScreen> {
     return SingleChildScrollView(
       controller: _scrollController,
       scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
       padding: const EdgeInsets.only(left: 16, top: 16, bottom: 16),
       child: Row(
           children: MatchDetailTab.values
@@ -123,7 +125,7 @@ class _MatchDetailTabScreenState extends ConsumerState<MatchDetailTabScreen> {
                     selected: _selectedTab == tab.index,
                     globalKey: _keys[tab.index],
                     onTap: () {
-                      _controller.jumpToPage(tab.index);
+                      _controller.animateToTab(tab.index);
                     },
                   ),
                 ),

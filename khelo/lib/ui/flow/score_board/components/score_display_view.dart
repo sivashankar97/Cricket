@@ -27,11 +27,12 @@ class ScoreDisplayView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(scoreBoardStateProvider);
+    final isFreeHit = ref.read(scoreBoardStateProvider.notifier).isFreeHit;
 
     return Expanded(
       child: ListView(
         children: [
-          _matchScoreView(context, state),
+          _matchScoreView(context, state, isFreeHit: isFreeHit),
           const SizedBox(height: 32),
           Divider(height: 0, color: context.colorScheme.outline),
           _batsManDetailsView(context, state),
@@ -61,8 +62,9 @@ class ScoreDisplayView extends ConsumerWidget {
 
   Widget _matchScoreView(
     BuildContext context,
-    ScoreBoardViewState state,
-  ) {
+    ScoreBoardViewState state, {
+    required bool isFreeHit,
+  }) {
     final inningString = state.match?.match_type == MatchType.testMatch
         ? (state.currentInning?.index == 1 || state.currentInning?.index == 2)
             ? context.l10n.common_first_inning_title
@@ -106,7 +108,49 @@ class ScoreDisplayView extends ConsumerWidget {
             ],
           ),
           _runNeededText(context, state),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: isFreeHit ? _freeHitTag(context) : const SizedBox.shrink(),
+          ),
+          _rulesSummary(context, state),
         ],
+      ),
+    );
+  }
+
+  Widget _freeHitTag(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: context.colorScheme.primary,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        context.l10n.score_board_free_hit_text,
+        style: AppTextStyle.caption.copyWith(
+          color: context.colorScheme.onPrimary,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+    );
+  }
+
+  Widget _rulesSummary(BuildContext context, ScoreBoardViewState state) {
+    final rules = state.match?.rules ?? const MatchRules();
+    final parts = [
+      if (rules.balls_per_over != 6)
+        context.l10n.match_rules_balls_per_over_summary(rules.balls_per_over),
+      if (rules.last_man_standing)
+        context.l10n.match_rules_last_man_standing_title,
+    ];
+    if (parts.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: Text(
+        parts.join(" • "),
+        style: AppTextStyle.caption
+            .copyWith(color: context.colorScheme.textDisabled),
       ),
     );
   }
@@ -150,7 +194,8 @@ class ScoreDisplayView extends ConsumerWidget {
               state.match?.number_of_over ??
               0) -
           state.overCount;
-      final pendingBall = (pendingOver * 6) + (6 - state.ballCount);
+      final bpo = state.match?.rules.balls_per_over ?? 6;
+      final pendingBall = (pendingOver * bpo) + (bpo - state.ballCount);
       return Text(
         state.match?.match_type == MatchType.testMatch
             ? context.l10n
@@ -180,16 +225,22 @@ class ScoreDisplayView extends ConsumerWidget {
   }
 
   Widget _batsManDetailsView(BuildContext context, ScoreBoardViewState state) {
+    final isLoneBatter = (state.match?.rules.last_man_standing ?? false) &&
+        state.batsMans?.length == 1 &&
+        state.strikerId == state.batsMans?.first.player.id;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: IntrinsicHeight(
         child: Row(
           children: [
             _batManCellView(context, state, state.batsMans?.firstOrNull),
-            VerticalDivider(
-              color: context.colorScheme.outline,
-            ),
-            _batManCellView(context, state, state.batsMans?.elementAtOrNull(1)),
+            if (!isLoneBatter) ...[
+              VerticalDivider(
+                color: context.colorScheme.outline,
+              ),
+              _batManCellView(
+                  context, state, state.batsMans?.elementAtOrNull(1)),
+            ],
           ],
         ),
       ),

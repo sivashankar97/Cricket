@@ -43,11 +43,7 @@ class HomeViewNotifier extends StateNotifier<HomeViewState> {
     loadData();
   }
 
-  void _onUserSessionUpdate(bool hasSession) {
-    if (!hasSession) {
-      _streamSubscription?.cancel();
-    }
-  }
+  void _onUserSessionUpdate(bool hasSession) => loadData();
 
   void loadData() async {
     _streamSubscription?.cancel();

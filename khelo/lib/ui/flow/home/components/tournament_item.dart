@@ -1,21 +1,23 @@
 import 'package:cached_network_image/cached_network_image.dart';
-
 import 'package:data/api/tournament/tournament_model.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:khelo/domain/extensions/enum_extensions.dart';
-import 'package:khelo/domain/extensions/image_provider_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
+import 'package:style/theme/shadows.dart';
 
 import '../../../../components/match_status_tag.dart';
 import '../../../../domain/formatter/date_formatter.dart';
 import '../../../../gen/assets.gen.dart';
 
-class TournamentItem extends StatefulWidget {
+/// iOS-style tournament card for the home screen horizontal list.
+///
+/// Banner image fills 55% height. Footer has name + status badge + date.
+/// 12pt radius, no shadow — white card on grouped background.
+class TournamentItem extends StatelessWidget {
   final TournamentModel tournament;
   final EdgeInsets margin;
   final Size? size;
@@ -28,81 +30,33 @@ class TournamentItem extends StatefulWidget {
   });
 
   @override
-  State<TournamentItem> createState() => _TournamentItemState();
-}
-
-class _TournamentItemState extends State<TournamentItem> {
-  ImageProvider? imageProvider;
-
-  PaletteGenerator? palette;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeImageProvider(widget.tournament.banner_img_url);
-  }
-
-  void _initializeImageProvider(String? imageUrl) {
-    if (imageUrl != null) {
-      imageProvider = CachedNetworkImageProvider(imageUrl);
-      imageProvider!.createPaletteGenerator().then((generatedPalette) {
-        if (mounted) {
-          setState(() => palette = generatedPalette);
-        }
-      });
-    } else {
-      setState(() => imageProvider = null);
-    }
-  }
-
-  @override
-  void didUpdateWidget(covariant TournamentItem oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.tournament.banner_img_url !=
-        oldWidget.tournament.banner_img_url) {
-      _initializeImageProvider(widget.tournament.banner_img_url);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final width = widget.size?.width ?? context.mediaQuerySize.width;
-    final (titleColor, dateAndTypeColor) = _getTextColors();
+    final width = size?.width ?? context.mediaQuerySize.width;
     return OnTapScale(
-      onTap: () => AppRoute.tournamentDetail(tournamentId: widget.tournament.id)
-          .push(context),
+      onTap: () =>
+          AppRoute.tournamentDetail(tournamentId: tournament.id).push(context),
       child: Container(
-        height: width / 2,
+        height: width * 0.52,
         width: width,
-        margin: widget.margin,
+        margin: margin,
         clipBehavior: Clip.antiAlias,
-        alignment: Alignment.bottomCenter,
         decoration: BoxDecoration(
-          color: context.colorScheme.containerNormalOnSurface,
-          borderRadius: BorderRadius.circular(16),
+          color: context.colorScheme.card,
+          borderRadius: BorderRadius.circular(12),
         ),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _bannerImage(widget.tournament.banner_img_url, width),
-            _gradient(context, width),
+            Expanded(child: _banner(context, width)),
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _titleAndStatus(
-                    title: widget.tournament.name,
-                    status: widget.tournament.status,
-                    titleColor: titleColor,
-                  ),
-                  const SizedBox(height: 4),
-                  _dateAndType(
-                    startTime: widget.tournament.start_date,
-                    endTime: widget.tournament.end_date,
-                    type: widget.tournament.type,
-                    dateAndTypeColor: dateAndTypeColor,
-                  ),
+                  _titleAndStatus(context),
+                  const SizedBox(height: 3),
+                  _dateAndType(context),
                 ],
               ),
             ),
@@ -112,122 +66,81 @@ class _TournamentItemState extends State<TournamentItem> {
     );
   }
 
-  Widget _gradient(BuildContext context, double width) {
-    final dominant =
-        palette?.dominantColor?.color ?? context.colorScheme.primary;
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Container(
-        height: width / 2,
-        width: width,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              dominant.withValues(alpha: 0),
-              dominant.withValues(alpha: 0.5),
-              dominant,
-            ],
+  Widget _banner(BuildContext context, double width) {
+    final bannerUrl = tournament.banner_img_url;
+    if (bannerUrl == null) {
+      return ColoredBox(
+        // Primary tinted placeholder instead of solid red
+        color: context.colorScheme.primaryVariantOnSurface,
+        child: Center(
+          child: SvgPicture.asset(
+            Assets.images.icTournaments,
+            height: 32,
+            width: 32,
+            colorFilter: ColorFilter.mode(
+              context.colorScheme.primary,
+              BlendMode.srcATop,
+            ),
           ),
         ),
-      ),
+      );
+    }
+    return CachedNetworkImage(
+      imageUrl: bannerUrl,
+      fit: BoxFit.cover,
+      width: width,
+      errorWidget: (context, url, error) =>
+          ColoredBox(color: context.colorScheme.containerLowOnSurface),
     );
   }
 
-  Widget _bannerImage(String? bannerUrl, double width) {
-    return bannerUrl == null
-        ? Center(
-            child: SvgPicture.asset(Assets.images.icTournaments,
-                height: 32,
-                width: 32,
-                colorFilter: ColorFilter.mode(
-                  context.colorScheme.textPrimary,
-                  BlendMode.srcATop,
-                )),
-          )
-        : CachedNetworkImage(
-            imageUrl: bannerUrl,
-            fit: BoxFit.cover,
-            width: width,
-            height: width / 2,
-          );
-  }
-
-  Widget _titleAndStatus(
-      {required String title,
-      required TournamentStatus status,
-      required Color titleColor}) {
+  Widget _titleAndStatus(BuildContext context) {
     return Row(
       children: [
         Expanded(
           child: Text(
-            title,
-            style: AppTextStyle.subtitle1.copyWith(
-              color: titleColor,
+            tournament.name,
+            style: AppTextStyle.subtitle2.copyWith(
+              color: context.colorScheme.textPrimary,
+              fontWeight: FontWeight.w600,
             ),
             overflow: TextOverflow.ellipsis,
             textScaler: TextScaler.noScaling,
             maxLines: 1,
           ),
         ),
-        const SizedBox(width: 16),
-        StatusTag(tournamentStatus: status)
+        const SizedBox(width: 12),
+        StatusTag(tournamentStatus: tournament.status),
       ],
     );
   }
 
-  Widget _dateAndType(
-      {required DateTime startTime,
-      required DateTime endTime,
-      required TournamentType type,
-      required Color dateAndTypeColor}) {
+  Widget _dateAndType(BuildContext context) {
+    final color = context.colorScheme.textSecondary;
     return Text.rich(
-        overflow: TextOverflow.ellipsis,
-        TextSpan(
-            text: DateFormatter.formatDateRange(
-              context,
-              startDate: startTime,
-              endDate: endTime,
-              formatType: DateFormatType.dayMonth,
+      overflow: TextOverflow.ellipsis,
+      textScaler: TextScaler.noScaling,
+      TextSpan(
+        text: DateFormatter.formatDateRange(
+          context,
+          startDate: tournament.start_date,
+          endDate: tournament.end_date,
+          formatType: DateFormatType.dayMonth,
+        ),
+        style: AppTextStyle.caption.copyWith(color: color),
+        children: [
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: Container(
+              height: 3,
+              width: 3,
+              margin: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
             ),
-            style: AppTextStyle.caption.copyWith(
-              color: dateAndTypeColor,
-            ),
-            children: [
-              WidgetSpan(
-                  alignment: PlaceholderAlignment.middle,
-                  child: Container(
-                    height: 5,
-                    width: 5,
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: dateAndTypeColor,
-                    ),
-                  )),
-              TextSpan(text: type.getString(context))
-            ]));
-  }
-
-  (Color, Color) _getTextColors() {
-    final dominant =
-        palette?.dominantColor?.color ?? context.colorScheme.primary;
-
-    if (dominant == context.colorScheme.primary) {
-      return (
-        context.colorScheme.onPrimary,
-        context.colorScheme.onPrimary.withValues(alpha: 0.8)
-      );
-    }
-
-    if (dominant.computeLuminance() < 0.5) {
-      return (Colors.white, Colors.white.withValues(alpha: 0.8));
-    } else {
-      return (
-        Colors.black.withValues(alpha: 0.87),
-        Colors.black.withValues(alpha: 0.6)
-      );
-    }
+          ),
+          TextSpan(text: tournament.type.getString(context)),
+        ],
+      ),
+    );
   }
 }

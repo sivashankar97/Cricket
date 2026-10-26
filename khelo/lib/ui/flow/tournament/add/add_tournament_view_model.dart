@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:data/api/team/team_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
 import 'package:data/errors/app_error.dart';
@@ -71,7 +69,7 @@ class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
         imageUploading: true,
         actionError: null,
       );
-      if (await File(imagePath).isFileUnderMaxSize()) {
+      if (await isFileUnderMaxSize(imagePath)) {
         isBanner
             ? state =
                 state.copyWith(bannerPath: imagePath, imageUploading: false)

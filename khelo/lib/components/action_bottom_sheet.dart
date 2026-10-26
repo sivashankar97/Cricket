@@ -8,6 +8,10 @@ import 'package:style/text/app_text_style.dart';
 
 import '../gen/assets.gen.dart';
 
+/// Shows an iOS-style action sheet as a modal bottom sheet.
+///
+/// Top-radius 20pt, drag handle gutter, hairline separators between rows —
+/// matching UIAlertController action sheet appearance.
 Future<T?> showActionBottomSheet<T>({
   required BuildContext context,
   required List<BottomSheetAction> items,
@@ -20,7 +24,7 @@ Future<T?> showActionBottomSheet<T>({
     backgroundColor: context.colorScheme.surface,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
-        top: Radius.circular(16),
+        top: Radius.circular(20),
       ),
     ),
     useRootNavigator: useRootNavigator,
@@ -34,7 +38,7 @@ Future<T?> showActionBottomSheet<T>({
         child: Container(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(16),
+              top: Radius.circular(20),
             ),
             color: context.colorScheme.surface,
           ),
@@ -42,10 +46,11 @@ Future<T?> showActionBottomSheet<T>({
             bottom: context.mediaQueryPadding.bottom,
           ),
           child: ColumnBuilder.separated(
-            separatorBuilder: (index) => Divider(
-              height: 0,
-              thickness: 1,
+            // iOS uses 0.5pt hairline separators, not full 1pt
+            separatorBuilder: (index) => Container(
+              height: 0.5,
               color: context.colorScheme.outline,
+              margin: const EdgeInsets.only(left: 16),
             ),
             itemBuilder: (index) => items[index],
             itemCount: items.length,
@@ -57,6 +62,7 @@ Future<T?> showActionBottomSheet<T>({
   );
 }
 
+/// A single action row in an iOS action sheet.
 class BottomSheetAction extends StatelessWidget {
   final Widget? icon;
   final String title;
@@ -79,53 +85,47 @@ class BottomSheetAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.colorScheme;
     return OnTapScale(
       enabled: enabled,
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+        // iOS action rows: 16pt horizontal, 14pt vertical
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         child: Row(
           children: [
-            icon ?? const SizedBox(),
-            Visibility(
-              visible: icon != null,
-              child: const SizedBox(width: 20),
-            ),
+            if (icon != null) ...[icon!, const SizedBox(width: 14)],
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: AppTextStyle.subtitle2
-                        .copyWith(color: context.colorScheme.textPrimary),
+                    style: AppTextStyle.body2.copyWith(
+                      color: enabled ? cs.textPrimary : cs.textDisabled,
+                    ),
                   ),
                   if (subTitle != null) ...[
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     Text(
                       subTitle ?? '',
                       style: AppTextStyle.caption.copyWith(
-                        color: context.colorScheme.textSecondary,
+                        color: cs.textSecondary,
                       ),
                     ),
                   ],
                 ],
               ),
             ),
-            Visibility(
-              visible: showCheck,
-              child: SvgPicture.asset(
+            if (showCheck)
+              SvgPicture.asset(
                 Assets.images.icCheck,
                 colorFilter: ColorFilter.mode(
-                  context.colorScheme.primary,
+                  cs.primary,
                   BlendMode.srcATop,
                 ),
               ),
-            ),
-            Visibility(
-              visible: child != null,
-              child: child ?? const SizedBox(),
-            ),
+            if (child != null) child!,
           ],
         ),
       ),

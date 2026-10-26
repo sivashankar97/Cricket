@@ -151,9 +151,11 @@ class ImagePickerSheet extends ConsumerWidget {
     );
   }
 
-  Future<CroppedFile?> _openCropImage(BuildContext context, XFile image) async {
-    final croppedImage = await ImageCropper().cropImage(
+  Future<CroppedFile?> _openCropImage(BuildContext context, XFile image) {
+    return ImageCropper().cropImage(
       sourcePath: image.path,
+      aspectRatio:
+          cropOriginal ? null : const CropAspectRatio(ratioX: 1, ratioY: 1),
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: context.l10n.image_picker_crop_image_title,
@@ -175,10 +177,13 @@ class ImagePickerSheet extends ConsumerWidget {
                 : CropAspectRatioPreset.square
           ],
         ),
-        WebUiSettings(context: context),
+        WebUiSettings(
+          context: context,
+          size: const CropperSize(width: 320, height: 320),
+          viewwMode: WebViewMode.mode_1,
+          checkCrossOrigin: false,
+        ),
       ],
     );
-
-    return croppedImage;
   }
 }

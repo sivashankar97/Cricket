@@ -4,6 +4,10 @@ import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 
+/// iOS-style circular checkbox using the native checkmark glyph.
+///
+/// Matches the iOS Mail / Reminders checkbox: unfilled circle outline at
+/// rest, solid primary circle with white checkmark when selected.
 class RoundedCheckBox extends StatelessWidget {
   final bool isSelected;
   final Function(bool)? onTap;
@@ -16,26 +20,28 @@ class RoundedCheckBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.colorScheme;
     return OnTapScale(
       enabled: onTap != null,
       onTap: () => onTap?.call(!isSelected),
-      child: Container(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
         height: 24,
         width: 24,
         decoration: BoxDecoration(
-            color:
-                isSelected ? context.colorScheme.primary : Colors.transparent,
-            shape: BoxShape.circle,
-            border: Border.all(
-                width: 2,
-                color: isSelected
-                    ? context.colorScheme.primary
-                    : context.colorScheme.containerHigh)),
+          color: isSelected ? cs.primary : Colors.transparent,
+          shape: BoxShape.circle,
+          border: Border.all(
+            width: 1.5,
+            color: isSelected ? cs.primary : cs.textDisabled,
+          ),
+        ),
         child: isSelected
             ? Icon(
                 CupertinoIcons.checkmark_alt,
-                color: context.colorScheme.onPrimary,
-                size: 18,
+                color: cs.onPrimary,
+                size: 15,
               )
             : null,
       ),
@@ -68,13 +74,14 @@ class RoundedCheckBoxTile extends StatelessWidget {
             isSelected: isSelected,
             onTap: onTap,
           ),
-          const SizedBox(width: 8),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               title,
               style: style ??
-                  AppTextStyle.body1
-                      .copyWith(color: context.colorScheme.textPrimary),
+                  AppTextStyle.body2.copyWith(
+                    color: context.colorScheme.textPrimary,
+                  ),
             ),
           ),
         ],

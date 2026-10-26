@@ -24,6 +24,11 @@ final matchListStateProvider =
 class MatchListViewNotifier extends StateNotifier<MatchListViewState> {
   final MatchService _matchService;
   StreamSubscription? _matchesStreamSubscription;
+  int _currentLimit = 10;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
+  bool get hasMore => _hasMore;
 
   MatchListViewNotifier(this._matchService, String? userId)
       : super(MatchListViewState(currentUserId: userId)) {
@@ -34,6 +39,9 @@ class MatchListViewNotifier extends StateNotifier<MatchListViewState> {
     if (userId == null) {
       _matchesStreamSubscription?.cancel();
     }
+    _currentLimit = 10;
+    _hasMore = true;
+    _isLoadingMore = false;
     state = state.copyWith(currentUserId: userId);
     loadMatches();
   }
@@ -48,22 +56,37 @@ class MatchListViewNotifier extends StateNotifier<MatchListViewState> {
       _matchesStreamSubscription = _matchService
           .streamUserRelatedMatches(
         userId: state.currentUserId!,
-        limit: state.matches.length + 10,
+        limit: _currentLimit,
       )
           .listen((matches) {
+        if (matches.length < _currentLimit) {
+          _hasMore = false;
+        }
+        _isLoadingMore = false;
         state = state.copyWith(
           matches: matches,
           loading: false,
           error: null,
         );
       }, onError: (e) {
+        _isLoadingMore = false;
         state = state.copyWith(loading: false, error: e);
         debugPrint("MatchListViewNotifier: error while load matches -> $e");
       });
     } catch (e) {
+      _isLoadingMore = false;
       state = state.copyWith(loading: false, error: e);
       debugPrint("MatchListViewNotifier: error while load matches -> $e");
     }
+  }
+
+  Future<void> loadMore() async {
+    if (!_hasMore || _isLoadingMore || state.loading || state.currentUserId == null) {
+      return;
+    }
+    _isLoadingMore = true;
+    _currentLimit += 10;
+    loadMatches();
   }
 
   @override

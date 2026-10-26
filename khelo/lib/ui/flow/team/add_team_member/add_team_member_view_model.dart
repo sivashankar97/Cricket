@@ -65,6 +65,12 @@ class AddTeamMemberViewNotifier extends StateNotifier<AddTeamMemberState> {
     state = state.copyWith(selectedUsers: [...state.selectedUsers, player]);
   }
 
+  Future<UserModel> createPlayer({required String name, String? phone}) async {
+    final user = await _userService.createPlayer(name: name, phone: phone);
+    selectUser(user);
+    return user;
+  }
+
   void unSelectUser(UserModel user) {
     final updatedList = state.selectedUsers.toList();
     updatedList.removeWhere((element) => element.id == user.id);

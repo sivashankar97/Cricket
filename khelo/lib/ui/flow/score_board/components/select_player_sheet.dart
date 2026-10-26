@@ -238,15 +238,9 @@ class _SelectPlayerSheetState extends ConsumerState<SelectPlayerSheet> {
   int _getOverCount(ScoreBoardViewState state, String id) {
     final scores = state.currentScoresList
         .where((element) =>
-            element.bowler_id == id &&
-            element.extras_type != ExtrasType.noBall &&
-            element.extras_type != ExtrasType.penaltyRun &&
-            element.extras_type != ExtrasType.wide &&
-            element.wicket_type != WicketType.retired &&
-            element.wicket_type != WicketType.retiredHurt &&
-            element.wicket_type != WicketType.timedOut)
+            element.bowler_id == id && (element.isLegalDelivery() ?? false))
         .toList();
-    return (scores.length / 6).floor();
+    return (scores.length / (state.match?.rules.balls_per_over ?? 6)).floor();
   }
 
   Widget _stickyButton(

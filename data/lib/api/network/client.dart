@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../errors/app_error.dart';
+import '../../errors/socket_exception_check.dart';
 import '../../service/auth/auth_service.dart';
 import '../../utils/constant/firestore_constant.dart';
 
@@ -47,7 +47,7 @@ extension HttpExtensions on http.Client {
         return response;
       }
     } catch (error) {
-      if (error is SocketException) {
+      if (isSocketException(error)) {
         throw const NoConnectionError();
       } else if (error is TimeoutException) {
         throw const NoConnectionError();

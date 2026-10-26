@@ -79,12 +79,12 @@ Widget adaptiveAction(
       return CupertinoDialogAction(
         onPressed: onPressed,
         isDestructiveAction: isDestructiveAction,
+        isDefaultAction: !isDestructiveAction,
         textStyle: isDestructiveAction
             ? null
             : TextStyle(
-                color: isDestructiveAction
-                    ? context.colorScheme.textPrimary
-                    : context.colorScheme.textSecondary,
+                color: context.colorScheme.primary,
+                fontWeight: FontWeight.w600,
               ),
         child: child,
       );

@@ -1,18 +1,20 @@
-import 'dart:io';
-
 import 'package:data/service/device/device_service.dart';
+import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
+import 'package:khelo/components/sign_in_required_view.dart';
 import 'package:khelo/gen/assets.gen.dart';
 import 'package:khelo/ui/flow/app_links/app_links_handler.dart';
 import 'package:khelo/ui/flow/my_game/my_game_tab_screen.dart';
 import 'package:khelo/ui/flow/profile/profile_screen.dart';
 import 'package:khelo/ui/flow/stats/user_stat/user_stat_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:style/animations/fade_indexed_stack.dart';
 import 'package:style/extensions/context_extensions.dart';
+import 'package:style/platform.dart';
 import 'package:style/navigation/bottom_navigation_bar.dart';
 
 import '../../../domain/extensions/widget_extension.dart';
@@ -30,7 +32,7 @@ class MainScreen extends ConsumerStatefulWidget {
 
 class _MainScreenState extends ConsumerState<MainScreen>
     with WidgetsBindingObserver {
-  final _materialPageController = PageController();
+  int _currentTab = 0;
   final _cupertinoTabController = CupertinoTabController();
   void Function(int) onTabChange = (_) {};
   late final NotificationHandler notificationHandler;
@@ -52,7 +54,6 @@ class _MainScreenState extends ConsumerState<MainScreen>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.detached) {
       // deallocate resources
-      _materialPageController.dispose();
       _cupertinoTabController.dispose();
       WidgetsBinding.instance.removeObserver(this);
     }
@@ -67,16 +68,23 @@ class _MainScreenState extends ConsumerState<MainScreen>
   @override
   Widget build(BuildContext context) {
     _observerShowNotificationPermissionPrompt(context);
+    final hasSession = ref.watch(hasUserSession);
     final List<Widget> widgets = <Widget>[
       const HomeScreen(),
-      const MyGameTabScreen(),
-      const UserStatScreen(),
-      ProfileScreen(changeTabToMyCricket: () {
-        changeTab(1);
-      }),
+      hasSession
+          ? const MyGameTabScreen()
+          : SignInRequiredView(title: context.l10n.my_cricket_screen_title),
+      hasSession
+          ? const UserStatScreen()
+          : SignInRequiredView(title: context.l10n.common_stats_title),
+      hasSession
+          ? ProfileScreen(changeTabToMyCricket: () {
+              changeTab(1);
+            })
+          : SignInRequiredView(title: context.l10n.tab_profile_title),
     ];
 
-    if (Platform.isIOS) {
+    if (isIOS) {
       return _cupertinoTabs(context, widgets);
     }
     return _materialTabs(context, widgets);
@@ -106,17 +114,23 @@ class _MainScreenState extends ConsumerState<MainScreen>
 
   Widget _cupertinoTabs(BuildContext context, List<Widget> widgets) =>
       CupertinoTabScaffold(
-        backgroundColor: context.colorScheme.surface,
+        // Grouped background behind the tab content
+        backgroundColor: context.colorScheme.groupedBackground,
         controller: _cupertinoTabController,
         tabBar: CupertinoTabBar(
+          // iOS-standard white / dark bar background
           backgroundColor: context.colorScheme.surface,
-          height: 65,
+          // iOS standard tab bar height
+          height: 49,
           border: Border(
             top: BorderSide(
+              // iOS 0.5pt hairline separator
               color: context.colorScheme.outline,
-              width: 1,
+              width: 0.5,
             ),
           ),
+          activeColor: context.colorScheme.primary,
+          inactiveColor: context.colorScheme.textDisabled,
           items: _tabItems(context)
               .map((e) => e.toBottomNavigationBarItem(context))
               .toList(),
@@ -129,10 +143,9 @@ class _MainScreenState extends ConsumerState<MainScreen>
       );
 
   Widget _materialTabs(BuildContext context, List<Widget> widgets) => Scaffold(
-        backgroundColor: context.colorScheme.surface,
-        body: PageView(
-          controller: _materialPageController,
-          physics: const NeverScrollableScrollPhysics(),
+        backgroundColor: context.colorScheme.groupedBackground,
+        body: FadeIndexedStack(
+          index: _currentTab,
           children: widgets,
         ),
         bottomNavigationBar: AppBottomNavigationBar(
@@ -150,7 +163,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
               imagePath: Assets.images.icHome, isActive: true),
           tabLabel: context.l10n.home_screen_title,
           route: '',
-          onTap: () => _materialPageController.jumpToPage(0),
+          onTap: () => setState(() => _currentTab = 0),
         ),
         TabItem(
           tabIcon: _tabImage(context, imagePath: Assets.images.icCricket),
@@ -161,7 +174,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
           ),
           tabLabel: context.l10n.my_cricket_screen_title,
           route: '',
-          onTap: () => _materialPageController.jumpToPage(1),
+          onTap: () => setState(() => _currentTab = 1),
         ),
         TabItem(
           tabIcon: _tabImage(context, imagePath: Assets.images.icStats),
@@ -169,7 +182,7 @@ class _MainScreenState extends ConsumerState<MainScreen>
               imagePath: Assets.images.icStats, isActive: true),
           tabLabel: context.l10n.common_stats_title,
           route: '',
-          onTap: () => _materialPageController.jumpToPage(2),
+          onTap: () => setState(() => _currentTab = 2),
         ),
         TabItem(
           tabIcon: _tabImage(context, imagePath: Assets.images.icProfile),
@@ -177,37 +190,33 @@ class _MainScreenState extends ConsumerState<MainScreen>
               imagePath: Assets.images.icProfile, isActive: true),
           tabLabel: context.l10n.tab_profile_title,
           route: '',
-          onTap: () => _materialPageController.jumpToPage(3),
+          onTap: () => setState(() => _currentTab = 3),
         ),
       ];
 
+  /// iOS tab icon: simple color tween between disabled gray and primary blue.
+  /// No pill capsule — native iOS tab bars only tint the icon+label.
   Widget _tabImage(
     BuildContext context, {
     required String imagePath,
     bool isActive = false,
   }) {
-    return Container(
-      height: 32,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-      decoration: BoxDecoration(
-          color: isActive ? context.colorScheme.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(30)),
-      child: SvgPicture.asset(imagePath,
-          height: 24,
-          width: 24,
-          colorFilter: ColorFilter.mode(
-              isActive
-                  ? context.colorScheme.onPrimary
-                  : context.colorScheme.textDisabled,
-              BlendMode.srcIn)),
+    final color = isActive
+        ? context.colorScheme.primary
+        : context.colorScheme.textDisabled;
+    return SvgPicture.asset(
+      imagePath,
+      height: 24,
+      width: 24,
+      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
 
   void changeTab(int tabNumber) {
-    if (Platform.isIOS) {
+    if (isIOS) {
       _cupertinoTabController.index = tabNumber;
     } else {
-      _materialPageController.jumpToPage(tabNumber);
+      setState(() => _currentTab = tabNumber);
       onTabChange.call(tabNumber);
     }
   }

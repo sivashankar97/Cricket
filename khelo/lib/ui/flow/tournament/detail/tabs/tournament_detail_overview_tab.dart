@@ -10,6 +10,7 @@ import 'package:khelo/domain/extensions/string_extensions.dart';
 import 'package:khelo/domain/formatter/date_formatter.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/tournament/detail/components/match_group_tag.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
@@ -52,7 +53,7 @@ class TournamentDetailOverviewTab extends ConsumerWidget {
             title:
                 context.l10n.tournament_detail_overview_featured_matches_title,
             showViewAll: matches.length > 3,
-            onViewAll: () => controller.jumpToPage(2),
+            onViewAll: () => controller.animateToTab(2),
           ),
           ...List.generate(
             matches.take(3).length,
@@ -177,7 +178,7 @@ class TournamentDetailOverviewTab extends ConsumerWidget {
             context,
             showViewAll: keyStatsList.length > 4,
             title: context.l10n.tournament_detail_overview_key_stats_title,
-            onViewAll: () => controller.jumpToPage(4),
+            onViewAll: () => controller.animateToTab(4),
           ),
           const SizedBox(height: 8),
           GridView.builder(
@@ -278,7 +279,7 @@ class TournamentDetailOverviewTab extends ConsumerWidget {
             context,
             showViewAll: teams.length > 3,
             title: context.l10n.tournament_detail_overview_teams_squads_title,
-            onViewAll: () => controller.jumpToPage(1),
+            onViewAll: () => controller.animateToTab(1),
           ),
           const SizedBox(height: 8),
           SizedBox(

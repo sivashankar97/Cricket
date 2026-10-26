@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    match /{document=**} {
+      allow read, write: if signedIn();
+    }
+
+    match /matches/{document=**} {
+      allow read: if true;
+    }
+    match /teams/{document=**} {
+      allow read: if true;
+    }
+    match /tournaments/{document=**} {
+      allow read: if true;
+    }
+    match /innings/{document=**} {
+      allow read: if true;
+    }
+    match /ball_scores/{document=**} {
+      allow read: if true;
+    }
+    match /match_events/{document=**} {
+      allow read: if true;
+    }
+    match /partnerships/{document=**} {
+      allow read: if true;
+    }
+    match /leaderboard/{document=**} {
+      allow read: if true;
+    }
+    match /users/{userId} {
+      allow read: if true;
+    }
+    match /users/{userId}/user_stat/{document=**} {
+      allow read: if true;
+    }
+  }
+}

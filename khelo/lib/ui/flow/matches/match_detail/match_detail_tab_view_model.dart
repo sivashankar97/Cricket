@@ -228,7 +228,11 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
                   : 0,
               totalWickets: lastOver?.inning_id == ball.inning_id
                   ? lastOver?.totalWickets ?? 0
-                  : 0)
+                  : 0,
+              extrasSummary: lastOver?.inning_id == ball.inning_id
+                  ? lastOver?.extrasSummary ?? const ExtraSummary()
+                  : const ExtraSummary(),
+              ballsPerOver: state.match?.rules.balls_per_over ?? 6)
           .addBall(ball, catchBy: catchBy);
     }
   }

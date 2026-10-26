@@ -5,7 +5,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
-import 'package:khelo/ui/flow/tournament/team_selection/component/verification_team_list_sheet.dart';
 import 'package:khelo/ui/flow/tournament/team_selection/team_selection_view_model.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/extensions/context_extensions.dart';
@@ -73,33 +72,7 @@ class _TeamSelectionScreenState extends ConsumerState<TeamSelectionScreen> {
         ),
         actionButton(
           context,
-          onPressed: () async {
-            final userTeams = state.userTeams.map((e) => e.id).toSet();
-            final previouslySelected = notifier.selectedIds.toSet();
-            final List<TeamModel> verified = [];
-            final List<TeamModel> unverified = [];
-
-            for (final team in state.selectedTeams) {
-              if (userTeams.contains(team.id) ||
-                  previouslySelected.contains(team.id)) {
-                verified.add(team);
-              } else {
-                unverified.add(team);
-              }
-            }
-
-            if (unverified.isNotEmpty) {
-              final list =
-                  await VerificationTeamListSheet.show<List<TeamModel>>(
-                context,
-                verified: verified,
-                allTeams: state.selectedTeams,
-              );
-              if (context.mounted && list != null) context.pop(list);
-            } else if (context.mounted) {
-              context.pop(verified);
-            }
-          },
+          onPressed: () => context.pop(state.selectedTeams),
           icon: SvgPicture.asset(
             Assets.images.icCheck,
             colorFilter: ColorFilter.mode(

@@ -111,24 +111,9 @@ class _SearchTeamScreenState extends ConsumerState<SearchTeamScreen> {
     BuildContext context,
     SearchTeamState state,
   ) async {
-    if (state.userTeams.any((team) => team.id == state.selectedTeam?.id) ||
-        (state.tournament?.team_ids
-                .any((element) => element == state.selectedTeam?.id) ??
-            false)) {
-      await notifier.addTeamToTournamentIfNeeded();
-      if (context.mounted) {
-        context.pop(state.selectedTeam);
-      }
-    } else {
-      final res = await TeamMemberSheet.show<bool>(
-        context,
-        team: state.selectedTeam!,
-        isForVerification: true,
-      );
-      await notifier.addTeamToTournamentIfNeeded();
-      if (res != null && res && context.mounted) {
-        context.pop(state.selectedTeam);
-      }
+    await notifier.addTeamToTournamentIfNeeded();
+    if (context.mounted) {
+      context.pop(state.selectedTeam);
     }
   }
 

@@ -58,10 +58,10 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen>
 
   Widget _body(BuildContext context) {
     final state = ref.watch(teamListViewStateProvider);
-    if (state.loading) {
+    if (state.loading && state.teams.isEmpty) {
       return const Center(child: AppProgressIndicator());
     }
-    if (state.error != null) {
+    if (state.error != null && state.teams.isEmpty) {
       return ErrorScreen(
         error: state.error,
         onRetryTap: notifier.loadTeamList,
@@ -77,11 +77,11 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen>
   ) {
     return (state.filteredTeams.isNotEmpty)
         ? ListView.separated(
-            itemCount: state.filteredTeams.length + 1,
+            itemCount: state.filteredTeams.length + (notifier.hasMore ? 1 : 0),
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 8) +
                 context.mediaQueryPadding,
             separatorBuilder: (context, index) =>
-                Divider(color: context.colorScheme.outline),
+                Divider(height: 0.5, thickness: 0.5, color: context.colorScheme.outline),
             itemBuilder: (context, index) {
               if (index < state.filteredTeams.length) {
                 final team = state.filteredTeams[index];
@@ -95,7 +95,7 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen>
                 );
               }
               return OnVisibleCallback(
-                onVisible: () => runPostFrame(notifier.loadTeamList),
+                onVisible: () => runPostFrame(notifier.loadMore),
                 child: (state.loading && state.teams.isNotEmpty)
                     ? const Center(child: AppProgressIndicator())
                     : const SizedBox(),

@@ -96,7 +96,7 @@ class SignInWithPhoneScreen extends ConsumerWidget {
                 ),
                 hintText: context.l10n.sign_in_phone_number_placeholder,
                 backgroundColor: context.colorScheme.containerLowOnSurface,
-                borderRadius: BorderRadius.circular(40),
+                borderRadius: BorderRadius.circular(12),
                 borderType: AppTextFieldBorderType.outline,
                 borderColor: BorderColor(
                     focusColor: Colors.transparent,

@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Khelo</string>
+	<string>Sports Tamil</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>khelo</string>
+	<string>Sports Tamil</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -29,8 +29,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>app-1-753506519474-ios-8cd38557e090c0b51e7cab</string>
-				<string>app-1-92999931839-ios-f166ae55796f68ceac330a</string>
+				<string>app-1-871840644093-ios-de0dec03c704a46e3e7794</string>
 			</array>
 		</dict>
 	</array>

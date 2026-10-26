@@ -3,9 +3,13 @@ import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/indicator/progress_indicator.dart';
 
 import '../text/app_text_style.dart';
-import '../theme/colors.dart';
 import '../theme/theme.dart';
 
+/// iOS-style filled primary button.
+///
+/// - Rounded rectangle (radius 14) — matches iOS pill buttons
+/// - No floating shadow; relies on color contrast
+/// - Faint opacity reduction when disabled (iOS convention)
 class PrimaryButton extends StatelessWidget {
   final String text;
   final EdgeInsets edgeInsets;
@@ -21,7 +25,7 @@ class PrimaryButton extends StatelessWidget {
     super.key,
     this.onPressed,
     this.edgeInsets =
-        const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+        const EdgeInsets.symmetric(vertical: 14.0, horizontal: 16.0),
     this.expanded = true,
     this.enabled = true,
     this.progress = false,
@@ -31,54 +35,49 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AppColorScheme colorScheme = appColorSchemeOf(context);
+    final colorScheme = appColorSchemeOf(context);
     final tappable = !progress && enabled;
 
     final bg = background ?? colorScheme.primary;
-    final bgColor = tappable
-        ? bg
-        : Color.alphaBlend(bg.withValues(alpha: 0.4), colorScheme.surface);
+    // iOS dims the button to ~38% when disabled, no color blend needed.
+    final bgColor = tappable ? bg : bg.withValues(alpha: 0.38);
 
     final fg = foreground ?? colorScheme.onPrimary;
-    final fgColor = tappable
-        ? fg
-        : Color.alphaBlend(fg.withValues(alpha: 0.5), colorScheme.surface);
+    final fgColor = tappable ? fg : fg.withValues(alpha: 0.6);
 
     return OnTapScale(
-      onTap: () {
-        onPressed?.call();
-      },
+      onTap: () => onPressed?.call(),
       enabled: tappable,
       child: Container(
         width: expanded ? double.infinity : null,
         constraints: const BoxConstraints(
-          minHeight: 48,
+          minHeight: 50,
           minWidth: 88,
         ),
         padding: edgeInsets,
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(24),
+          // iOS uses radius 14 for most buttons, 10 for compact ones.
+          borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
           mainAxisSize: expanded ? MainAxisSize.max : MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Visibility(
-              visible: progress,
-              child: Padding(
-                padding: const EdgeInsets.only(right: 12),
+            if (progress) ...[
+              SizedBox(
+                width: 18,
+                height: 18,
                 child: AppProgressIndicator(
                   size: AppProgressIndicatorSize.small,
                   color: fgColor,
                 ),
               ),
-            ),
+              const SizedBox(width: 10),
+            ],
             Text(
               text,
-              style: AppTextStyle.button.copyWith(
-                color: fgColor,
-              ),
+              style: AppTextStyle.button.copyWith(color: fgColor),
             ),
           ],
         ),

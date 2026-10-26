@@ -560,6 +560,76 @@ class MatchService {
     }
   }
 
+  Future<void> updateMatchDetails({
+    required String matchId,
+    required int numberOfOver,
+    required int overPerBowler,
+    required String city,
+    required String ground,
+    required MatchRules rules,
+  }) async {
+    try {
+      await _matchCollection.doc(matchId).update({
+        'number_of_over': numberOfOver,
+        'over_per_bowler': overPerBowler,
+        'city': city,
+        'ground': ground,
+        'rules': rules.toJson(),
+        FireStoreConst.updatedAt: DateTime.now(),
+      });
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  Future<void> replaceSquadPlayer({
+    required String matchId,
+    required String teamId,
+    required String outPlayerId,
+    required String inPlayerId,
+  }) async {
+    try {
+      final matchRef = _matchCollection.doc(matchId);
+      await _firestore.runTransaction((transaction) async {
+        final snapshot = await transaction.get(matchRef);
+        final match = snapshot.data();
+        if (match == null) return;
+
+        final teams = match.teams.map((team) {
+          if (team.team_id != teamId) return team;
+          final squad = team.squad
+              .map(
+                (player) => player.id == outPlayerId
+                    ? MatchPlayer(
+                        id: inPlayerId,
+                        performance: player.performance,
+                      )
+                    : player,
+              )
+              .toList();
+          return team.copyWith(
+            squad: squad,
+            captain_id:
+                team.captain_id == outPlayerId ? inPlayerId : team.captain_id,
+            admin_id: team.admin_id == outPlayerId ? inPlayerId : team.admin_id,
+          );
+        }).toList();
+
+        final players = match.players.toList()
+          ..remove(outPlayerId)
+          ..add(inPlayerId);
+
+        transaction.update(matchRef, {
+          FireStoreConst.teams: teams.map((e) => e.toJson()).toList(),
+          FireStoreConst.players: players.toSet().toList(),
+          FireStoreConst.updatedAt: DateTime.now(),
+        });
+      });
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
   Future<void> changeMatchOwner({
     required String matchId,
     required String ownerId,

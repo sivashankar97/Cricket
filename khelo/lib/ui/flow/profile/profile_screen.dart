@@ -1,4 +1,5 @@
 import 'package:data/storage/app_preferences.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -16,6 +17,7 @@ import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/button/primary_button.dart';
 import 'package:style/button/toggle_button.dart';
 import 'package:style/extensions/context_extensions.dart';
+import 'package:style/theme/shadows.dart';
 import 'package:style/text/app_text_style.dart';
 
 import '../../../gen/assets.gen.dart';
@@ -71,7 +73,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
   void _observeUserSession(BuildContext context) {
     ref.listen(hasUserSession, (previous, next) {
       if (!next) {
-        AppRoute.intro.go(context);
+        AppRoute.main.go(context);
       }
     });
   }
@@ -142,23 +144,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-            color: context.colorScheme.containerNormal,
-            borderRadius: BorderRadius.circular(16)),
+          color: context.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           children: [
             ImageAvatar(
-              size: 80,
+              size: 64,
               imageUrl: state.currentUser?.profile_img_url,
               initial: state.currentUser?.nameInitial ?? '?',
             ),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                state.currentUser?.name ?? context.l10n.common_anonymous_title,
-                style: AppTextStyle.subtitle1
-                    .copyWith(color: context.colorScheme.textPrimary),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    state.currentUser?.name ??
+                        context.l10n.common_anonymous_title,
+                    style: AppTextStyle.header4
+                        .copyWith(color: context.colorScheme.textPrimary),
+                  ),
+                  if (state.currentUser?.phone != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      state.currentUser!.phone!,
+                      style: AppTextStyle.caption
+                          .copyWith(color: context.colorScheme.textSecondary),
+                    ),
+                  ],
+                ],
               ),
-            )
+            ),
+            Icon(
+              CupertinoIcons.chevron_forward,
+              size: 16,
+              color: context.colorScheme.textDisabled,
+            ),
           ],
         ),
       ),
@@ -170,10 +192,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     ProfileState state,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colorScheme.outline),
+        color: context.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
@@ -185,38 +207,49 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
                 defaultEnabled: state.enableUserNotification,
                 onTap: (_) => notifier.onToggleUserNotificationChange()),
           ),
+          _hairlineDivider(context),
           _settingItem(
             context,
             icon: Assets.images.icContactSupport,
             title: context.l10n.profile_setting_contact_support,
+            showChevron: true,
             onTap: () => AppRoute.contactSupport.push(context),
           ),
+          _hairlineDivider(context),
           _settingItem(
             context,
             icon: Assets.images.icPrivacyPolicy,
             title: context.l10n.profile_setting_privacy_policy_title,
+            showChevron: true,
             onTap: () => notifier.openUrl(privacyPolicyUrl),
           ),
+          _hairlineDivider(context),
           _settingItem(
             context,
             icon: Assets.images.icTermsConditions,
             title: context.l10n.profile_setting_terms_and_condition_title,
+            showChevron: true,
             onTap: () => notifier.openUrl(termsAndConditionsUrl),
           ),
+          _hairlineDivider(context),
           _settingItem(
             context,
             icon: Assets.images.icShare,
             title: context.l10n.profile_setting_share_app_title,
+            showChevron: true,
             onTap: () => notifier.onShareApp(context.l10n
                 .profile_setting_share_app_message(
                     playStoreLink, appStoreLink)),
           ),
+          _hairlineDivider(context),
           _settingItem(
             context,
             icon: Assets.images.icStar,
             title: context.l10n.profile_setting_rate_us_title,
+            showChevron: true,
             onTap: () => notifier.onRateUs(),
           ),
+          _hairlineDivider(context),
           _settingItem(
             context,
             icon: Assets.images.icSignOut,
@@ -236,6 +269,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     );
   }
 
+  Widget _hairlineDivider(BuildContext context) {
+    return Divider(
+      height: 0.5,
+      thickness: 0.5,
+      indent: 52,
+      color: context.colorScheme.outline,
+    );
+  }
+
   Widget _settingItem(
     BuildContext context, {
     required String icon,
@@ -243,20 +285,22 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
     required String title,
     VoidCallback? onTap,
     Widget? child,
+    bool showChevron = false,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      child: OnTapScale(
-        onTap: onTap,
+    return OnTapScale(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             SvgPicture.asset(
               icon,
+              height: 22,
+              width: 22,
               colorFilter: ColorFilter.mode(
                   color ?? context.colorScheme.textPrimary, BlendMode.srcIn),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 14),
             Expanded(
               child: Text(
                 title,
@@ -265,6 +309,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
               ),
             ),
             if (child != null) child,
+            if (showChevron && child == null)
+              Icon(
+                CupertinoIcons.chevron_forward,
+                size: 16,
+                color: context.colorScheme.textDisabled,
+              ),
           ],
         ),
       ),
@@ -282,10 +332,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
           .push(context),
       child: Container(
         padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: context.colorScheme.outline),
-        ),
+        decoration: context.colorScheme.cardDecoration(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

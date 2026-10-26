@@ -7,7 +7,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/ui/app.dart';
+import 'package:khelo/ui/flow/splash/splash_screen.dart';
+import 'package:data/service/file_upload/supabase_storage_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'firebase_options.dart';
 
 const _baseUrl = 'https://apiv1-g7mqemn2ga-el.a.run.app/';
@@ -15,6 +18,7 @@ const appBaseUrl = 'https://khelo.canopas.com';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  runApp(const SplashScreen());
   final container = await _initContainer();
 
   runApp(UncontrolledProviderScope(container: container, child: const App()));
@@ -25,13 +29,18 @@ Future<ProviderContainer> _initContainer() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  await Supabase.initialize(
+    url: SupabaseStorageConfig.projectUrl,
+    publishableKey: SupabaseStorageConfig.anonKey,
+  );
+
   DataConfig.init(
     DataConfig(
       apiBaseUrl: _baseUrl,
     ),
   );
 
-  if (!kDebugMode) {
+  if (!kDebugMode && !kIsWeb) {
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(true);
   }
 

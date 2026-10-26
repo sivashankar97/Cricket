@@ -1,12 +1,12 @@
-import 'dart:io';
-
 import 'package:data/api/leaderboard/leaderboard_model.dart';
 import 'package:data/api/match/match_model.dart';
 import 'package:data/api/team/team_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:style/animations/app_animations.dart';
+import 'package:style/animations/page_transitions.dart';
+import 'package:style/platform.dart';
 import 'package:khelo/ui/flow/home/home_view_model.dart';
 import 'package:khelo/ui/flow/home/search/search_screen.dart';
 import 'package:khelo/ui/flow/intro/intro_screen.dart';
@@ -22,6 +22,7 @@ import 'package:khelo/ui/flow/score_board/add_toss_detail/add_toss_detail_screen
 import 'package:khelo/ui/flow/score_board/score_board_screen.dart';
 import 'package:khelo/ui/flow/settings/edit_profile/edit_profile_screen.dart';
 import 'package:khelo/ui/flow/sign_in/phone_verification/phone_verification_screen.dart';
+import 'package:khelo/ui/flow/sign_in/sign_in_options_screen.dart';
 import 'package:khelo/ui/flow/team/add_team/add_team_screen.dart';
 import 'package:khelo/ui/flow/team/add_team_member/add_team_member_screen.dart';
 import 'package:khelo/ui/flow/team/detail/make_admin/make_team_admin_screen.dart';
@@ -36,7 +37,7 @@ import 'package:khelo/ui/flow/tournament/team_selection/team_selection_screen.da
 import 'flow/home/view_all/home_view_all_screen.dart';
 import 'flow/main/main_screen.dart';
 import 'flow/settings/support/contact_support_screen.dart';
-import 'flow/sign_in/sign_in_with_phone/sign_in_with_phone_screen.dart';
+import 'flow/sign_in/sign_in_with_email/sign_in_with_email_screen.dart';
 import 'flow/team/user_detail/user_detail_screen.dart';
 import 'flow/tournament/detail/tournament_detail_screen.dart';
 import 'flow/tournament/match_selection/match_selection_screen.dart';
@@ -135,7 +136,8 @@ class AppRoute {
   GoRoute goRoute() => GoRoute(
         path: path,
         name: path,
-        builder: (context, state) => state.widget(context),
+        pageBuilder: (context, state) =>
+            adaptivePage(state: state, child: state.widget(context)),
       );
 
   // Routes
@@ -145,7 +147,10 @@ class AppRoute {
       AppRoute("/intro", builder: (_) => const IntroScreen());
 
   static AppRoute get phoneLogin =>
-      AppRoute("/phone-login", builder: (_) => const SignInWithPhoneScreen());
+      AppRoute("/phone-login", builder: (_) => const SignInOptionsScreen());
+
+  static AppRoute get emailLogin =>
+      AppRoute("/email-login", builder: (_) => const SignInWithEmailScreen());
 
   static AppRoute get contactSupport => AppRoute(
         "/contact-support",
@@ -350,107 +355,146 @@ class AppRoute {
   static final routes = [
     GoRoute(
       path: main.path,
-      builder: (context, state) {
-        return state.extra == null ? const MainScreen() : state.widget(context);
-      },
+      pageBuilder: (context, state) => adaptivePage(
+        state: state,
+        child: state.extra == null ? const MainScreen() : state.widget(context),
+      ),
     ),
     GoRoute(
       path: intro.path,
-      builder: (context, state) {
-        return state.extra == null
-            ? const IntroScreen()
-            : state.widget(context);
-      },
+      pageBuilder: (context, state) => adaptivePage(
+        state: state,
+        child:
+            state.extra == null ? const IntroScreen() : state.widget(context),
+      ),
     ),
     GoRoute(
       path: pathEditProfile,
-      builder: (context, state) {
-        return state.extra == null
+      pageBuilder: (context, state) => adaptivePage(
+        state: state,
+        child: state.extra == null
             ? const EditProfileScreen(isToCreateAccount: true)
-            : state.widget(context);
-      },
+            : state.widget(context),
+      ),
     ),
     contactSupport.goRoute(),
-    phoneLogin.goRoute(),
+    GoRoute(
+      path: phoneLogin.path,
+      pageBuilder: (context, state) => adaptivePage(
+        state: state,
+        child: state.extra == null
+            ? const SignInOptionsScreen()
+            : state.widget(context),
+      ),
+    ),
+    GoRoute(
+      path: emailLogin.path,
+      pageBuilder: (context, state) => adaptivePage(
+        state: state,
+        child: state.extra == null
+            ? const SignInWithEmailScreen()
+            : state.widget(context),
+      ),
+    ),
     searchHome.goRoute(),
     GoRoute(
       path: pathViewAll,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathScoreBoard,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathAddTossDetail,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathAddMatch,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathAddTournament,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathTeamSelection,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathMemberSelection,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
         path: pathMatchSelection,
-        builder: (context, state) => state.widget(context)),
+        pageBuilder: (context, state) =>
+            adaptivePage(state: state, child: state.widget(context))),
     GoRoute(
       path: pathTournamentDetail,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathMatchDetailTab,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathAddTeamMember,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathSearchTeam,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathPhoneNumberVerification,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathSelectSquad,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathTeamDetail,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathUserDetail,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathScannerScreen,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathMakeTeamAdmin,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathLeaderboard,
-      builder: (context, state) => state.widget(context),
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
     ),
     GoRoute(
       path: pathAddTeam,
       pageBuilder: (context, state) => adaptivePage(
+        state: state,
         child: state.widget(context),
         fullscreenDialog: true,
       ),
@@ -458,6 +502,7 @@ class AppRoute {
     GoRoute(
       path: pathPowerPlay,
       pageBuilder: (context, state) => adaptivePage(
+        state: state,
         child: state.widget(context),
         fullscreenDialog: true,
       ),
@@ -465,6 +510,7 @@ class AppRoute {
     GoRoute(
       path: pathAddMatchOfficials,
       pageBuilder: (context, state) => adaptivePage(
+        state: state,
         child: state.widget(context),
         fullscreenDialog: true,
       ),
@@ -472,6 +518,7 @@ class AppRoute {
     GoRoute(
       path: pathQrCode,
       pageBuilder: (context, state) => adaptivePage(
+        state: state,
         child: state.widget(context),
         fullscreenDialog: true,
       ),
@@ -479,14 +526,27 @@ class AppRoute {
   ];
 
   static Page<T> adaptivePage<T>({
+    required GoRouterState state,
     required Widget child,
     bool fullscreenDialog = false,
   }) {
-    if (Platform.isIOS) {
-      return CupertinoPage<T>(child: child, fullscreenDialog: fullscreenDialog);
-    } else {
-      return MaterialPage<T>(child: child, fullscreenDialog: fullscreenDialog);
+    if (isIOS) {
+      return CupertinoPage<T>(
+        key: state.pageKey,
+        child: child,
+        fullscreenDialog: fullscreenDialog,
+      );
     }
+    return CustomTransitionPage<T>(
+      key: state.pageKey,
+      child: child,
+      fullscreenDialog: fullscreenDialog,
+      transitionDuration: AppAnimations.slow,
+      reverseTransitionDuration: AppAnimations.normal,
+      transitionsBuilder: fullscreenDialog
+          ? AppPageTransitions.slideUp
+          : AppPageTransitions.slideFade,
+    );
   }
 }
 

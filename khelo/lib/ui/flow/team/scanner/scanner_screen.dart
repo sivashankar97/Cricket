@@ -12,7 +12,7 @@ import 'package:khelo/gen/assets.gen.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/team/scanner/scanner_view_model.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:khelo/ui/flow/team/scanner/qr_scanner.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/button/primary_button.dart';

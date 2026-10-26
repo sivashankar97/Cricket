@@ -1,7 +1,12 @@
 import 'package:flutter/cupertino.dart';
 
 import '../extensions/context_extensions.dart';
+import '../theme/shadows.dart';
 
+/// iOS-style bottom sticky action bar.
+///
+/// Uses a hairline top separator + white/dark surface, matching
+/// iOS tab bar and action sheet anatomy. No heavy shadow.
 class BottomStickyOverlay extends StatelessWidget {
   static const padding = EdgeInsets.only(bottom: 80);
 
@@ -16,23 +21,21 @@ class BottomStickyOverlay extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // iOS hairline separator at the top edge
+          Container(
+            height: 0.5,
+            color: context.colorScheme.outline,
+          ),
           Container(
             padding: EdgeInsets.only(
               left: 16,
               right: 16,
+              top: 12,
               bottom: 16 + MediaQuery.of(context).padding.bottom,
             ),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  context.colorScheme.surface.withValues(alpha: 0),
-                  context.colorScheme.surface,
-                  context.colorScheme.surface,
-                  context.colorScheme.surface,
-                ],
-              ),
+              color: context.colorScheme.surface,
+              boxShadow: context.colorScheme.bottomBarShadow,
             ),
             child: child,
           ),

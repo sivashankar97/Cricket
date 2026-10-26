@@ -3,6 +3,10 @@ import 'package:style/button/primary_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 
+/// iOS-style placeholder / empty state screen with an illustration.
+///
+/// Image sits in a 120×120 container for consistent sizing.
+/// Heading uses Title 2 weight; subtitle uses Body color.
 class PlaceHolderScreen extends StatelessWidget {
   final Widget image;
   final String title;
@@ -28,43 +32,46 @@ class PlaceHolderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.colorScheme;
     return Center(
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: padding,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              image,
+              // Consistent illustration container
               SizedBox(
-                height: 40,
-                width: context.mediaQuerySize.width,
+                height: 120,
+                width: 120,
+                child: image,
               ),
+              const SizedBox(height: 32),
               Text(
                 title,
-                style: AppTextStyle.header1.copyWith(
-                  color: context.colorScheme.textPrimary,
-                ),
+                style: AppTextStyle.header3.copyWith(color: cs.textPrimary),
+                textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 16),
-              Visibility(
-                visible: messageWidget != null,
-                replacement: Text(
-                  message ?? '',
-                  style: AppTextStyle.subtitle1.copyWith(
-                    color: context.colorScheme.textSecondary,
+              const SizedBox(height: 10),
+              // Description or custom widget
+              messageWidget ??
+                  Text(
+                    message ?? '',
+                    style: AppTextStyle.body2.copyWith(
+                      color: cs.textSecondary,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                child: messageWidget ?? const SizedBox(),
-              ),
-              const SizedBox(height: 40),
               if (actionBtnTitle != null) ...[
+                const SizedBox(height: 32),
                 PrimaryButton(
-                  edgeInsets:
-                      const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                   actionBtnTitle ?? '',
-                  onPressed: onActionBtnTap,
+                  edgeInsets: const EdgeInsets.symmetric(
+                    vertical: 14,
+                    horizontal: 32,
+                  ),
                   expanded: false,
+                  onPressed: onActionBtnTap,
                 ),
               ],
             ],

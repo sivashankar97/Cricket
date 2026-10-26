@@ -1,12 +1,11 @@
-import 'dart:io';
-
 import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:khelo/l10n/app_localizations.dart';
 import 'package:style/extensions/context_extensions.dart';
+import 'package:style/platform.dart';
 import 'package:style/theme/colors.dart';
 import 'package:style/theme/theme.dart';
 
@@ -35,7 +34,7 @@ class _AppState extends ConsumerState<App> {
         initialRoute = AppRoute.main;
       }
     } else {
-      initialRoute = AppRoute.intro;
+      initialRoute = AppRoute.main;
     }
 
     _router = GoRouter(
@@ -50,35 +49,63 @@ class _AppState extends ConsumerState<App> {
     final colorScheme = isDarkMode ? appColorSchemeDark : appColorSchemeLight;
 
     return AppTheme(
-        colorScheme: colorScheme,
-        child: Builder(
-          builder: (context) {
-            if (Platform.isIOS) {
-              return CupertinoApp.router(
-                debugShowCheckedModeBanner: false,
-                routerConfig: _router,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                theme: CupertinoThemeData(
-                  brightness: context.brightness,
+      colorScheme: colorScheme,
+      child: Builder(
+        builder: (context) {
+          if (isIOS) {
+            return CupertinoApp.router(
+              debugShowCheckedModeBanner: false,
+              routerConfig: _router,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: CupertinoThemeData(
+                brightness: context.brightness,
+                // iOS blue as the system accent
+                primaryColor: colorScheme.primary,
+                primaryContrastingColor: colorScheme.onPrimary,
+                // Nav bar: slightly translucent white / near-black
+                barBackgroundColor: isDarkMode
+                    ? const Color(0xF0000000)
+                    : const Color(0xF2F9F9F9),
+                // Grouped screen background
+                scaffoldBackgroundColor: colorScheme.groupedBackground,
+                applyThemeToAll: true,
+                textTheme: CupertinoTextThemeData(
+                  // Nav bar title — matches our navTitle style
+                  navTitleTextStyle: TextStyle(
+                    fontFamily: 'Poppins',
+                    package: 'style',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.41,
+                    color: colorScheme.textPrimary,
+                  ),
+                  // Large nav title for expanded nav bars
+                  navLargeTitleTextStyle: TextStyle(
+                    fontFamily: 'Poppins',
+                    package: 'style',
+                    fontSize: 34,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.37,
+                    color: colorScheme.textPrimary,
+                  ),
                   primaryColor: colorScheme.primary,
-                  primaryContrastingColor: colorScheme.onPrimary,
-                  barBackgroundColor: colorScheme.surface,
-                  scaffoldBackgroundColor: colorScheme.surface,
-                  applyThemeToAll: true,
                 ),
-              );
-            } else {
-              return MaterialApp.router(
-                debugShowCheckedModeBanner: false,
-                routerConfig: _router,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
-                supportedLocales: AppLocalizations.supportedLocales,
-                theme: materialThemeDataLight,
-                darkTheme: materialThemeDataDark,
-              );
-            }
-          },
-        ));
+              ),
+            );
+          } else {
+            return MaterialApp.router(
+              debugShowCheckedModeBanner: false,
+              routerConfig: _router,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocalizations.supportedLocales,
+              theme: materialThemeDataLight,
+              darkTheme: materialThemeDataDark,
+              themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
+            );
+          }
+        },
+      ),
+    );
   }
 }

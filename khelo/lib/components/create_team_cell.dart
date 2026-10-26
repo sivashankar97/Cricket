@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:style/button/primary_button.dart';
 import 'package:style/extensions/context_extensions.dart';
+import 'package:style/theme/shadows.dart';
 import 'package:style/text/app_text_style.dart';
 
 import '../ui/app_route.dart';
@@ -9,10 +10,7 @@ import '../ui/app_route.dart';
 Widget createTeamCell(BuildContext context) {
   return Container(
     padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-        color: context.colorScheme.containerLow,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: context.colorScheme.outline)),
+    decoration: context.colorScheme.cardDecoration(),
     child: Row(
       children: [
         Expanded(

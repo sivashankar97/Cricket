@@ -25,6 +25,11 @@ final teamListViewStateProvider =
 class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
   final TeamService _teamService;
   StreamSubscription? _teamsStreamSubscription;
+  int _currentLimit = 10;
+  bool _hasMore = true;
+  bool _isLoadingMore = false;
+
+  bool get hasMore => _hasMore;
 
   TeamListViewNotifier(this._teamService, String? userId)
       : super(TeamListViewState(currentUserId: userId)) {
@@ -35,7 +40,11 @@ class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
     if (userId == null) {
       _teamsStreamSubscription?.cancel();
     }
+    _currentLimit = 10;
+    _hasMore = true;
+    _isLoadingMore = false;
     state = state.copyWith(currentUserId: userId);
+    loadTeamList();
   }
 
   Future<void> loadTeamList() async {
@@ -48,9 +57,13 @@ class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
       _teamsStreamSubscription = _teamService
           .streamUserRelatedTeams(
         userId: state.currentUserId!,
-        limit: state.teams.length + 10,
+        limit: _currentLimit,
       )
           .listen((teams) {
+        if (teams.length < _currentLimit) {
+          _hasMore = false;
+        }
+        _isLoadingMore = false;
         state = state.copyWith(
           teams: {...state.teams, ...teams}.toList(),
           loading: false,
@@ -58,13 +71,24 @@ class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
         );
         _filterTeamList();
       }, onError: (e) {
+        _isLoadingMore = false;
         state = state.copyWith(loading: false, error: e);
         debugPrint("TeamListViewNotifier: error while loading team list -> $e");
       });
     } catch (e) {
+      _isLoadingMore = false;
       state = state.copyWith(loading: false, error: e);
       debugPrint("TeamListViewNotifier: error while loading team list -> $e");
     }
+  }
+
+  Future<void> loadMore() async {
+    if (!_hasMore || _isLoadingMore || state.loading || state.currentUserId == null) {
+      return;
+    }
+    _isLoadingMore = true;
+    _currentLimit += 10;
+    loadTeamList();
   }
 
   void _filterTeamList() {

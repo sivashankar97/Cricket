@@ -18,6 +18,7 @@ import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/matches/add_match/add_match_view_model.dart';
 import 'package:khelo/ui/flow/matches/add_match/components/ball_selection_view.dart';
 import 'package:khelo/ui/flow/matches/add_match/components/match_official_selection_view.dart';
+import 'package:khelo/ui/flow/matches/add_match/components/match_rules_view.dart';
 import 'package:khelo/ui/flow/matches/add_match/components/over_detail_view.dart';
 import 'package:khelo/ui/flow/matches/add_match/components/pitch_selection_view.dart';
 import 'package:khelo/ui/flow/matches/add_match/components/section_title.dart';
@@ -201,6 +202,10 @@ class _AddMatchScreenState extends ConsumerState<AddMatchScreen> {
         _matchScheduleView(context, notifier, state),
         BallSelectionView(notifier: notifier, state: state),
         PitchSelectionView(notifier: notifier, state: state),
+        MatchRulesView(
+          rules: state.rules,
+          onChanged: notifier.onRulesChange,
+        ),
         MatchOfficialSelectionView(notifier: notifier, state: state),
       ],
     );

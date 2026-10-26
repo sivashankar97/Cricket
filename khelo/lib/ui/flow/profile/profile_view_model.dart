@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:data/api/user/user_models.dart';
 import 'package:data/service/auth/auth_service.dart';
 import 'package:data/service/device/device_service.dart';
@@ -115,9 +113,10 @@ class ProfileViewNotifier extends StateNotifier<ProfileState> {
   Future<void> onRateUs() async {
     try {
       final packageName = await _deviceService.packageName;
-      final targetUrl = (!kIsWeb && Platform.isAndroid)
+      final targetUrl = (!kIsWeb &&
+              defaultTargetPlatform == TargetPlatform.android)
           ? "market://details?id=$packageName"
-          : (!kIsWeb && Platform.isIOS)
+          : (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS)
               ? "itms-apps://itunes.apple.com/app/6480175424"
               : webFallbackUrl;
       await launchUrl(Uri.parse(targetUrl));

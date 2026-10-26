@@ -56,11 +56,14 @@ class BallScoreService {
     int otherTotalWicketTaken = 0,
     int otherTotalBowlingTeamRuns = 0,
     MatchPlayer? updatedPlayer,
+    int ballsPerOver = 6,
   }) async {
     try {
       final scoreRef = _ballScoreCollection.doc(score.id);
       await _firestore.runTransaction(maxAttempts: 1, (transaction) async {
         final overCount = score.formattedOver;
+        final otherInningBalls =
+            otherInningOver.toBalls(ballsPerOver: ballsPerOver);
 
         // update matchTeamScore and squad(if needed)
         await _matchService.updateTeamScoreAndSquadViaTransaction(
@@ -68,7 +71,7 @@ class BallScoreService {
           matchId: matchId,
           battingTeamId: battingTeamId,
           totalRun: otherTotalRuns + totalRuns,
-          over: overCount.add(otherInningOver.toBalls()),
+          over: overCount.add(otherInningBalls, ballsPerOver: ballsPerOver),
           bowlingTeamId: bowlingTeamId,
           wicket: otherTotalWicketTaken + totalWicketTaken,
           runs: totalBowlingTeamRuns != null
@@ -156,6 +159,7 @@ class BallScoreService {
     int otherTotalWicketTaken = 0,
     int otherTotalBowlingTeamRuns = 0,
     List<MatchPlayer>? updatedPlayer,
+    int ballsPerOver = 6,
   }) async {
     try {
       _firestore.runTransaction((transaction) async {
@@ -165,7 +169,10 @@ class BallScoreService {
           matchId: matchId,
           battingTeamId: battingTeamId,
           totalRun: otherTotalRuns + totalRuns,
-          over: overCount?.add(otherInningOver.toBalls()),
+          over: overCount?.add(
+            otherInningOver.toBalls(ballsPerOver: ballsPerOver),
+            ballsPerOver: ballsPerOver,
+          ),
           bowlingTeamId: bowlingTeamId,
           wicket: otherTotalWicketTaken + totalWicketTaken,
           runs: totalBowlingTeamRuns != null

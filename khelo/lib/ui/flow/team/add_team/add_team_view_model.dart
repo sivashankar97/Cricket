@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:data/api/team/team_model.dart';
 import 'package:data/api/user/user_models.dart';
@@ -69,7 +68,7 @@ class AddTeamViewNotifier extends StateNotifier<AddTeamState> {
   Future<void> onImageSelect(String imagePath) async {
     try {
       state = state.copyWith(isImageUploading: true, actionError: null);
-      if (await File(imagePath).isFileUnderMaxSize()) {
+      if (await isFileUnderMaxSize(imagePath)) {
         state = state.copyWith(filePath: imagePath, isImageUploading: false);
       } else {
         state = state.copyWith(

@@ -10,6 +10,7 @@ import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/widget_extension.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/home/search/search_view_model.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/callback/on_visible_callback.dart';
@@ -130,6 +131,7 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: List.generate(
@@ -139,7 +141,7 @@ class _SearchHomeScreenState extends ConsumerState<SearchHomeScreen> {
             child: TabButton(
               tabs[index],
               onTap: () {
-                _controller.jumpToPage(index);
+                _controller.animateToTab(index);
               },
               selected: index == _selectedTab,
             ),

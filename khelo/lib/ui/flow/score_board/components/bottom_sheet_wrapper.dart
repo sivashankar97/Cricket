@@ -28,7 +28,7 @@ class BottomSheetWrapper extends StatelessWidget {
               0.8),
       decoration: BoxDecoration(
         color: context.colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: IntrinsicHeight(
         child: Stack(

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 
+/// iOS-style segmented tab pill.
+///
+/// Selected:   solid primary fill.
+/// Unselected: transparent with secondary-colored label.
+/// The parent scrollable row acts like an iOS segmented control.
 class TabButton extends StatelessWidget {
   final Function() onTap;
   final String text;
@@ -19,23 +25,23 @@ class TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = context.colorScheme;
     return OnTapScale(
       onTap: onTap,
-      child: Container(
+      child: AnimatedContainer(
         key: globalKey,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        duration: AppAnimations.normal,
+        curve: AppAnimations.curve,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
         decoration: BoxDecoration(
-          color: selected
-              ? context.colorScheme.primary
-              : context.colorScheme.containerLow,
-          borderRadius: BorderRadius.circular(30),
+          color: selected ? cs.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           text,
-          style: AppTextStyle.body2.copyWith(
-            color: selected
-                ? context.colorScheme.onPrimary
-                : context.colorScheme.textSecondary,
+          style: AppTextStyle.subtitle2.copyWith(
+            color: selected ? cs.onPrimary : cs.textSecondary,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
           ),
         ),
       ),

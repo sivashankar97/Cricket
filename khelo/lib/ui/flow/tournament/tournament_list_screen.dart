@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:data/api/tournament/tournament_model.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:khelo/components/app_page.dart';
@@ -130,8 +130,9 @@ class _TournamentListScreenState extends ConsumerState<TournamentListScreen>
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-            color: context.colorScheme.containerLow,
-            borderRadius: BorderRadius.circular(16)),
+          color: context.colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           children: [
             _profileImage(context, tournament.profile_img_url),
@@ -162,11 +163,11 @@ class _TournamentListScreenState extends ConsumerState<TournamentListScreen>
               ),
             ),
             const SizedBox(width: 16),
-            SvgPicture.asset(Assets.images.icArrowForward,
-                colorFilter: ColorFilter.mode(
-                  context.colorScheme.textDisabled,
-                  BlendMode.srcATop,
-                ))
+            Icon(
+              CupertinoIcons.chevron_forward,
+              size: 16,
+              color: context.colorScheme.textDisabled,
+            ),
           ],
         ),
       ),

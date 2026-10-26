@@ -10,6 +10,12 @@
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
+  /// File path: assets/images/app_logo_splash.png
+  String get appLogoSplash => 'assets/images/app_logo_splash.png';
+
+  /// File path: assets/images/app_logo_text.png
+  String get appLogoText => 'assets/images/app_logo_text.png';
+
   /// File path: assets/images/batsman.svg
   String get batsman => 'assets/images/batsman.svg';
 
@@ -156,6 +162,8 @@ class $AssetsImagesGen {
 
   /// List of all assets
   List<String> get values => [
+        appLogoSplash,
+        appLogoText,
         batsman,
         bowler,
         icAboutUs,

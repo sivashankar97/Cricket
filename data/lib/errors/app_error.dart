@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'app_error_l10n_codes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'socket_exception_check.dart';
 
 import '../utils/constant/firebase_error_constant.dart';
 
@@ -26,7 +26,7 @@ class AppError implements Exception {
   factory AppError.fromError(Object error, [StackTrace? stack]) {
     if (error is AppError) {
       return error;
-    } else if (error is SocketException) {
+    } else if (isSocketException(error)) {
       return const NoConnectionError();
     } else if (error is FirebaseException) {
       return _handleFirebaseError(error);

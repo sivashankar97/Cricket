@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:khelo/domain/platform/local_file_image.dart';
 import 'package:khelo/gen/assets.gen.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
@@ -56,7 +55,7 @@ class ProfileImageAvatar extends StatelessWidget {
           color: context.colorScheme.primary,
           image: (filePath != null)
               ? DecorationImage(
-                  image: FileImage(File(filePath!)),
+                  image: localFileImage(filePath!),
                   fit: BoxFit.cover,
                 )
               : null),

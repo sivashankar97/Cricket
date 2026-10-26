@@ -10,6 +10,7 @@ import 'package:khelo/domain/extensions/widget_extension.dart';
 import 'package:khelo/domain/formatter/string_formatter.dart';
 import 'package:khelo/ui/flow/team/user_detail/component/user_detail_info_content.dart';
 import 'package:khelo/ui/flow/team/user_detail/user_detail_view_model.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/button/secondary_button.dart';
 import 'package:style/button/tab_button.dart';
@@ -147,6 +148,7 @@ class _UserDetailScreenState extends ConsumerState<UserDetailScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
       scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: List.generate(
@@ -156,7 +158,7 @@ class _UserDetailScreenState extends ConsumerState<UserDetailScreen> {
             child: TabButton(
               tabs[index],
               onTap: () {
-                _controller.jumpToPage(index);
+                _controller.animateToTab(index);
               },
               selected: index == _selectedTab,
             ),

@@ -1,15 +1,15 @@
 import 'int_extensions.dart';
 
 extension OverExtensionOnDouble on double {
-  double add(int ballsToAdd) {
-    final int totalBalls = toBalls() + ballsToAdd;
-    return totalBalls.toOvers();
+  double add(int ballsToAdd, {int ballsPerOver = 6}) {
+    final int totalBalls = toBalls(ballsPerOver: ballsPerOver) + ballsToAdd;
+    return totalBalls.toOvers(ballsPerOver: ballsPerOver);
   }
 
-  double remove(int ballsToRemove) {
-    int totalBalls = toBalls() - ballsToRemove;
+  double remove(int ballsToRemove, {int ballsPerOver = 6}) {
+    int totalBalls = toBalls(ballsPerOver: ballsPerOver) - ballsToRemove;
     if (totalBalls < 0) totalBalls = 0;
-    return totalBalls.toOvers();
+    return totalBalls.toOvers(ballsPerOver: ballsPerOver);
   }
 
   int getBallNumberFromOver() {
@@ -28,7 +28,7 @@ extension OverExtensionOnDouble on double {
     return toInt();
   }
 
-  int toBalls() {
-    return (getOverNumberFromOver() * 6) + getBallNumberFromOver();
+  int toBalls({int ballsPerOver = 6}) {
+    return (getOverNumberFromOver() * ballsPerOver) + getBallNumberFromOver();
   }
 }

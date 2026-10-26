@@ -15,7 +15,7 @@ import 'package:khelo/domain/extensions/widget_extension.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/matches/add_match/select_squad/components/user_detail_sheet.dart';
 import 'package:khelo/ui/flow/team/add_team_member/add_team_member_view_model.dart';
-import 'package:khelo/ui/flow/team/add_team_member/components/verify_team_member_sheet.dart';
+import 'package:khelo/ui/flow/team/add_team_member/components/create_player_sheet.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/button/secondary_button.dart';
@@ -56,6 +56,14 @@ class _AddTeamMemberScreenState extends ConsumerState<AddTeamMemberScreen> {
     return AppPage(
       title: context.l10n.add_team_member_screen_title,
       actions: [
+        actionButton(
+          context,
+          onPressed: () => _createPlayer(context),
+          icon: Icon(
+            Icons.person_add_alt_1_outlined,
+            color: context.colorScheme.textPrimary,
+          ),
+        ),
         actionButton(
           context,
           onPressed: () async {
@@ -132,7 +140,12 @@ class _AddTeamMemberScreenState extends ConsumerState<AddTeamMemberScreen> {
               description: (state.searchController.text.isNotEmpty)
                   ? context.l10n.add_team_member_search_description_text
                   : context.l10n.add_team_member_empty_description_text,
-              isShowButton: false,
+              buttonTitle: state.searchController.text.trim().isNotEmpty
+                  ? context.l10n.add_team_member_create_named_player(
+                      state.searchController.text.trim())
+                  : context.l10n.add_team_member_create_player_button,
+              onTap: () => _createPlayer(context,
+                  initialName: state.searchController.text.trim()),
             )
           : ListView.separated(
               padding: const EdgeInsets.only(top: 8, bottom: 70),
@@ -162,33 +175,14 @@ class _AddTeamMemberScreenState extends ConsumerState<AddTeamMemberScreen> {
                           user,
                           actionButtonTitle:
                               isAdded ? null : context.l10n.common_select_title,
-                          onButtonTap: () async {
-                            if (user.phone != null) {
-                              final res = await VerifyTeamMemberSheet.show(
-                                  context,
-                                  phoneNumber: user.phone!);
-                              if (res != null && res && context.mounted) {
-                                notifier.selectUser(user);
-                              }
-                            }
-                          },
+                          onButtonTap: () => notifier.selectUser(user),
                         ),
                         trailing: SecondaryButton(
                           isAdded
                               ? context.l10n.add_team_member_added_text
                               : context.l10n.common_add_title.toUpperCase(),
                           enabled: !isAdded,
-                          onPressed: () async {
-                            if (user.phone != null) {
-                              final res = await VerifyTeamMemberSheet.show(
-                                  context,
-                                  phoneNumber: user.phone!
-                                      .substring(user.phone!.length - 5));
-                              if (res != null && res && context.mounted) {
-                                notifier.selectUser(user);
-                              }
-                            }
-                          },
+                          onPressed: () => notifier.selectUser(user),
                         ),
                       ),
                     ),
@@ -287,6 +281,16 @@ class _AddTeamMemberScreenState extends ConsumerState<AddTeamMemberScreen> {
         size: 16,
         color: context.colorScheme.textPrimary,
       ),
+    );
+  }
+
+  Future<void> _createPlayer(BuildContext context, {String initialName = ''}) {
+    return CreatePlayerSheet.show(
+      context,
+      initialName: initialName,
+      onCreate: (name, phone) async {
+        await notifier.createPlayer(name: name, phone: phone);
+      },
     );
   }
 

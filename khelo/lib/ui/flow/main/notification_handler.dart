@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:style/platform.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -11,7 +11,7 @@ import '../../app_route.dart';
 
 const _androidChannel = AndroidNotificationChannel(
   "notification_khelo_channel",
-  "Khelo Notification",
+  "Sports Tamil Notification",
   importance: Importance.max,
 );
 
@@ -42,7 +42,7 @@ class NotificationHandler {
     FirebaseMessaging.onMessageOpenedApp.listen((event) {
       if (context.mounted) _onTapNotification(context, event.data);
     });
-    if (Platform.isAndroid) {
+    if (isAndroid) {
       FirebaseMessaging.onMessage.listen((event) {
         showLocalNotification(event);
       });

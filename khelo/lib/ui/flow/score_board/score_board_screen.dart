@@ -16,6 +16,8 @@ import 'package:khelo/ui/flow/matches/add_match/match_officials/search_user/sear
 import 'package:khelo/ui/flow/score_board/add_substitute_sheet/add_substitute_sheet.dart';
 import 'package:khelo/ui/flow/score_board/components/add_extra_sheet.dart';
 import 'package:khelo/ui/flow/score_board/components/add_penalty_run_sheet.dart';
+import 'package:khelo/ui/flow/score_board/components/edit_match_detail_sheet.dart';
+import 'package:khelo/ui/flow/score_board/components/replace_player_sheet.dart';
 import 'package:khelo/ui/flow/score_board/components/match_complete_sheet.dart';
 import 'package:khelo/ui/flow/score_board/components/over_complete_sheet.dart';
 import 'package:khelo/ui/flow/score_board/components/score_board_buttons.dart';
@@ -114,7 +116,14 @@ class _ScoreBoardScreenState extends ConsumerState<ScoreBoardScreen> {
                     enabled: !option.showToggle(),
                     onTap: () {
                       context.pop();
-                      notifier.onMatchOptionSelect(option, true);
+                      switch (option) {
+                        case MatchOption.editMatch:
+                          EditMatchDetailSheet.show(context);
+                        case MatchOption.replacePlayer:
+                          ReplacePlayerSheet.show(context);
+                        default:
+                          notifier.onMatchOptionSelect(option, true);
+                      }
                     },
                     child: option.showToggle()
                         ? toggleButton(
@@ -301,7 +310,9 @@ class _ScoreBoardScreenState extends ConsumerState<ScoreBoardScreen> {
         notifier.addBall(
             run: notFromBat ? 0 : runs,
             extrasType: ExtrasType.noBall,
-            extra: notFromBat ? 1 + runs : 1,
+            extra: notFromBat
+                ? notifier.rules.no_ball_runs + runs
+                : notifier.rules.no_ball_runs,
             isFour: isBoundary && runs == 4,
             isSix: isBoundary && runs == 6,
             position: position);

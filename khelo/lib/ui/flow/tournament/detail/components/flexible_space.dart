@@ -3,9 +3,7 @@ import 'package:data/api/tournament/tournament_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
-import 'package:khelo/domain/extensions/image_provider_extensions.dart';
 import 'package:khelo/domain/formatter/date_formatter.dart';
-import 'package:palette_generator/palette_generator.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 
@@ -25,42 +23,9 @@ class FlexibleSpace extends StatefulWidget {
 }
 
 class _FlexibleSpaceState extends State<FlexibleSpace> {
-  ImageProvider? imageProvider;
-
-  PaletteGenerator? palette;
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeImageProvider(widget.tournament.banner_img_url);
-  }
-
-  @override
-  void didUpdateWidget(covariant FlexibleSpace oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (widget.tournament.banner_img_url !=
-        oldWidget.tournament.banner_img_url) {
-      _initializeImageProvider(widget.tournament.banner_img_url);
-    }
-  }
-
-  void _initializeImageProvider(String? imageUrl) {
-    if (imageUrl != null) {
-      imageProvider = CachedNetworkImageProvider(imageUrl);
-      imageProvider!.createPaletteGenerator().then((generatedPalette) {
-        if (mounted) {
-          setState(() => palette = generatedPalette);
-        }
-      });
-    } else {
-      setState(() => imageProvider = null);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final dominant =
-        palette?.dominantColor?.color ?? context.colorScheme.surface;
+    final hasBanner = widget.tournament.banner_img_url != null;
 
     return LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
@@ -89,7 +54,7 @@ class _FlexibleSpaceState extends State<FlexibleSpace> {
           children: [
             Container(
               decoration: BoxDecoration(
-                color: context.colorScheme.containerHigh,
+                color: context.colorScheme.primary,
                 image: (widget.tournament.banner_img_url != null)
                     ? DecorationImage(
                         image: CachedNetworkImageProvider(
@@ -102,27 +67,18 @@ class _FlexibleSpaceState extends State<FlexibleSpace> {
                   ? Center(
                       child: SvgPicture.asset(
                         Assets.images.icTournaments,
+                        height: 40,
+                        width: 40,
                         colorFilter: ColorFilter.mode(
-                          context.colorScheme.textSecondary,
+                          context.colorScheme.onPrimary,
                           BlendMode.srcIn,
                         ),
                       ),
                     )
                   : null,
             ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    dominant.withValues(alpha: 0),
-                    dominant.withValues(alpha: 0.2),
-                    dominant.withValues(alpha: 0.86),
-                  ],
-                ),
-              ),
-            ),
+            if (hasBanner)
+              Container(color: Colors.black.withValues(alpha: 0.4)),
             Positioned(
               left: 16,
               bottom: 24,
@@ -193,14 +149,6 @@ class _FlexibleSpaceState extends State<FlexibleSpace> {
     );
   }
 
-  (Color, Color) getTextColors() {
-    final dominant =
-        palette?.dominantColor?.color ?? context.colorScheme.surface;
-
-    if (dominant.computeLuminance() < 0.5) {
-      return (Colors.white, Colors.white.withValues(alpha: 0.86));
-    } else {
-      return (Colors.black, Colors.black.withValues(alpha: 0.7));
-    }
-  }
+  (Color, Color) getTextColors() =>
+      (Colors.white, Colors.white.withValues(alpha: 0.86));
 }

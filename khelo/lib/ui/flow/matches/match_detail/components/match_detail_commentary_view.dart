@@ -106,7 +106,7 @@ class MatchDetailCommentaryView extends ConsumerWidget {
 
     // Add CommentaryOverOverview or InningOverview if applicable
     if ((overSummary.balls.lastOrNull?.isLegalDelivery() ?? false) &&
-        overSummary.balls.lastOrNull?.ball_number == 6 &&
+        overSummary.balls.lastOrNull?.ball_number == overSummary.ballsPerOver &&
         nextOverSummary?.inning_id == overSummary.inning_id) {
       children
           .add(CommentaryOverOverview(overSummary: overSummary, team: team));

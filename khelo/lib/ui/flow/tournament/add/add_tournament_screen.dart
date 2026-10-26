@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:data/api/team/team_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
@@ -9,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:khelo/components/profile_image_avatar.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
+import 'package:khelo/domain/platform/local_file_image.dart';
 import 'package:khelo/domain/extensions/enum_extensions.dart';
 import 'package:khelo/domain/extensions/widget_extension.dart';
 import 'package:khelo/gen/assets.gen.dart';
@@ -213,7 +212,7 @@ class _AddTournamentScreenState extends ConsumerState<AddTournamentScreen> {
             color: context.colorScheme.containerLow,
             image: state.bannerPath != null
                 ? DecorationImage(
-                    image: FileImage(File(state.bannerPath!)),
+                    image: localFileImage(state.bannerPath!),
                     fit: BoxFit.cover,
                   )
                 : null,
@@ -244,8 +243,8 @@ class _AddTournamentScreenState extends ConsumerState<AddTournamentScreen> {
   Widget _buildCachedNetworkOrFileImage(
       BuildContext context, AddTournamentState state) {
     if (state.bannerPath != null) {
-      return Image.file(
-        File(state.bannerPath!),
+      return Image(
+        image: localFileImage(state.bannerPath!),
         fit: BoxFit.cover,
         width: double.infinity,
         height: double.infinity,

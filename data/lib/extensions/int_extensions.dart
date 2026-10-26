@@ -1,7 +1,7 @@
 extension OverExtensionOnInt on int {
-  double toOvers() {
-    final int overs = this ~/ 6;
-    final int additionalBalls = this % 6;
+  double toOvers({int ballsPerOver = 6}) {
+    final int overs = this ~/ ballsPerOver;
+    final int additionalBalls = this % ballsPerOver;
     return double.parse("$overs.$additionalBalls");
   }
 }

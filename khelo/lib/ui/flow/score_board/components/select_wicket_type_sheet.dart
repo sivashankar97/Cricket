@@ -11,6 +11,16 @@ import 'package:style/button/chip_button.dart';
 import 'package:style/button/primary_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 
+/// Dismissals still possible on a free hit.
+const freeHitWicketTypes = [
+  WicketType.runOut,
+  WicketType.hitBallTwice,
+  WicketType.obstructingField,
+  WicketType.handledBall,
+  WicketType.retired,
+  WicketType.retiredHurt,
+];
+
 class SelectWicketTypeSheet extends ConsumerStatefulWidget {
   static Future<T?> show<T>(BuildContext context) {
     HapticFeedback.mediumImpact();
@@ -56,11 +66,14 @@ class _SelectWicketTypeSheetState extends ConsumerState<SelectWicketTypeSheet> {
     BuildContext context,
     ScoreBoardViewState state,
   ) {
+    final types = ref.read(scoreBoardStateProvider.notifier).isFreeHit
+        ? WicketType.values.where((type) => freeHitWicketTypes.contains(type))
+        : WicketType.values;
     return Wrap(
       alignment: WrapAlignment.start,
       spacing: 8,
       runSpacing: 8,
-      children: WicketType.values.map(
+      children: types.map(
         (element) {
           final isSelected = selectedType == element;
           return ChipButton(

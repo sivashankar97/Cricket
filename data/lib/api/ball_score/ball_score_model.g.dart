@@ -28,6 +28,7 @@ _$BallScoreModelImpl _$$BallScoreModelImplFromJson(Map<String, dynamic> json) =>
       wicket_taker_id: json['wicket_taker_id'] as String?,
       is_four: json['is_four'] as bool,
       is_six: json['is_six'] as bool,
+      legal_delivery: json['legal_delivery'] as bool?,
       time:
           json['time'] == null ? null : DateTime.parse(json['time'] as String),
       score_time: _$JsonConverterFromJson<Object, DateTime>(
@@ -55,6 +56,8 @@ Map<String, dynamic> _$$BallScoreModelImplToJson(
       'wicket_taker_id': instance.wicket_taker_id,
       'is_four': instance.is_four,
       'is_six': instance.is_six,
+      if (instance.legal_delivery != null)
+        'legal_delivery': instance.legal_delivery,
       'time': instance.time?.toIso8601String(),
       'score_time': _$JsonConverterToJson<Object, DateTime>(
           instance.score_time, const TimeStampJsonConverter().toJson),

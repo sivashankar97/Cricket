@@ -38,6 +38,7 @@ mixin _$BallScoreModel {
   String? get wicket_taker_id => throw _privateConstructorUsedError;
   bool get is_four => throw _privateConstructorUsedError;
   bool get is_six => throw _privateConstructorUsedError;
+  bool? get legal_delivery => throw _privateConstructorUsedError;
   DateTime? get time => throw _privateConstructorUsedError;
   @TimeStampJsonConverter()
   DateTime? get score_time => throw _privateConstructorUsedError;
@@ -76,6 +77,7 @@ abstract class $BallScoreModelCopyWith<$Res> {
       String? wicket_taker_id,
       bool is_four,
       bool is_six,
+      bool? legal_delivery,
       DateTime? time,
       @TimeStampJsonConverter() DateTime? score_time});
 }
@@ -112,6 +114,7 @@ class _$BallScoreModelCopyWithImpl<$Res, $Val extends BallScoreModel>
     Object? wicket_taker_id = freezed,
     Object? is_four = null,
     Object? is_six = null,
+    Object? legal_delivery = freezed,
     Object? time = freezed,
     Object? score_time = freezed,
   }) {
@@ -184,6 +187,10 @@ class _$BallScoreModelCopyWithImpl<$Res, $Val extends BallScoreModel>
           ? _value.is_six
           : is_six // ignore: cast_nullable_to_non_nullable
               as bool,
+      legal_delivery: freezed == legal_delivery
+          ? _value.legal_delivery
+          : legal_delivery // ignore: cast_nullable_to_non_nullable
+              as bool?,
       time: freezed == time
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
@@ -222,6 +229,7 @@ abstract class _$$BallScoreModelImplCopyWith<$Res>
       String? wicket_taker_id,
       bool is_four,
       bool is_six,
+      bool? legal_delivery,
       DateTime? time,
       @TimeStampJsonConverter() DateTime? score_time});
 }
@@ -256,6 +264,7 @@ class __$$BallScoreModelImplCopyWithImpl<$Res>
     Object? wicket_taker_id = freezed,
     Object? is_four = null,
     Object? is_six = null,
+    Object? legal_delivery = freezed,
     Object? time = freezed,
     Object? score_time = freezed,
   }) {
@@ -328,6 +337,10 @@ class __$$BallScoreModelImplCopyWithImpl<$Res>
           ? _value.is_six
           : is_six // ignore: cast_nullable_to_non_nullable
               as bool,
+      legal_delivery: freezed == legal_delivery
+          ? _value.legal_delivery
+          : legal_delivery // ignore: cast_nullable_to_non_nullable
+              as bool?,
       time: freezed == time
           ? _value.time
           : time // ignore: cast_nullable_to_non_nullable
@@ -361,6 +374,7 @@ class _$BallScoreModelImpl implements _BallScoreModel {
       this.wicket_taker_id,
       required this.is_four,
       required this.is_six,
+      this.legal_delivery,
       this.time,
       @TimeStampJsonConverter() this.score_time});
 
@@ -402,6 +416,8 @@ class _$BallScoreModelImpl implements _BallScoreModel {
   @override
   final bool is_six;
   @override
+  final bool? legal_delivery;
+  @override
   final DateTime? time;
   @override
   @TimeStampJsonConverter()
@@ -409,7 +425,7 @@ class _$BallScoreModelImpl implements _BallScoreModel {
 
   @override
   String toString() {
-    return 'BallScoreModel(id: $id, inning_id: $inning_id, match_id: $match_id, over_number: $over_number, ball_number: $ball_number, bowler_id: $bowler_id, batsman_id: $batsman_id, non_striker_id: $non_striker_id, runs_scored: $runs_scored, extras_type: $extras_type, extras_awarded: $extras_awarded, wicket_type: $wicket_type, fielding_position: $fielding_position, player_out_id: $player_out_id, wicket_taker_id: $wicket_taker_id, is_four: $is_four, is_six: $is_six, time: $time, score_time: $score_time)';
+    return 'BallScoreModel(id: $id, inning_id: $inning_id, match_id: $match_id, over_number: $over_number, ball_number: $ball_number, bowler_id: $bowler_id, batsman_id: $batsman_id, non_striker_id: $non_striker_id, runs_scored: $runs_scored, extras_type: $extras_type, extras_awarded: $extras_awarded, wicket_type: $wicket_type, fielding_position: $fielding_position, player_out_id: $player_out_id, wicket_taker_id: $wicket_taker_id, is_four: $is_four, is_six: $is_six, legal_delivery: $legal_delivery, time: $time, score_time: $score_time)';
   }
 
   @override
@@ -448,6 +464,8 @@ class _$BallScoreModelImpl implements _BallScoreModel {
                 other.wicket_taker_id == wicket_taker_id) &&
             (identical(other.is_four, is_four) || other.is_four == is_four) &&
             (identical(other.is_six, is_six) || other.is_six == is_six) &&
+            (identical(other.legal_delivery, legal_delivery) ||
+                other.legal_delivery == legal_delivery) &&
             (identical(other.time, time) || other.time == time) &&
             (identical(other.score_time, score_time) ||
                 other.score_time == score_time));
@@ -474,6 +492,7 @@ class _$BallScoreModelImpl implements _BallScoreModel {
         wicket_taker_id,
         is_four,
         is_six,
+        legal_delivery,
         time,
         score_time
       ]);
@@ -514,6 +533,7 @@ abstract class _BallScoreModel implements BallScoreModel {
           final String? wicket_taker_id,
           required final bool is_four,
           required final bool is_six,
+          final bool? legal_delivery,
           final DateTime? time,
           @TimeStampJsonConverter() final DateTime? score_time}) =
       _$BallScoreModelImpl;
@@ -555,6 +575,8 @@ abstract class _BallScoreModel implements BallScoreModel {
   bool get is_four;
   @override
   bool get is_six;
+  @override
+  bool? get legal_delivery;
   @override
   DateTime? get time;
   @override
@@ -974,6 +996,7 @@ mixin _$OverSummary {
   ExtraSummary get extrasSummary => throw _privateConstructorUsedError;
   int get totalRuns => throw _privateConstructorUsedError;
   int get totalWickets => throw _privateConstructorUsedError;
+  int get ballsPerOver => throw _privateConstructorUsedError;
 
   /// Create a copy of OverSummary
   /// with the given fields replaced by the non-null parameter values.
@@ -999,7 +1022,8 @@ abstract class $OverSummaryCopyWith<$Res> {
       int overNumber,
       ExtraSummary extrasSummary,
       int totalRuns,
-      int totalWickets});
+      int totalWickets,
+      int ballsPerOver});
 
   $BowlerSummaryCopyWith<$Res> get bowler;
   $BatsmanSummaryCopyWith<$Res> get striker;
@@ -1033,6 +1057,7 @@ class _$OverSummaryCopyWithImpl<$Res, $Val extends OverSummary>
     Object? extrasSummary = null,
     Object? totalRuns = null,
     Object? totalWickets = null,
+    Object? ballsPerOver = null,
   }) {
     return _then(_value.copyWith(
       inning_id: null == inning_id
@@ -1078,6 +1103,10 @@ class _$OverSummaryCopyWithImpl<$Res, $Val extends OverSummary>
       totalWickets: null == totalWickets
           ? _value.totalWickets
           : totalWickets // ignore: cast_nullable_to_non_nullable
+              as int,
+      ballsPerOver: null == ballsPerOver
+          ? _value.ballsPerOver
+          : ballsPerOver // ignore: cast_nullable_to_non_nullable
               as int,
     ) as $Val);
   }
@@ -1142,7 +1171,8 @@ abstract class _$$OverSummaryImplCopyWith<$Res>
       int overNumber,
       ExtraSummary extrasSummary,
       int totalRuns,
-      int totalWickets});
+      int totalWickets,
+      int ballsPerOver});
 
   @override
   $BowlerSummaryCopyWith<$Res> get bowler;
@@ -1178,6 +1208,7 @@ class __$$OverSummaryImplCopyWithImpl<$Res>
     Object? extrasSummary = null,
     Object? totalRuns = null,
     Object? totalWickets = null,
+    Object? ballsPerOver = null,
   }) {
     return _then(_$OverSummaryImpl(
       inning_id: null == inning_id
@@ -1224,6 +1255,10 @@ class __$$OverSummaryImplCopyWithImpl<$Res>
           ? _value.totalWickets
           : totalWickets // ignore: cast_nullable_to_non_nullable
               as int,
+      ballsPerOver: null == ballsPerOver
+          ? _value.ballsPerOver
+          : ballsPerOver // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -1242,7 +1277,8 @@ class _$OverSummaryImpl implements _OverSummary {
       this.overNumber = 0,
       this.extrasSummary = const ExtraSummary(),
       this.totalRuns = 0,
-      this.totalWickets = 0})
+      this.totalWickets = 0,
+      this.ballsPerOver = 6})
       : _balls = balls,
         _outPlayers = outPlayers;
 
@@ -1291,10 +1327,13 @@ class _$OverSummaryImpl implements _OverSummary {
   @override
   @JsonKey()
   final int totalWickets;
+  @override
+  @JsonKey()
+  final int ballsPerOver;
 
   @override
   String toString() {
-    return 'OverSummary(inning_id: $inning_id, team_id: $team_id, balls: $balls, bowler: $bowler, striker: $striker, nonStriker: $nonStriker, outPlayers: $outPlayers, overNumber: $overNumber, extrasSummary: $extrasSummary, totalRuns: $totalRuns, totalWickets: $totalWickets)';
+    return 'OverSummary(inning_id: $inning_id, team_id: $team_id, balls: $balls, bowler: $bowler, striker: $striker, nonStriker: $nonStriker, outPlayers: $outPlayers, overNumber: $overNumber, extrasSummary: $extrasSummary, totalRuns: $totalRuns, totalWickets: $totalWickets, ballsPerOver: $ballsPerOver)';
   }
 
   @override
@@ -1319,7 +1358,9 @@ class _$OverSummaryImpl implements _OverSummary {
             (identical(other.totalRuns, totalRuns) ||
                 other.totalRuns == totalRuns) &&
             (identical(other.totalWickets, totalWickets) ||
-                other.totalWickets == totalWickets));
+                other.totalWickets == totalWickets) &&
+            (identical(other.ballsPerOver, ballsPerOver) ||
+                other.ballsPerOver == ballsPerOver));
   }
 
   @override
@@ -1335,7 +1376,8 @@ class _$OverSummaryImpl implements _OverSummary {
       overNumber,
       extrasSummary,
       totalRuns,
-      totalWickets);
+      totalWickets,
+      ballsPerOver);
 
   /// Create a copy of OverSummary
   /// with the given fields replaced by the non-null parameter values.
@@ -1358,7 +1400,8 @@ abstract class _OverSummary implements OverSummary {
       final int overNumber,
       final ExtraSummary extrasSummary,
       final int totalRuns,
-      final int totalWickets}) = _$OverSummaryImpl;
+      final int totalWickets,
+      final int ballsPerOver}) = _$OverSummaryImpl;
 
   @override
   String get inning_id;
@@ -1382,6 +1425,8 @@ abstract class _OverSummary implements OverSummary {
   int get totalRuns;
   @override
   int get totalWickets;
+  @override
+  int get ballsPerOver;
 
   /// Create a copy of OverSummary
   /// with the given fields replaced by the non-null parameter values.

@@ -3,6 +3,10 @@ import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
 
+/// iOS-style large icon button.
+///
+/// Uses a circular fill; the tint comes from the provided [backgroundColor]
+/// (defaults to primary). No shadow — matches iOS HIG icon button pattern.
 class LargeIconButton extends StatelessWidget {
   final Color? backgroundColor;
   final Widget icon;
@@ -14,7 +18,7 @@ class LargeIconButton extends StatelessWidget {
   const LargeIconButton({
     super.key,
     this.backgroundColor,
-    this.size = 52,
+    this.size = 50,
     required this.icon,
     this.onTap,
     this.enabled = true,
@@ -26,12 +30,7 @@ class LargeIconButton extends StatelessWidget {
     final tappable = !progress && enabled;
 
     final bg = backgroundColor ?? context.colorScheme.primary;
-    final bgColor = tappable
-        ? bg
-        : Color.alphaBlend(
-            bg.withValues(alpha: 0.4),
-            context.colorScheme.surface,
-          );
+    final bgColor = tappable ? bg : bg.withValues(alpha: 0.38);
 
     return OnTapScale(
       enabled: tappable,

@@ -1,9 +1,15 @@
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:style/platform.dart';
 import 'package:flutter/material.dart';
+import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/widgets/custom_cupertino_navigation_bar.dart';
 
+/// Cross-platform page scaffold.
+///
+/// On iOS → [CupertinoPageScaffold] with a translucent nav bar and
+///           `systemGroupedBackground` scaffold color.
+/// On Android → [Scaffold] with a zero-elevation [AppBar].
 class AppPage extends StatelessWidget {
   final String? title;
   final Widget? titleWidget;
@@ -32,37 +38,31 @@ class AppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
+    if (isIOS) {
       return _cupertino(context);
     } else {
-      return _material();
+      return _material(context);
     }
   }
 
+  /// iOS scaffold: grouped background + translucent nav bar.
   Widget _cupertino(BuildContext context) => CupertinoPageScaffold(
         resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-        navigationBar: (title == null && titleWidget == null) &&
-                actions == null &&
-                leading == null
-            ? null
-            : CustomCupertinoNavigationBar(
+        backgroundColor: context.colorScheme.groupedBackground,
+        navigationBar: _hasNavBar
+            ? CustomCupertinoNavigationBar(
                 leading: leading,
-                padding: padding ?? const EdgeInsets.symmetric(horizontal: 8),
+                padding:
+                    padding ?? const EdgeInsets.symmetric(horizontal: 8),
                 backgroundColor: appBarBackgroundColor,
-                middle: titleWidget ?? _title(),
-                trailing: actions == null
-                    ? null
-                    : actions!.length == 1
-                        ? actions!.first
-                        : Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: actions!,
-                          ),
+                middle: titleWidget ?? _titleWidget(),
+                trailing: _trailingActions(),
                 automaticallyImplyLeading: automaticallyImplyLeading,
                 previousPageTitle: automaticallyImplyLeading
                     ? MaterialLocalizations.of(context).backButtonTooltip
                     : null,
-              ),
+              )
+            : null,
         child: Stack(
           alignment: Alignment.bottomRight,
           children: [
@@ -77,31 +77,58 @@ class AppPage extends StatelessWidget {
         ),
       );
 
-  Widget _material() => Scaffold(
+  /// Material scaffold: flat app bar, no tint.
+  Widget _material(BuildContext context) => Scaffold(
         resizeToAvoidBottomInset: resizeToAvoidBottomInset,
-        appBar: (title == null && titleWidget == null) &&
-                actions == null &&
-                leading == null
-            ? null
-            : AppBar(
-                backgroundColor: appBarBackgroundColor,
-                toolbarHeight: kToolbarHeight + (padding?.vertical ?? 0),
+        backgroundColor: context.colorScheme.groupedBackground,
+        appBar: _hasNavBar
+            ? AppBar(
+                backgroundColor:
+                    appBarBackgroundColor ?? context.colorScheme.surface,
+                surfaceTintColor: Colors.transparent,
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                toolbarHeight:
+                    kToolbarHeight + (padding?.vertical ?? 0),
                 title: Padding(
-                    padding:
-                        padding ?? const EdgeInsets.symmetric(horizontal: 8),
-                    child: titleWidget ?? _title()),
+                  padding:
+                      padding ?? const EdgeInsets.symmetric(horizontal: 8),
+                  child: titleWidget ?? _titleWidget(),
+                ),
                 actions: actions,
                 leading: leading,
                 automaticallyImplyLeading: automaticallyImplyLeading,
-              ),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(0.5),
+                  child: Container(
+                    height: 0.5,
+                    color: context.colorScheme.outline,
+                  ),
+                ),
+              )
+            : null,
         body: body,
         floatingActionButton: floatingActionButton,
       );
 
-  Widget _title() => Text(
-        title ?? '',
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: const TextStyle(fontFamily: AppTextStyle.poppinsFontFamily),
-      );
+  bool get _hasNavBar =>
+      title != null || titleWidget != null || actions != null || leading != null;
+
+  Widget? _titleWidget() => title != null
+      ? Text(
+          title!,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyle.navTitle,
+        )
+      : null;
+
+  Widget? _trailingActions() {
+    if (actions == null) return null;
+    if (actions!.length == 1) return actions!.first;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: actions!,
+    );
+  }
 }

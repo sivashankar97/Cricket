@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import '../../api/network/client.dart';
 import '../../storage/app_preferences.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -41,14 +39,16 @@ class DeviceService {
   }
 
   Future<String> get deviceName async {
-    final deviceInfo = await DeviceInfoPlugin().deviceInfo;
-    if (Platform.isAndroid) {
-      final deviceInfo = await DeviceInfoPlugin().androidInfo;
-      deviceInfo.version.sdkInt;
-      return deviceInfo.data['product'];
-    } else {
-      return deviceInfo.data['name'];
+    if (kIsWeb) {
+      final info = await DeviceInfoPlugin().webBrowserInfo;
+      return info.browserName.name;
     }
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final android = await DeviceInfoPlugin().androidInfo;
+      return android.data['product']?.toString() ?? 'Android';
+    }
+    final deviceInfo = await DeviceInfoPlugin().deviceInfo;
+    return deviceInfo.data['name']?.toString() ?? 'Unknown';
   }
 
   Future<String> get osVersion async {
@@ -57,10 +57,10 @@ class DeviceService {
       return deviceInfo.userAgent ??
           deviceInfo.productSub ??
           deviceInfo.browserName.name;
-    } else if (!kIsWeb && Platform.isAndroid) {
+    } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       final deviceInfo = await DeviceInfoPlugin().androidInfo;
       return deviceInfo.version.release;
-    } else if (!kIsWeb && Platform.isIOS) {
+    } else if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       final deviceInfo = await DeviceInfoPlugin().iosInfo;
       return deviceInfo.systemVersion;
     } else {
@@ -81,9 +81,9 @@ class DeviceService {
   int currentPlatformType() {
     if (kIsWeb) {
       return 3;
-    } else if (Platform.isIOS) {
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       return 1;
-    } else if (Platform.isAndroid) {
+    } else if (defaultTargetPlatform == TargetPlatform.android) {
       return 2;
     } else {
       return 0;
@@ -91,14 +91,14 @@ class DeviceService {
   }
 
   static Future<bool> isNotificationPermissionRequired() async {
-    if (!kIsWeb && Platform.isAndroid) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
       final androidInfo = await DeviceInfoPlugin().androidInfo;
       if (androidInfo.version.sdkInt < 33) {
         return false;
       }
       return true;
     }
-    if (!kIsWeb && Platform.isIOS) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
       return true;
     }
     return false;

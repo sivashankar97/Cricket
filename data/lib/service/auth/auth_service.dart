@@ -104,6 +104,83 @@ class AuthService {
     }
   }
 
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+    required bool createAccount,
+  }) async {
+    final trimmedEmail = email.trim();
+    try {
+      final credential = createAccount
+          ? await _auth.createUserWithEmailAndPassword(
+              email: trimmedEmail,
+              password: password,
+            )
+          : await _auth.signInWithEmailAndPassword(
+              email: trimmedEmail,
+              password: password,
+            );
+      await _onEmailSignInSuccess(trimmedEmail, credential);
+      try {
+        final deviceToken = await FirebaseMessaging.instance.getToken();
+        if (deviceToken != null) {
+          await registerDevice(deviceToken);
+        }
+      } catch (error) {
+        debugPrint('AuthService: FCM token skipped $error');
+      }
+    } on FirebaseAuthException catch (error, stack) {
+      throw AppError(
+        statusCode: error.code,
+        message: _emailAuthMessage(error.code),
+        stackTrace: stack,
+      );
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  String _emailAuthMessage(String code) {
+    switch (code) {
+      case 'email-already-in-use':
+        return 'An account with this email already exists. Sign in instead.';
+      case 'invalid-email':
+        return 'Enter a valid email address.';
+      case 'weak-password':
+        return 'Use a password with at least 6 characters.';
+      case 'user-not-found':
+      case 'wrong-password':
+      case 'invalid-credential':
+        return 'Email or password is incorrect. Create an account if you are new.';
+      case 'operation-not-allowed':
+        return 'Email sign-in is not available yet.';
+      case 'unauthorized-domain':
+        return 'This site is not allowed to sign in yet.';
+      case 'network-request-failed':
+        return 'No internet connection. Please check your network and try again.';
+      default:
+        return 'Could not sign in. Try again.';
+    }
+  }
+
+  Future<void> _onEmailSignInSuccess(
+    String email,
+    UserCredential credential,
+  ) async {
+    if (credential.user == null) {
+      _currentUserNotifier.state = null;
+      _userSessionNotifier.state = null;
+      return;
+    }
+    final (user, session) = await _userService.upsertUser(
+      uid: credential.user!.uid,
+      phone: '',
+      email: email,
+    );
+    _currentUserNotifier.state = user.toJsonString();
+    _userSessionNotifier.state = session.toJsonString();
+  }
+
   Future<void> _onVerificationSuccess(
     String countryCode,
     String phoneNumber,
@@ -131,12 +208,17 @@ class AuthService {
 
   Future<void> reAuthenticateAndDeleteAccount() async {
     try {
-      final providerData = _auth.currentUser?.providerData.first;
-      if (PhoneAuthProvider().providerId == providerData?.providerId) {
+      final providers = _auth.currentUser?.providerData ?? [];
+      final providerId = providers.isEmpty ? null : providers.first.providerId;
+      if (providerId == PhoneAuthProvider.PROVIDER_ID) {
         await _auth.currentUser
             ?.reauthenticateWithProvider(PhoneAuthProvider());
-        deleteAccount();
+        await deleteAccount();
+        return;
       }
+      throw const AppError(
+        message: 'Sign out, sign in again, then delete the account.',
+      );
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }

@@ -122,7 +122,7 @@ class _PhoneVerificationScreenState
           errorText: state.showErrorVerificationCodeText
               ? context.l10n.otp_verification_incorrect_otp_error_text
               : null,
-          borderRadius: BorderRadius.circular(40),
+          borderRadius: BorderRadius.circular(12),
           borderType: AppTextFieldBorderType.outline,
           borderColor: BorderColor(
               focusColor: Colors.transparent, unFocusColor: Colors.transparent),

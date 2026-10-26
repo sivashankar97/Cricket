@@ -1,13 +1,7 @@
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
-extension FileExtension on File {
-  Future<bool> isFileUnderMaxSize() async {
-    try {
-      const maxAllowedSizeInBytes = 25 * 1024 * 1024;
-      final sizeInBytes = await length();
-      return sizeInBytes <= maxAllowedSizeInBytes;
-    } catch (e) {
-      rethrow;
-    }
-  }
+Future<bool> isFileUnderMaxSize(String path) async {
+  const maxAllowedSizeInBytes = 25 * 1024 * 1024;
+  final sizeInBytes = await XFile(path).length();
+  return sizeInBytes <= maxAllowedSizeInBytes;
 }

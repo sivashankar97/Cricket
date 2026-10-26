@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:style/platform.dart';
 
 import '../extensions/context_extensions.dart';
 
@@ -19,10 +18,12 @@ class AppProgressIndicator extends StatefulWidget {
     this.radius,
     AppProgressIndicatorSize? size,
     this.color,
-  })  : assert(radius == null || size == null,
-            "Cannot provide both a radius and a size."),
-        size = radius == null ? size ?? AppProgressIndicatorSize.normal : null,
-        super(key: key);
+  }) : assert(
+         radius == null || size == null,
+         "Cannot provide both a radius and a size.",
+       ),
+       size = radius == null ? size ?? AppProgressIndicatorSize.normal : null,
+       super(key: key);
 
   @override
   State<AppProgressIndicator> createState() => _AppProgressIndicatorState();
@@ -51,10 +52,11 @@ class _AppProgressIndicatorState extends State<AppProgressIndicator> {
   }
 
   Widget _indicator() {
-    final radius = widget.radius ??
+    final radius =
+        widget.radius ??
         (widget.size == AppProgressIndicatorSize.small ? 10.0 : 16.0);
 
-    if (Platform.isIOS) {
+    if (isIOS) {
       return CupertinoActivityIndicator(
         color: widget.color ?? context.colorScheme.primary,
         radius: radius,

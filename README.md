@@ -87,6 +87,20 @@ Khelo is built using Flutter and Dart, leveraging Firestore for database managem
 - A **Google account** to create a Firebase project.
 - An **active internet connection** for Firebase communication.
 
+**Authentication setup:**
+
+- Email sign-in verifies a one-time code through Supabase Auth. Supabase controls the email body, so configure both **Authentication → Email Templates → Confirm signup** and **Magic Link** to show `{{ .Token }}` instead of using only `{{ .ConfirmationURL }}`. For example:
+
+  ```html
+  <h2>Your Khelo sign-in code</h2>
+  <p>Enter this code in the app:</p>
+  <p><strong>{{ .Token }}</strong></p>
+  ```
+
+  Save the templates and request a new code; previously sent emails will still contain their original link-only template.
+- Email verification is not yet linked to the app's Firebase identity and Firestore session. A secure Firebase auth bridge is required before verified email accounts can access the app.
+- WhatsApp sign-in remains unavailable until a business number and a server-side WhatsApp verification/link service are configured.
+
 **Platform-Specific Requirements:**
 
 - **Android (if targeting Android):**
@@ -112,7 +126,8 @@ Khelo leverages modern Flutter development technologies, adhering to industry be
 - **Http & Dio**: Libraries for making network requests.
 - **GoRouter**: A declarative routing package for Flutter.
 - **RiverPod**: A state management solution that is simple and powerful.
-- **Firebase Authentication**: For secure user authentication.
+- **Firebase Authentication**: For the app's existing user identity and Firestore access.
+- **Supabase Auth**: For email one-time-code verification.
 - **Firebase Firestore**: A scalable database for storing app data.
 - **Cloud Functions**: To run backend code in response to events triggered by Firebase features.
 
@@ -155,8 +170,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ```
-
-
 
 
 

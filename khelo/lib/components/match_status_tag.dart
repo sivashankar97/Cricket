@@ -8,6 +8,10 @@ import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 
+/// iOS-style status pill tag.
+///
+/// Uses a rounded rect with a tinted background color matching the status.
+/// Smaller padding and caption text size — matching iOS tag/badge conventions.
 class StatusTag extends StatelessWidget {
   final MatchStatus? matchStatus;
   final TournamentStatus? tournamentStatus;
@@ -29,37 +33,43 @@ class StatusTag extends StatelessWidget {
       onTap: onTap,
       enabled: onTap != null,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
           color: matchStatus?.getColor(context) ??
               tournamentStatus?.getColor(context),
-          borderRadius: BorderRadius.circular(30),
+          // iOS uses 8pt radius for compact badges
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (onTap != null) ...[
               matchStatus == MatchStatus.running ||
                       tournamentStatus == TournamentStatus.running
                   ? Icon(
-                      CupertinoIcons.play,
-                      size: 16,
+                      CupertinoIcons.play_fill,
+                      size: 11,
                       color: context.colorScheme.onPrimary,
                     )
                   : SvgPicture.asset(
                       Assets.images.icEdit,
-                      height: 16,
-                      width: 16,
+                      height: 11,
+                      width: 11,
                       colorFilter: ColorFilter.mode(
-                          context.colorScheme.onPrimary, BlendMode.srcIn),
+                        context.colorScheme.onPrimary,
+                        BlendMode.srcIn,
+                      ),
                     ),
-              const SizedBox(width: 2)
+              const SizedBox(width: 3),
             ],
             Text(
               matchStatus?.getString(context) ??
                   tournamentStatus?.getString(context) ??
                   '',
-              style: AppTextStyle.caption
-                  .copyWith(color: context.colorScheme.onPrimary),
+              style: AppTextStyle.caption.copyWith(
+                color: context.colorScheme.onPrimary,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ],
         ),

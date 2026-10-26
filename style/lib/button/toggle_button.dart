@@ -1,5 +1,7 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:style/extensions/context_extensions.dart';
+import 'package:style/platform.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 
@@ -10,11 +12,24 @@ Widget toggleButton(
 }) {
   bool defaultValue = defaultEnabled;
 
-  return Material(
-    type: MaterialType.transparency,
-    child: StatefulBuilder(
-      builder: (context, setStateSwitch) {
-        return Theme(
+  return StatefulBuilder(
+    builder: (context, setStateSwitch) {
+      if (isIOS) {
+        return CupertinoSwitch(
+          activeColor: context.colorScheme.primary,
+          trackColor: context.colorScheme.containerHigh,
+          value: defaultValue,
+          onChanged: (value) {
+            setStateSwitch(() {
+              defaultValue = value;
+              onTap(value);
+            });
+          },
+        );
+      }
+      return Material(
+        type: MaterialType.transparency,
+        child: Theme(
           data: context.brightness == Brightness.dark
               ? materialThemeDataDark
               : materialThemeDataLight,
@@ -40,9 +55,9 @@ Widget toggleButton(
               ),
             ),
           ),
-        );
-      },
-    ),
+        ),
+      );
+    },
   );
 }
 

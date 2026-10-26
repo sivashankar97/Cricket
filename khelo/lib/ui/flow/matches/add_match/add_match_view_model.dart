@@ -126,6 +126,7 @@ class AddMatchViewNotifier extends StateNotifier<AddMatchViewState> {
           pitchType: match.pitch_type,
           matchType: match.match_type,
           ballType: match.ball_type,
+          rules: match.rules,
           officials: referee != null
               ? [...umpire, ...commentator, ...scorer, referee]
               : [
@@ -227,6 +228,7 @@ class AddMatchViewNotifier extends StateNotifier<AddMatchViewState> {
           toss_winner_id: editMatch?.toss_winner_id,
           referee_id: refereeId,
           current_playing_team_id: editMatch?.current_playing_team_id,
+          rules: state.rules,
           match_status:
               startMatch ? MatchStatus.running : MatchStatus.yetToStart);
 
@@ -265,6 +267,10 @@ class AddMatchViewNotifier extends StateNotifier<AddMatchViewState> {
   void onBallTypeSelection(BallType type) {
     state = state.copyWith(ballType: type);
     onTextChange();
+  }
+
+  void onRulesChange(MatchRules rules) {
+    state = state.copyWith(rules: rules);
   }
 
   void onTeamSelect(TeamModel team, TeamType type) {
@@ -430,6 +436,7 @@ class AddMatchViewState with _$AddMatchViewState {
     @Default(false) bool isAddMatchInProgress,
     @Default(null) bool? pushTossDetailScreen,
     @Default(null) MatchModel? match,
+    @Default(MatchRules()) MatchRules rules,
   }) = _AddMatchViewState;
 }
 

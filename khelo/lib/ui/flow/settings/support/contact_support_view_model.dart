@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:data/api/support/support_models.dart';
 import 'package:data/errors/app_error.dart';
@@ -66,7 +64,7 @@ class ContactSupportViewStateNotifier
             uploadStatus: AttachmentUploadStatus.uploading),
       ]);
       onValueChange();
-      final bool isLarge = !(await File(path).isFileUnderMaxSize());
+      final bool isLarge = !(await isFileUnderMaxSize(path));
 
       if (isLarge) {
         final attachments = state.attachments.toList()

@@ -82,9 +82,16 @@ class UserService {
   Future<(UserModel, ApiSession)> upsertUser({
     required String uid,
     required String phone,
+    String? email,
   }) async {
     var user = await getUser(uid);
-    user ??= await _createUser(uid, phone);
+    user ??= await _createUser(uid, phone: phone, email: email);
+    if ((user.email == null || user.email!.isEmpty) &&
+        email != null &&
+        email.isNotEmpty) {
+      user = user.copyWith(email: email, updated_at: DateTime.now());
+      await updateUser(user);
+    }
     final session = await _createSession(uid);
     return (user, session);
   }
@@ -176,14 +183,46 @@ class UserService {
     }
   }
 
-  Future<UserModel> _createUser(String userId, String phone) async {
+  Future<UserModel> _createUser(
+    String userId, {
+    required String phone,
+    String? email,
+  }) async {
+    final trimmedPhone = phone.trim();
     final user = UserModel(
       id: userId,
-      phone: phone,
+      phone: trimmedPhone.isEmpty ? null : trimmedPhone,
+      email: email,
       created_at: DateTime.now(),
     );
     await _userRef.doc(userId).set(user);
     return user;
+  }
+
+  Future<UserModel> createPlayer({
+    required String name,
+    String? phone,
+  }) async {
+    try {
+      final docRef = _userRef.doc();
+      final trimmedName = name.trim();
+      final trimmedPhone = phone?.trim() ?? '';
+      final user = UserModel(
+        id: docRef.id,
+        name: trimmedName,
+        name_lowercase: trimmedName.toLowerCase(),
+        phone: trimmedPhone.isEmpty ? null : trimmedPhone,
+        created_at: DateTime.now(),
+      );
+      // created_by marks profiles made by an organizer rather than by sign-up.
+      await firestore
+          .collection(FireStoreConst.usersCollection)
+          .doc(docRef.id)
+          .set({...user.toJson(), 'created_by': _currentUser?.id});
+      return user;
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
   }
 
   Future<void> deleteUser() async {

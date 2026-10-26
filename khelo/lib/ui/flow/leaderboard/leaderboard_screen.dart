@@ -7,10 +7,12 @@ import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/enum_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/leaderboard/leaderboard_view_model.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/callback/on_visible_callback.dart';
 import 'package:style/extensions/context_extensions.dart';
+import 'package:style/theme/shadows.dart';
 import 'package:style/indicator/progress_indicator.dart';
 import 'package:style/text/app_text_style.dart';
 
@@ -95,6 +97,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
       scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         children: List.generate(
@@ -103,7 +106,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 4),
             child: TabButton(
               tabs[index].getString(context),
-              onTap: () => _controller.jumpToPage(index),
+              onTap: () => _controller.animateToTab(index),
               selected: index == _selectedTab,
             ),
           ),
@@ -181,10 +184,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
       onTap: () => AppRoute.userDetail(userId: player.id).push(context),
       child: Container(
         padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.colorScheme.outline),
-        ),
+        decoration: context.colorScheme.cardDecoration(radius: 12),
         child: Row(
           children: [
             Text(
@@ -213,10 +213,11 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
                   color: rank <= 2
                       ? context.colorScheme.primary
                       : context.colorScheme.containerLowOnSurface,
-                  borderRadius: BorderRadius.circular(30)),
+                  borderRadius: BorderRadius.circular(8)),
               child: Text(
                 _getCountAsPerField(context, player, field),
                 style: AppTextStyle.body2.copyWith(
+                  fontWeight: FontWeight.w600,
                   color: rank <= 2
                       ? context.colorScheme.onPrimary
                       : context.colorScheme.primary,

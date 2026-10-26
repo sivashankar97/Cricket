@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:data/api/user/user_models.dart';
 import 'package:data/errors/app_error.dart';
 import 'package:data/service/auth/auth_service.dart';
@@ -106,7 +104,7 @@ class EditProfileViewNotifier extends StateNotifier<EditProfileState> {
   Future<void> onImageChange(String imagePath) async {
     try {
       state = state.copyWith(isImageUploading: true, actionError: null);
-      if (await File(imagePath).isFileUnderMaxSize()) {
+      if (await isFileUnderMaxSize(imagePath)) {
         state = state.copyWith(filePath: imagePath, isImageUploading: false);
       } else {
         state = state.copyWith(

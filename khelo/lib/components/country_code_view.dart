@@ -24,7 +24,7 @@ class CountryCodeView extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
         decoration: BoxDecoration(
             color: context.colorScheme.containerLow,
-            borderRadius: BorderRadius.circular(30)),
+            borderRadius: BorderRadius.circular(12)),
         child: Row(
           children: [
             ClipPath(

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:data/api/team/team_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,7 +14,9 @@ import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_stats_tab
 import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_teams_tab.dart';
 import 'package:khelo/ui/flow/tournament/detail/tournament_detail_view_model.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:style/animations/app_animations.dart';
 import 'package:style/button/action_button.dart';
+import 'package:style/platform.dart';
 import 'package:style/button/more_option_button.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/extensions/context_extensions.dart';
@@ -184,6 +184,7 @@ class _TournamentDetailScreenState
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       scrollDirection: Axis.horizontal,
+      clipBehavior: Clip.none,
       child: Row(
         children: List.generate(
           tabs.length,
@@ -193,7 +194,7 @@ class _TournamentDetailScreenState
               tabs[index],
               selected: index == _selectedTab,
               onTap: () {
-                _controller.jumpToPage(index);
+                _controller.animateToTab(index);
               },
             ),
           ),
@@ -252,7 +253,7 @@ class _TournamentDetailScreenState
           backgroundColor:
               context.colorScheme.containerHighOnSurface.withValues(alpha: 0.4),
           child: Icon(
-            Platform.isIOS ? Icons.arrow_back_ios_new : Icons.arrow_back,
+            isIOS ? Icons.arrow_back_ios_new : Icons.arrow_back,
             size: 20,
             color: context.colorScheme.textPrimary,
           ),
@@ -268,7 +269,7 @@ class _TournamentDetailScreenState
         backgroundColor:
             context.colorScheme.containerHighOnSurface.withValues(alpha: 0.4),
         child: Icon(
-          Platform.isIOS ? Icons.share : Icons.share_outlined,
+          isIOS ? Icons.share : Icons.share_outlined,
           size: 20,
           color: context.colorScheme.textPrimary,
         ),

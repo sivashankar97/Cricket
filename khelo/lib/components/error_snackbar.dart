@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:style/platform.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:khelo/domain/extensions/app_error_extension.dart';
@@ -23,7 +23,7 @@ void showSnackBar(
   String text, {
   SnackBarLength length = SnackBarLength.short,
 }) {
-  if (Platform.isIOS) {
+  if (isIOS) {
     Fluttertoast.showToast(
       msg: text,
       timeInSecForIosWeb: length.seconds,
