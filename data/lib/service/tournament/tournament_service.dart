@@ -413,6 +413,19 @@ class TournamentService {
     }
   }
 
+  Future<void> addMatchIdsInTournament(
+    String tournamentId,
+    List<String> matchIds,
+  ) async {
+    try {
+      await _tournamentCollection.doc(tournamentId).update({
+        FireStoreConst.matchIds: FieldValue.arrayUnion(matchIds),
+      });
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
   Future<void> updateTournamentMembers(
     String tournamentId,
     List<TournamentMember> members,
@@ -477,7 +490,7 @@ class TournamentService {
       query = query.limit(limit);
       final snapshot = await query.get();
 
-      return Future.wait(
+      return await Future.wait(
         snapshot.docs.map(
           (e) async {
             var tournament = e.data();

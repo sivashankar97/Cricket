@@ -181,6 +181,46 @@ class AuthService {
     _userSessionNotifier.state = session.toJsonString();
   }
 
+  Future<void> signInWithCustomToken(String token) async {
+    try {
+      final credential = await _auth.signInWithCustomToken(token.trim());
+      if (credential.user != null) {
+        final phone = credential.user!.phoneNumber ?? '';
+        final email = credential.user!.email ?? '';
+        final (user, session) = await _userService.upsertUser(
+          uid: credential.user!.uid,
+          phone: phone,
+          email: email,
+        );
+        _currentUserNotifier.state = user.toJsonString();
+        _userSessionNotifier.state = session.toJsonString();
+      }
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  Future<void> signInWithWhatsAppPhone(String phoneNumber) async {
+    try {
+      final trimmed = phoneNumber.trim();
+      User? user = _auth.currentUser;
+      if (user == null) {
+        final anonCredential = await _auth.signInAnonymously();
+        user = anonCredential.user;
+      }
+      if (user != null) {
+        final (appUser, session) = await _userService.upsertUser(
+          uid: user.uid,
+          phone: trimmed,
+        );
+        _currentUserNotifier.state = appUser.toJsonString();
+        _userSessionNotifier.state = session.toJsonString();
+      }
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
   Future<void> _onVerificationSuccess(
     String countryCode,
     String phoneNumber,

@@ -38,6 +38,7 @@ import 'flow/home/view_all/home_view_all_screen.dart';
 import 'flow/main/main_screen.dart';
 import 'flow/settings/support/contact_support_screen.dart';
 import 'flow/sign_in/sign_in_with_email/sign_in_with_email_screen.dart';
+import 'flow/sign_in/whatsapp_login_redirect_screen.dart';
 import 'flow/team/user_detail/user_detail_screen.dart';
 import 'flow/tournament/detail/tournament_detail_screen.dart';
 import 'flow/tournament/match_selection/match_selection_screen.dart';
@@ -395,6 +396,17 @@ class AppRoute {
             ? const SignInWithEmailScreen()
             : state.widget(context),
       ),
+    ),
+    GoRoute(
+      path: '/whatsapp-login',
+      pageBuilder: (context, state) {
+        final token = state.uri.queryParameters['token'];
+        final phone = state.uri.queryParameters['phone'];
+        return adaptivePage(
+          state: state,
+          child: WhatsAppLoginRedirectScreen(token: token, phone: phone),
+        );
+      },
     ),
     searchHome.goRoute(),
     GoRoute(

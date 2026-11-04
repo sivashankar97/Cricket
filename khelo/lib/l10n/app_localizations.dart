@@ -659,11 +659,47 @@ abstract class AppLocalizations {
   /// **'Continue with WhatsApp'**
   String get sign_in_whatsapp_option;
 
-  /// No description provided for @sign_in_whatsapp_unavailable.
+  /// No description provided for @sign_in_whatsapp_subtitle.
   ///
   /// In en, this message translates to:
-  /// **'WhatsApp sign-in is not configured yet. A verified WhatsApp number and sign-in service are required.'**
-  String get sign_in_whatsapp_unavailable;
+  /// **'Send \'Hi login\' on WhatsApp to get your instant login link.'**
+  String get sign_in_whatsapp_subtitle;
+
+  /// No description provided for @sign_in_whatsapp_opened_title.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp Chat Opened'**
+  String get sign_in_whatsapp_opened_title;
+
+  /// No description provided for @sign_in_whatsapp_opened_desc.
+  ///
+  /// In en, this message translates to:
+  /// **'Send the prefilled message \'Hi login\' in WhatsApp. You will receive a login link to continue.'**
+  String get sign_in_whatsapp_opened_desc;
+
+  /// No description provided for @sign_in_whatsapp_open_again_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Open WhatsApp Again'**
+  String get sign_in_whatsapp_open_again_btn;
+
+  /// No description provided for @sign_in_whatsapp_have_link_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'I have a login link or token'**
+  String get sign_in_whatsapp_have_link_btn;
+
+  /// No description provided for @sign_in_whatsapp_enter_link_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste login link or token here'**
+  String get sign_in_whatsapp_enter_link_placeholder;
+
+  /// No description provided for @sign_in_whatsapp_submit_token_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Verify & Sign In'**
+  String get sign_in_whatsapp_submit_token_btn;
 
   /// No description provided for @sign_in_email_title.
   ///
@@ -1258,6 +1294,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All Teams'**
   String get tournament_detail_matches_filter_all_teams_option;
+
+  /// No description provided for @tournament_detail_matches_schedule_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Matches'**
+  String get tournament_detail_matches_schedule_btn;
+
+  /// No description provided for @tournament_detail_matches_all_status.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get tournament_detail_matches_all_status;
+
+  /// No description provided for @tournament_detail_matches_live_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get tournament_detail_matches_live_status;
+
+  /// No description provided for @tournament_detail_matches_upcoming_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get tournament_detail_matches_upcoming_status;
+
+  /// No description provided for @tournament_detail_matches_past_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Past'**
+  String get tournament_detail_matches_past_status;
+
+  /// No description provided for @tournament_detail_matches_live_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Live Matches'**
+  String get tournament_detail_matches_live_section;
+
+  /// No description provided for @tournament_detail_matches_upcoming_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming Matches'**
+  String get tournament_detail_matches_upcoming_section;
+
+  /// No description provided for @tournament_detail_matches_past_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Past Matches'**
+  String get tournament_detail_matches_past_section;
+
+  /// No description provided for @tournament_detail_matches_no_live.
+  ///
+  /// In en, this message translates to:
+  /// **'No live matches right now'**
+  String get tournament_detail_matches_no_live;
+
+  /// No description provided for @tournament_detail_matches_no_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'No upcoming matches scheduled'**
+  String get tournament_detail_matches_no_upcoming;
+
+  /// No description provided for @tournament_detail_matches_no_past.
+  ///
+  /// In en, this message translates to:
+  /// **'No past matches recorded yet'**
+  String get tournament_detail_matches_no_past;
+
+  /// No description provided for @tournament_schedule_whole_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule Whole Tournament'**
+  String get tournament_schedule_whole_title;
+
+  /// No description provided for @tournament_schedule_whole_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule all pending fixtures with default match settings at once.'**
+  String get tournament_schedule_whole_description;
+
+  /// No description provided for @tournament_schedule_all_matches_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule All Matches'**
+  String get tournament_schedule_all_matches_btn;
+
+  /// No description provided for @tournament_schedule_success_msg.
+  ///
+  /// In en, this message translates to:
+  /// **'Successfully scheduled all matches!'**
+  String get tournament_schedule_success_msg;
+
+  /// No description provided for @tournament_schedule_start_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting Date & Time'**
+  String get tournament_schedule_start_date;
+
+  /// No description provided for @tournament_schedule_overs.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Overs'**
+  String get tournament_schedule_overs;
+
+  /// No description provided for @tournament_schedule_overs_per_bowler.
+  ///
+  /// In en, this message translates to:
+  /// **'Overs per Bowler'**
+  String get tournament_schedule_overs_per_bowler;
+
+  /// No description provided for @tournament_schedule_venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Ground / Venue'**
+  String get tournament_schedule_venue;
+
+  /// No description provided for @tournament_schedule_city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get tournament_schedule_city;
+
+  /// No description provided for @tournament_schedule_spacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Match Spacing'**
+  String get tournament_schedule_spacing;
+
+  /// No description provided for @tournament_schedule_spacing_same_day.
+  ///
+  /// In en, this message translates to:
+  /// **'Same day (spaced 3 hours)'**
+  String get tournament_schedule_spacing_same_day;
+
+  /// No description provided for @tournament_schedule_spacing_consecutive.
+  ///
+  /// In en, this message translates to:
+  /// **'Consecutive days'**
+  String get tournament_schedule_spacing_consecutive;
+
+  /// No description provided for @tournament_schedule_no_pending.
+  ///
+  /// In en, this message translates to:
+  /// **'No pending fixtures to schedule.'**
+  String get tournament_schedule_no_pending;
 
   /// No description provided for @tournament_detail_key_stat_most_runs_title.
   ///

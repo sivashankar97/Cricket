@@ -186,6 +186,127 @@ class MatchSelectionViewNotifier extends StateNotifier<MatchSelectionState> {
     return options;
   }
 
+  Future<int> scheduleAllMatches({
+    required DateTime startDate,
+    required int numberOfOvers,
+    required int overPerBowler,
+    required String city,
+    required String ground,
+    required BallType ballType,
+    required PitchType pitchType,
+    bool staggerTimes = true,
+  }) async {
+    if (state.tournament == null) return 0;
+    state = state.copyWith(loading: true, actionError: null);
+
+    try {
+      final List<MatchModel> pendingMatches = [];
+      state.matches.forEach((group, rounds) {
+        rounds.forEach((roundNumber, matchesList) {
+          for (final m in matchesList) {
+            if (m.id.isEmpty && m.teams.length >= 2) {
+              pendingMatches.add(m);
+            }
+          }
+        });
+      });
+
+      if (pendingMatches.isEmpty) {
+        state = state.copyWith(loading: false);
+        return 0;
+      }
+
+      final tournament = state.tournament!;
+      final teamsMap = {for (final t in tournament.teams) t.id: t};
+
+      final List<MatchModel> matchesToCreate = [];
+      DateTime currentMatchTime = startDate;
+
+      for (int i = 0; i < pendingMatches.length; i++) {
+        final pending = pendingMatches[i];
+        final teamAId = pending.teams.first.team_id;
+        final teamBId = pending.teams.last.team_id;
+
+        final teamA = teamsMap[teamAId] ?? pending.teams.first.team;
+        final teamB = teamsMap[teamBId] ?? pending.teams.last.team;
+
+        final squadA = teamA.players
+            .where((p) => p.user.isActive)
+            .take(11)
+            .map((p) => MatchPlayer(id: p.user.id, player: p.user))
+            .toList();
+        final squadB = teamB.players
+            .where((p) => p.user.isActive)
+            .take(11)
+            .map((p) => MatchPlayer(id: p.user.id, player: p.user))
+            .toList();
+
+        final allPlayerIds = {
+          ...squadA.map((p) => p.id),
+          ...squadB.map((p) => p.id),
+        }.toList();
+
+        final matchTime = currentMatchTime;
+        if (staggerTimes) {
+          currentMatchTime = currentMatchTime.add(const Duration(hours: 3));
+        }
+
+        final matchModel = MatchModel(
+          id: '',
+          players: allPlayerIds,
+          team_ids: [teamA.id, teamB.id],
+          team_creator_ids: [
+            if (teamA.created_by != null) teamA.created_by!,
+            if (teamB.created_by != null && teamB.created_by != teamA.created_by)
+              teamB.created_by!,
+          ],
+          teams: [
+            MatchTeamModel(
+              team_id: teamA.id,
+              team: teamA,
+              squad: squadA,
+              captain_id: squadA.firstOrNull?.id,
+              admin_id: squadA.firstOrNull?.id,
+            ),
+            MatchTeamModel(
+              team_id: teamB.id,
+              team: teamB,
+              squad: squadB,
+              captain_id: squadB.firstOrNull?.id,
+              admin_id: squadB.firstOrNull?.id,
+            ),
+          ],
+          match_type: MatchType.limitedOvers,
+          number_of_over: numberOfOvers,
+          over_per_bowler: overPerBowler,
+          city: city.isNotEmpty ? city : (pending.city.isNotEmpty ? pending.city : ''),
+          ground: ground.isNotEmpty ? ground : (pending.ground.isNotEmpty ? pending.ground : ''),
+          match_group: pending.match_group,
+          match_group_number: pending.match_group_number,
+          tournament_id: tournament.id,
+          start_time: matchTime,
+          start_at: matchTime,
+          ball_type: ballType,
+          pitch_type: pitchType,
+          created_by: tournament.created_by,
+          match_status: MatchStatus.yetToStart,
+        );
+
+        matchesToCreate.add(matchModel);
+      }
+
+      final createdIds = await _matchService.createMatches(matchesToCreate);
+      await _tournamentService.addMatchIdsInTournament(tournament.id, createdIds);
+
+      state = state.copyWith(loading: false);
+      return createdIds.length;
+    } catch (e) {
+      state = state.copyWith(loading: false, actionError: e);
+      debugPrint("MatchSelectionViewNotifier: error in scheduleAllMatches -> $e");
+      rethrow;
+    }
+  }
+
   @override
   void dispose() {
     _tournamentSubscription?.cancel();

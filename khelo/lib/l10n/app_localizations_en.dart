@@ -331,8 +331,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sign_in_whatsapp_option => 'Continue with WhatsApp';
 
   @override
-  String get sign_in_whatsapp_unavailable =>
-      'WhatsApp sign-in is not configured yet. A verified WhatsApp number and sign-in service are required.';
+  String get sign_in_whatsapp_subtitle =>
+      'Send \'Hi login\' on WhatsApp to get your instant login link.';
+
+  @override
+  String get sign_in_whatsapp_opened_title => 'WhatsApp Chat Opened';
+
+  @override
+  String get sign_in_whatsapp_opened_desc =>
+      'Send the prefilled message \'Hi login\' in WhatsApp. You will receive a login link to continue.';
+
+  @override
+  String get sign_in_whatsapp_open_again_btn => 'Open WhatsApp Again';
+
+  @override
+  String get sign_in_whatsapp_have_link_btn => 'I have a login link or token';
+
+  @override
+  String get sign_in_whatsapp_enter_link_placeholder =>
+      'Paste login link or token here';
+
+  @override
+  String get sign_in_whatsapp_submit_token_btn => 'Verify & Sign In';
 
   @override
   String get sign_in_email_title => 'Sign in with email';
@@ -691,6 +711,84 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tournament_detail_matches_filter_all_teams_option => 'All Teams';
+
+  @override
+  String get tournament_detail_matches_schedule_btn => 'Schedule Matches';
+
+  @override
+  String get tournament_detail_matches_all_status => 'All';
+
+  @override
+  String get tournament_detail_matches_live_status => 'Live';
+
+  @override
+  String get tournament_detail_matches_upcoming_status => 'Upcoming';
+
+  @override
+  String get tournament_detail_matches_past_status => 'Past';
+
+  @override
+  String get tournament_detail_matches_live_section => 'Live Matches';
+
+  @override
+  String get tournament_detail_matches_upcoming_section => 'Upcoming Matches';
+
+  @override
+  String get tournament_detail_matches_past_section => 'Past Matches';
+
+  @override
+  String get tournament_detail_matches_no_live => 'No live matches right now';
+
+  @override
+  String get tournament_detail_matches_no_upcoming =>
+      'No upcoming matches scheduled';
+
+  @override
+  String get tournament_detail_matches_no_past =>
+      'No past matches recorded yet';
+
+  @override
+  String get tournament_schedule_whole_title => 'Schedule Whole Tournament';
+
+  @override
+  String get tournament_schedule_whole_description =>
+      'Schedule all pending fixtures with default match settings at once.';
+
+  @override
+  String get tournament_schedule_all_matches_btn => 'Schedule All Matches';
+
+  @override
+  String get tournament_schedule_success_msg =>
+      'Successfully scheduled all matches!';
+
+  @override
+  String get tournament_schedule_start_date => 'Starting Date & Time';
+
+  @override
+  String get tournament_schedule_overs => 'Total Overs';
+
+  @override
+  String get tournament_schedule_overs_per_bowler => 'Overs per Bowler';
+
+  @override
+  String get tournament_schedule_venue => 'Ground / Venue';
+
+  @override
+  String get tournament_schedule_city => 'City';
+
+  @override
+  String get tournament_schedule_spacing => 'Match Spacing';
+
+  @override
+  String get tournament_schedule_spacing_same_day =>
+      'Same day (spaced 3 hours)';
+
+  @override
+  String get tournament_schedule_spacing_consecutive => 'Consecutive days';
+
+  @override
+  String get tournament_schedule_no_pending =>
+      'No pending fixtures to schedule.';
 
   @override
   String get tournament_detail_key_stat_most_runs_title => 'Most Runs';

@@ -371,12 +371,34 @@ class MatchService {
 
   Future<String> updateMatch(MatchModel match) async {
     try {
-      final matchRef = _matchCollection.doc(match.id);
+      final matchRef = _matchCollection.doc(match.id.isEmpty ? null : match.id);
       await matchRef.set(
         match.copyWith(id: matchRef.id),
         SetOptions(merge: true),
       );
       return matchRef.id;
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  Future<List<String>> createMatches(List<MatchModel> matches) async {
+    try {
+      final batch = _firestore.batch();
+      final List<String> createdIds = [];
+
+      for (final match in matches) {
+        final docRef = _matchCollection.doc(match.id.isEmpty ? null : match.id);
+        final matchWithId = match.copyWith(
+          id: docRef.id,
+          updated_at: DateTime.now(),
+        );
+        batch.set(docRef, matchWithId);
+        createdIds.add(docRef.id);
+      }
+
+      await batch.commit();
+      return createdIds;
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
