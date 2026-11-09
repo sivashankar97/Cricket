@@ -11,6 +11,7 @@ import 'package:khelo/components/team_detail_cell.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/team/team_list_view_model.dart';
+import 'package:khelo/ui/flow/team/tournament_teams/components/tournament_teams_entry_card.dart';
 import 'package:style/callback/on_visible_callback.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
@@ -68,7 +69,15 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen>
       );
     }
 
-    return _teamList(context, state);
+    return Column(
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: TournamentTeamsEntryCard(),
+        ),
+        Expanded(child: _teamList(context, state)),
+      ],
+    );
   }
 
   Widget _teamList(

@@ -32,9 +32,14 @@ import 'package:khelo/ui/flow/team/scanner/scanner_view_model.dart';
 import 'package:khelo/ui/flow/team/search_team/search_team_screen.dart';
 import 'package:khelo/ui/flow/tournament/add/add_tournament_screen.dart';
 import 'package:khelo/ui/flow/tournament/detail/members/tournament_detail_members_screen.dart';
+import 'package:khelo/ui/flow/tournament/team_picker/tournament_team_picker_screen.dart';
 import 'package:khelo/ui/flow/tournament/team_selection/team_selection_screen.dart';
+import 'package:khelo/ui/flow/team/tournament_teams/players/tournament_team_players_screen.dart';
+import 'package:khelo/ui/flow/team/tournament_teams/tournament_team_list_screen.dart';
+import 'package:khelo/ui/flow/team/tournament_teams/pools/team_pool_list_screen.dart';
 
 import 'flow/home/view_all/home_view_all_screen.dart';
+import 'flow/play/game/play_game_screen.dart';
 import 'flow/main/main_screen.dart';
 import 'flow/settings/support/contact_support_screen.dart';
 import 'flow/sign_in/sign_in_with_email/sign_in_with_email_screen.dart';
@@ -42,6 +47,16 @@ import 'flow/sign_in/whatsapp_login_redirect_screen.dart';
 import 'flow/team/user_detail/user_detail_screen.dart';
 import 'flow/tournament/detail/tournament_detail_screen.dart';
 import 'flow/tournament/match_selection/match_selection_screen.dart';
+import 'flow/auction/form/auction_form_screen.dart';
+import 'flow/auction/players/auction_players_screen.dart';
+import 'flow/auction/retained/auction_retained_screen.dart';
+import 'flow/auction/room/auction_room_screen.dart';
+import 'flow/stats/user_stat/user_stat_screen.dart';
+import 'package:data/api/auction/auction_models.dart';
+import 'package:data/api/global_cricket/global_cricket_models.dart';
+
+import 'flow/home/global_cricket/global_cricket_screen.dart';
+import 'flow/home/global_cricket/global_match_screen.dart';
 
 class AppRoute {
   static const pathPhoneNumberVerification = '/phone-number-verification';
@@ -68,6 +83,18 @@ class AppRoute {
   static const pathTournamentDetail = "/tournament-detail";
   static const pathMemberSelection = "/member-selection";
   static const pathLeaderboard = "/leaderboard";
+  static const pathTournamentTeams = "/tournament-teams";
+  static const pathTournamentTeamPool = "/tournament-team-pool";
+  static const pathTournamentTeamPlayers = "/tournament-team-players";
+  static const pathTournamentTeamPicker = "/tournament-team-picker";
+  static const pathPlayGame = "/play-game";
+  static const pathAuctionForm = "/auction-form";
+  static const pathAuctionPlayers = "/auction-players";
+  static const pathAuctionRetained = "/auction-retained";
+  static const pathAuctionRoom = "/auction/:id";
+  static const pathUserStats = "/user-stats";
+  static const pathGlobalCricket = "/global-cricket";
+  static const pathGlobalCricketMatch = "/global-cricket-match";
 
   final String path;
   final String? name;
@@ -205,6 +232,73 @@ class AppRoute {
   static AppRoute teamSelection({List<TeamModel>? selectedTeams}) => AppRoute(
         pathTeamSelection,
         builder: (_) => TeamSelectionScreen(selectedTeams: selectedTeams),
+      );
+
+  static AppRoute get tournamentTeams => AppRoute(
+        pathTournamentTeams,
+        builder: (_) => const TeamPoolListScreen(),
+      );
+
+  /// Teams of a pool; without [poolId] it lists the ungrouped teams.
+  static AppRoute tournamentTeamPool({String? poolId}) => AppRoute(
+        pathTournamentTeamPool,
+        builder: (_) => TournamentTeamListScreen(poolId: poolId),
+      );
+
+  static AppRoute tournamentTeamPlayers({required String teamId}) => AppRoute(
+        pathTournamentTeamPlayers,
+        builder: (_) => TournamentTeamPlayersScreen(teamId: teamId),
+      );
+
+  static AppRoute tournamentTeamPicker({List<TeamModel>? selectedTeams}) =>
+      AppRoute(
+        pathTournamentTeamPicker,
+        builder: (_) =>
+            TournamentTeamPickerScreen(selectedTeams: selectedTeams ?? []),
+      );
+
+  static AppRoute playGame(PlayGameArgs args) => AppRoute(
+        pathPlayGame,
+        builder: (_) => PlayGameScreen(args: args),
+      );
+
+  static AppRoute auctionForm({Auction? auction}) => AppRoute(
+        pathAuctionForm,
+        builder: (_) => AuctionFormScreen(auction: auction),
+      );
+
+  static AppRoute auctionPlayers(String auctionId) => AppRoute(
+        pathAuctionPlayers,
+        builder: (_) => AuctionPlayersScreen(auctionId: auctionId),
+      );
+
+  static AppRoute auctionRetained(String auctionId) => AppRoute(
+        pathAuctionRetained,
+        builder: (_) => AuctionRetainedScreen(auctionId: auctionId),
+      );
+
+  /// Shareable: `/#/auction/<id>` opens the room directly, signed in or not.
+  static AppRoute auctionRoom(String auctionId) => AppRoute(
+        '/auction/$auctionId',
+        builder: (_) => AuctionRoomScreen(auctionId: auctionId),
+      );
+
+  static AppRoute userStats() => AppRoute(
+        pathUserStats,
+        builder: (_) => const UserStatScreen(showTitle: true),
+      );
+
+  static AppRoute globalCricket({
+    GlobalMatchCategory category = GlobalMatchCategory.international,
+  }) =>
+      AppRoute(
+        pathGlobalCricket,
+        builder: (_) => GlobalCricketScreen(initialCategory: category),
+      );
+
+  static AppRoute globalCricketMatch(GlobalMatch match) => AppRoute(
+        pathGlobalCricketMatch,
+        builder: (_) => GlobalMatchScreen(match: match),
       );
 
   static AppRoute memberSelection({required TournamentModel tournament}) =>
@@ -400,11 +494,11 @@ class AppRoute {
     GoRoute(
       path: '/whatsapp-login',
       pageBuilder: (context, state) {
-        final token = state.uri.queryParameters['token'];
-        final phone = state.uri.queryParameters['phone'];
         return adaptivePage(
           state: state,
-          child: WhatsAppLoginRedirectScreen(token: token, phone: phone),
+          child: WhatsAppLoginRedirectScreen(
+            code: state.uri.queryParameters['code'],
+          ),
         );
       },
     ),
@@ -436,6 +530,70 @@ class AppRoute {
     ),
     GoRoute(
       path: pathTeamSelection,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathTournamentTeams,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathTournamentTeamPool,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathTournamentTeamPlayers,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathTournamentTeamPicker,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathPlayGame,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathAuctionForm,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathAuctionPlayers,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathAuctionRetained,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathAuctionRoom,
+      pageBuilder: (context, state) => adaptivePage(
+        state: state,
+        child: state.extra == null
+            ? AuctionRoomScreen(auctionId: state.pathParameters['id']!)
+            : state.widget(context),
+      ),
+    ),
+    GoRoute(
+      path: pathUserStats,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathGlobalCricket,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathGlobalCricketMatch,
       pageBuilder: (context, state) =>
           adaptivePage(state: state, child: state.widget(context)),
     ),

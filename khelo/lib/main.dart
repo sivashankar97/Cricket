@@ -19,7 +19,10 @@ const appBaseUrl = 'https://khelo.canopas.com';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const SplashScreen());
-  final container = await _initContainer();
+  final (container, _) = await (
+    _initContainer(),
+    Future<void>.delayed(SplashScreen.minVisibleDuration),
+  ).wait;
 
   runApp(UncontrolledProviderScope(container: container, child: const App()));
 }

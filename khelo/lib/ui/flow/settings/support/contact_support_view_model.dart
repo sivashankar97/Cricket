@@ -91,7 +91,7 @@ class ContactSupportViewStateNotifier
       }
 
       onValueChange();
-    } catch (error, _) {
+    } catch (error) {
       state = state.copyWith(actionError: error);
       debugPrint(
           "ContactSupportViewStateNotifier: Error while uploading $path error $error");
@@ -111,7 +111,7 @@ class ContactSupportViewStateNotifier
       for (XFile media in medias) {
         _uploadAttachments(path: media.path, name: media.name);
       }
-    } catch (error, _) {
+    } catch (error) {
       debugPrint(
         "ContactSupportViewStateNotifier: Error while pick image! $error",
       );

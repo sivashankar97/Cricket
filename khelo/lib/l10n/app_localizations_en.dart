@@ -331,6 +331,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sign_in_whatsapp_option => 'Continue with WhatsApp';
 
   @override
+  String get sign_in_guest_option => 'Continue as guest';
+
+  @override
+  String get sign_in_guest_hint =>
+      'Play cricket without an account. Your scores show as \"Guest\".';
+
+  @override
   String get sign_in_whatsapp_subtitle =>
       'Send \'Hi login\' on WhatsApp to get your instant login link.';
 
@@ -359,37 +366,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sign_in_email_description =>
-      'Enter your email and we’ll send you a one-time code.';
+      'Sign in with your email and password.';
 
   @override
-  String get sign_in_email_code_title => 'Check your email';
+  String get sign_in_email_create_title => 'Create your account';
 
   @override
-  String sign_in_email_code_description(String email) {
-    return 'Enter the 6-digit code sent to $email.';
+  String get sign_in_email_create_description =>
+      'Use your email and choose a password with at least 6 characters.';
+
+  @override
+  String get sign_in_password_placeholder => 'Password';
+
+  @override
+  String get sign_in_email_sign_in_btn => 'Sign in';
+
+  @override
+  String get sign_in_email_create_btn => 'Create account';
+
+  @override
+  String get sign_in_email_switch_to_create => 'New here? Create an account';
+
+  @override
+  String get sign_in_email_switch_to_sign_in =>
+      'Already have an account? Sign in';
+
+  @override
+  String get sign_in_forgot_password => 'Forgot password?';
+
+  @override
+  String sign_in_reset_email_sent(String email) {
+    return 'Password reset link sent to $email. Check your inbox and spam folder.';
   }
 
   @override
+  String get sign_in_reset_enter_email =>
+      'Enter your email first, then tap Forgot password.';
+
+  @override
   String get sign_in_email_placeholder => 'Email';
-
-  @override
-  String get sign_in_email_code_placeholder => '000000';
-
-  @override
-  String get sign_in_send_code => 'Send code';
-
-  @override
-  String get sign_in_verify_code => 'Verify code';
-
-  @override
-  String get sign_in_resend_code => 'Resend code';
-
-  @override
-  String get sign_in_change_email => 'Use a different email';
-
-  @override
-  String get sign_in_email_bridge_pending =>
-      'Your email code is verified, but app sign-in is not enabled until the secure Firebase auth bridge is configured.';
 
   @override
   String get sign_in_required_title => 'Sign in to continue';
@@ -443,6 +458,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get home_screen_create_tournament_btn => 'Create tournament';
+
+  @override
+  String get home_global_cricket_title => 'Global cricket';
+
+  @override
+  String home_global_cricket_updated(String time) {
+    return 'Updated $time · CricketData.org';
+  }
+
+  @override
+  String get home_global_cricket_live => 'LIVE';
+
+  @override
+  String get global_cricket_international => 'International';
+
+  @override
+  String get global_cricket_leagues => 'Premier leagues';
+
+  @override
+  String get global_cricket_no_matches => 'No matches right now';
+
+  @override
+  String get global_cricket_live => 'Live';
+
+  @override
+  String get global_cricket_recent => 'Recent';
+
+  @override
+  String get global_cricket_upcoming => 'Upcoming';
+
+  @override
+  String get global_cricket_scorecard => 'Scorecard';
+
+  @override
+  String get global_cricket_info => 'Info';
+
+  @override
+  String get global_cricket_batter => 'Batter';
+
+  @override
+  String get global_cricket_bowler => 'Bowler';
+
+  @override
+  String get global_cricket_batting => 'batting';
+
+  @override
+  String get global_cricket_info_match => 'Match';
+
+  @override
+  String get global_cricket_info_series => 'Series';
+
+  @override
+  String get global_cricket_info_date => 'Date & time';
+
+  @override
+  String get global_cricket_info_venue => 'Venue';
+
+  @override
+  String get global_cricket_info_toss => 'Toss';
+
+  @override
+  String get global_cricket_info_format => 'Format';
+
+  @override
+  String global_cricket_toss_text(String team, String choice) {
+    return '$team won the toss and chose to $choice';
+  }
+
+  @override
+  String global_cricket_starts(String time) {
+    return 'Starts $time';
+  }
+
+  @override
+  String global_cricket_scorecard_updated(String time) {
+    return 'Scorecard updated $time · refreshes hourly while live';
+  }
+
+  @override
+  String get global_cricket_scorecard_not_started =>
+      'The scorecard will appear once the match starts.';
+
+  @override
+  String get global_cricket_scorecard_sign_in =>
+      'Sign in to load the full scorecard.';
+
+  @override
+  String get global_cricket_scorecard_limit =>
+      'The full scorecard isn\'t available right now (free data limit). The live score above still updates every 30 minutes.';
+
+  @override
+  String get global_cricket_scorecard_loading => 'Loading scorecard…';
 
   @override
   String get home_screen_no_matches_title => 'No Matches in this area!';
@@ -523,6 +630,47 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get add_tournament_end_date => 'End Date';
+
+  @override
+  String get add_tournament_venue_title => 'Venue';
+
+  @override
+  String get add_tournament_match_format_title => 'Match Format';
+
+  @override
+  String get add_tournament_schedule_title => 'Tournament Schedule';
+
+  @override
+  String get add_tournament_teams_hint =>
+      'Tap to pick teams from a tournament team pool';
+
+  @override
+  String get add_tournament_change_teams => 'Change teams';
+
+  @override
+  String get add_tournament_city => 'City';
+
+  @override
+  String get add_tournament_ground => 'Ground / Venue';
+
+  @override
+  String get add_tournament_ball_type => 'Ball Type';
+
+  @override
+  String get add_tournament_ball_type_placeholder => 'Select ball type';
+
+  @override
+  String get add_tournament_overs => 'Overs per match';
+
+  @override
+  String add_tournament_overs_hint(int max) {
+    return '1 to $max';
+  }
+
+  @override
+  String add_tournament_details_required(int max) {
+    return 'Fill in city, ground, ball type and overs (1–$max) to continue';
+  }
 
   @override
   String get add_tournament_team_selection => 'Team selection';
@@ -2393,4 +2541,1318 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get player_role_opening_batter_title => 'Opening batter';
+
+  @override
+  String get tournament_teams_title => 'Tournament Teams';
+
+  @override
+  String get tournament_teams_entry_description =>
+      'Pools of teams for each series, like GCPL or PSPL';
+
+  @override
+  String get tournament_teams_search_hint => 'Search teams';
+
+  @override
+  String get tournament_teams_empty_title => 'No teams yet';
+
+  @override
+  String get tournament_teams_empty_description =>
+      'Add your first team and its players once, then pick it in any tournament.';
+
+  @override
+  String get tournament_teams_add_first_team => 'Add your first team';
+
+  @override
+  String get tournament_teams_add_team => 'Add team';
+
+  @override
+  String get tournament_teams_edit_team => 'Edit team';
+
+  @override
+  String tournament_teams_no_search_result(Object query) {
+    return 'No teams match “$query”';
+  }
+
+  @override
+  String tournament_teams_player_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count players',
+      one: '1 player',
+      zero: 'No players',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tournament_teams_delete_title => 'Delete team?';
+
+  @override
+  String tournament_teams_delete_description(Object name) {
+    return '$name will be removed from your Tournament Teams.';
+  }
+
+  @override
+  String get tournament_teams_in_use_title => 'Team in use';
+
+  @override
+  String tournament_teams_in_use_description(Object name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tournaments',
+      one: '1 tournament',
+    );
+    return '$name is part of $_temp0. Remove it from those tournaments before deleting it.';
+  }
+
+  @override
+  String get tournament_team_name_label => 'Team name *';
+
+  @override
+  String get tournament_team_short_name_label => 'Short name / code';
+
+  @override
+  String get tournament_team_captain_label => 'Captain';
+
+  @override
+  String get tournament_team_captain_placeholder => 'Select captain (optional)';
+
+  @override
+  String get tournament_team_wicket_keeper_label => 'Wicket-keeper';
+
+  @override
+  String get tournament_team_add_players => 'Add players';
+
+  @override
+  String get tournament_team_players_empty_title => 'No players yet';
+
+  @override
+  String get tournament_team_players_empty_description =>
+      'Add players so this team is ready for matches.';
+
+  @override
+  String get tournament_team_add_player => 'Add player';
+
+  @override
+  String get tournament_team_edit_player => 'Edit player';
+
+  @override
+  String get tournament_team_player_name_label => 'Player name *';
+
+  @override
+  String get tournament_team_player_role_label => 'Role';
+
+  @override
+  String get tournament_team_jersey_label => 'Jersey number';
+
+  @override
+  String get tournament_team_make_captain => 'Make captain';
+
+  @override
+  String get tournament_team_remove_captain => 'Remove as captain';
+
+  @override
+  String get tournament_team_make_wicket_keeper => 'Make wicket-keeper';
+
+  @override
+  String get tournament_team_remove_wicket_keeper => 'Remove as wicket-keeper';
+
+  @override
+  String get tournament_team_remove_player_title => 'Remove player?';
+
+  @override
+  String tournament_team_remove_player_description(Object name) {
+    return '$name will be removed from this team.';
+  }
+
+  @override
+  String get tournament_team_captain_short => 'C';
+
+  @override
+  String get tournament_team_wicket_keeper_short => 'WK';
+
+  @override
+  String get tournament_player_role_batsman => 'Batsman';
+
+  @override
+  String get tournament_player_role_bowler => 'Bowler';
+
+  @override
+  String get tournament_player_role_all_rounder => 'All-rounder';
+
+  @override
+  String get tournament_player_role_wicket_keeper => 'Wicket-keeper';
+
+  @override
+  String get tournament_team_picker_title => 'Select teams';
+
+  @override
+  String get tournament_team_picker_select_all => 'Select all';
+
+  @override
+  String get tournament_team_picker_clear => 'Clear';
+
+  @override
+  String get tournament_team_picker_add_new => '+ Add new team';
+
+  @override
+  String get tournament_team_picker_min_teams =>
+      'Select at least 2 teams to continue';
+
+  @override
+  String tournament_team_picker_done(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count teams',
+      one: '1 team',
+    );
+    return 'Continue with $_temp0';
+  }
+
+  @override
+  String tournament_team_picker_selected(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get tournament_team_picker_not_in_pool => 'Not in Tournament Teams';
+
+  @override
+  String get tournament_team_picker_choose_pool =>
+      'Choose a pool to see its teams';
+
+  @override
+  String get tournament_team_picker_switch_pool_title =>
+      'Clear current selection?';
+
+  @override
+  String tournament_team_picker_switch_pool_description(
+      String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count selected teams',
+      one: '1 selected team',
+    );
+    return 'Switching to $name clears $_temp0.';
+  }
+
+  @override
+  String get tournament_team_picker_switch => 'Switch';
+
+  @override
+  String get team_pools_search_hint => 'Search pools';
+
+  @override
+  String get team_pools_empty_title => 'No pools yet';
+
+  @override
+  String get team_pools_empty_description =>
+      'Create a pool for each tournament series, like “GCPL Teams”, then add its teams and players.';
+
+  @override
+  String get team_pools_create_first => 'Create your first pool';
+
+  @override
+  String get team_pools_new_pool => 'New pool';
+
+  @override
+  String get team_pools_add_new => '+ New pool';
+
+  @override
+  String get team_pools_edit_pool => 'Edit pool';
+
+  @override
+  String get team_pools_name_label => 'Pool name *';
+
+  @override
+  String get team_pools_short_name_label => 'Short code';
+
+  @override
+  String team_pools_team_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count teams',
+      one: '1 team',
+      zero: 'No teams',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String team_pools_no_search_result(String query) {
+    return 'No pools match “$query”';
+  }
+
+  @override
+  String get team_pools_ungrouped => 'Ungrouped teams';
+
+  @override
+  String get team_pools_ungrouped_description =>
+      'Teams created before pools. Move them into a pool.';
+
+  @override
+  String get team_pools_delete_title => 'Delete pool?';
+
+  @override
+  String team_pools_delete_description(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count teams',
+      one: '1 team',
+      zero: 'teams',
+    );
+    return 'Delete $name and its $_temp0? Players are kept.';
+  }
+
+  @override
+  String get team_pools_in_use_title => 'Pool in use';
+
+  @override
+  String team_pools_in_use_description(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tournaments',
+      one: '1 tournament',
+    );
+    return '$name has teams in $_temp0. Remove them from those tournaments before deleting the pool.';
+  }
+
+  @override
+  String get team_pools_move_to_pool => 'Move to pool…';
+
+  @override
+  String get team_pools_team_actions => 'Team actions';
+
+  @override
+  String get team_pools_no_other_pools => 'Create another pool first.';
+
+  @override
+  String get team_pool_teams_empty_title => 'No teams in this pool';
+
+  @override
+  String get team_pool_teams_empty_description =>
+      'Add the teams and players for this series.';
+
+  @override
+  String get error_duplicate_team_name =>
+      'A team with this name already exists in this pool.';
+
+  @override
+  String get error_duplicate_player_name =>
+      'This player is already in the team.';
+
+  @override
+  String get error_duplicate_jersey_number =>
+      'This jersey number is already taken in this team.';
+
+  @override
+  String get error_team_used_in_tournament =>
+      'This team is used in a tournament and can\'t be deleted.';
+
+  @override
+  String get error_duplicate_pool_name =>
+      'A pool with this name already exists.';
+
+  @override
+  String get error_pool_used_in_tournament =>
+      'This pool has teams used in a tournament and can\'t be deleted.';
+
+  @override
+  String get tab_play_title => 'Play';
+
+  @override
+  String get play_screen_title => 'Play Cricket';
+
+  @override
+  String get play_guest_title => 'Playing as Guest';
+
+  @override
+  String get play_guest_description =>
+      'Your scores show as \"Guest\". Sign in to use your name and challenge friends.';
+
+  @override
+  String get play_guest_challenge_hint => 'Sign in to challenge';
+
+  @override
+  String get play_daily_title => 'Daily Challenge';
+
+  @override
+  String play_daily_target(int target) {
+    return 'Chase $target in 2 overs';
+  }
+
+  @override
+  String play_daily_best(String score) {
+    return 'Your best today: $score';
+  }
+
+  @override
+  String get play_daily_not_played =>
+      'Same balls for everyone today. Can you chase it?';
+
+  @override
+  String play_daily_players(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count players today',
+      one: '1 player today',
+      zero: 'Be the first to play today',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get play_quick_play => 'Quick Play';
+
+  @override
+  String get play_quick_play_hint => '2 overs · 3 wickets';
+
+  @override
+  String get play_challenge_friend => 'Challenge';
+
+  @override
+  String get play_challenge_friend_hint => 'Beat a friend\'s score';
+
+  @override
+  String get play_how_to =>
+      'Tap anywhere as the ball reaches the bat. Perfect timing hits a six; miss a ball on the stumps and you\'re bowled.';
+
+  @override
+  String get play_challenges_title => 'Challenges';
+
+  @override
+  String play_challenge_incoming(String name, int runs) {
+    return '$name challenged you · beat $runs';
+  }
+
+  @override
+  String play_challenge_waiting(String name, String score) {
+    return 'Waiting for $name · you scored $score';
+  }
+
+  @override
+  String play_challenge_result(String me, String other, String name) {
+    return '$me vs $other · $name';
+  }
+
+  @override
+  String get play_challenge_play => 'Play';
+
+  @override
+  String get play_result_won => 'Won';
+
+  @override
+  String get play_result_lost => 'Lost';
+
+  @override
+  String get play_result_tie => 'Tie';
+
+  @override
+  String get play_leaderboard_title => 'Leaderboard';
+
+  @override
+  String get play_leaderboard_today => 'Today';
+
+  @override
+  String get play_leaderboard_week => 'This week';
+
+  @override
+  String get play_leaderboard_empty =>
+      'No scores yet. Play a game to get on the board!';
+
+  @override
+  String get play_recent_title => 'Recent Games';
+
+  @override
+  String get play_recent_empty => 'Your games will show up here.';
+
+  @override
+  String get play_mode_solo => 'Quick Play';
+
+  @override
+  String get play_mode_daily => 'Daily';
+
+  @override
+  String get play_mode_challenge => 'Challenge';
+
+  @override
+  String play_balls(int count) {
+    return '$count balls';
+  }
+
+  @override
+  String get play_select_opponent_title => 'Challenge a friend';
+
+  @override
+  String get play_select_opponent_hint => 'Search players by name';
+
+  @override
+  String get play_select_opponent_empty => 'No players found';
+
+  @override
+  String get play_game_tap_to_start => 'Tap to start';
+
+  @override
+  String play_game_balls_left(int count) {
+    return '$count balls left';
+  }
+
+  @override
+  String play_game_need(int runs, int balls) {
+    return 'Need $runs off $balls';
+  }
+
+  @override
+  String play_game_vs(String name) {
+    return 'vs $name';
+  }
+
+  @override
+  String get play_shot_six => 'SIX!';
+
+  @override
+  String get play_shot_four => 'FOUR!';
+
+  @override
+  String get play_shot_two => '2 runs';
+
+  @override
+  String get play_shot_single => '1 run';
+
+  @override
+  String get play_shot_dot => 'Dot ball';
+
+  @override
+  String get play_shot_out => 'OUT!';
+
+  @override
+  String get play_timing_perfect => 'Perfect timing';
+
+  @override
+  String get play_timing_early => 'Early';
+
+  @override
+  String get play_timing_late => 'Late';
+
+  @override
+  String get play_timing_left => 'Left alone';
+
+  @override
+  String get play_end_title => 'Innings over';
+
+  @override
+  String play_end_score(int runs, int wickets, int balls) {
+    return '$runs/$wickets in $balls balls';
+  }
+
+  @override
+  String get play_end_target_won => 'Target chased!';
+
+  @override
+  String play_end_target_lost(int target) {
+    return 'Fell short of $target';
+  }
+
+  @override
+  String play_end_challenge_sent(String name) {
+    return 'Challenge sent to $name';
+  }
+
+  @override
+  String play_end_challenge_won(String name) {
+    return 'You beat $name!';
+  }
+
+  @override
+  String play_end_challenge_lost(String name) {
+    return '$name wins this one';
+  }
+
+  @override
+  String play_end_challenge_tie(String name) {
+    return 'It\'s a tie with $name';
+  }
+
+  @override
+  String get play_end_saving => 'Saving…';
+
+  @override
+  String get play_again => 'Play again';
+
+  @override
+  String get play_done => 'Done';
+
+  @override
+  String get play_retry_save => 'Retry';
+
+  @override
+  String get profile_my_stats => 'My stats';
+
+  @override
+  String get tab_auction_title => 'Auction';
+
+  @override
+  String get auction_screen_title => 'Player Auctions';
+
+  @override
+  String get auction_hero_title => 'Run a player auction';
+
+  @override
+  String get auction_hero_subtitle =>
+      'Register players, set retained players and run live bidding. The tournament is created for you at the end.';
+
+  @override
+  String get auction_create_title => 'Create auction';
+
+  @override
+  String get auction_sign_in_to_create => 'Sign in to create';
+
+  @override
+  String get auction_section_mine => 'My auctions';
+
+  @override
+  String get auction_section_live => 'Live now';
+
+  @override
+  String get auction_section_upcoming => 'Upcoming';
+
+  @override
+  String get auction_section_completed => 'Completed';
+
+  @override
+  String get auction_empty => 'No auctions yet.';
+
+  @override
+  String get auction_not_found =>
+      'This auction doesn\'t exist or isn\'t public yet.';
+
+  @override
+  String get auction_status_draft => 'Draft';
+
+  @override
+  String get auction_status_upcoming => 'Upcoming';
+
+  @override
+  String get auction_status_live => 'Live';
+
+  @override
+  String get auction_status_paused => 'Paused';
+
+  @override
+  String get auction_status_completed => 'Completed';
+
+  @override
+  String auction_tile_summary(int teams, int players) {
+    return '$teams teams · $players players';
+  }
+
+  @override
+  String auction_progress(int done, int total) {
+    return '$done/$total processed';
+  }
+
+  @override
+  String get auction_progress_label => 'Auction progress';
+
+  @override
+  String auction_pts(int amount) {
+    return '$amount pts';
+  }
+
+  @override
+  String get auction_edit_title => 'Edit auction';
+
+  @override
+  String get auction_name_label => 'Auction name';
+
+  @override
+  String get auction_name_hint => 'e.g. GCPL Auction';
+
+  @override
+  String get auction_tournament_name_label => 'Tournament name';
+
+  @override
+  String get auction_tournament_name_hint => 'e.g. GCPL';
+
+  @override
+  String get auction_tournament_name_help =>
+      'The tournament created when the auction is completed gets this name.';
+
+  @override
+  String get auction_description_label => 'Description';
+
+  @override
+  String get auction_description_hint =>
+      'Season, venue, anything players should know';
+
+  @override
+  String get auction_date_label => 'Auction date';
+
+  @override
+  String get auction_date_pick => 'Pick a date';
+
+  @override
+  String get auction_banner_add => 'Add banner';
+
+  @override
+  String get auction_banner_change => 'Change banner';
+
+  @override
+  String get auction_rules_title => 'Budget and bidding';
+
+  @override
+  String get auction_team_budget => 'Team budget (pts)';
+
+  @override
+  String get auction_base_price => 'Starting bid (pts)';
+
+  @override
+  String get auction_bid_increment => 'Bid increment (pts)';
+
+  @override
+  String get auction_min_squad => 'Min squad (0 = none)';
+
+  @override
+  String get auction_max_squad => 'Max squad (0 = no limit)';
+
+  @override
+  String get auction_show_budgets => 'Show team budgets on the public screen';
+
+  @override
+  String get auction_teams_title => 'Teams';
+
+  @override
+  String auction_team_name(int number) {
+    return 'Team $number name';
+  }
+
+  @override
+  String get auction_team_short => 'Short';
+
+  @override
+  String get auction_add_team => 'Add team';
+
+  @override
+  String get auction_teams_locked =>
+      'Teams can\'t change after the auction starts.';
+
+  @override
+  String get auction_admins_title => 'Admins';
+
+  @override
+  String get auction_admins_help => 'Admins can edit and run this auction.';
+
+  @override
+  String get auction_add_admin => 'Add admin';
+
+  @override
+  String get auction_select_admin => 'Select an admin';
+
+  @override
+  String get auction_creator => 'Creator';
+
+  @override
+  String get auction_save => 'Save';
+
+  @override
+  String get auction_validation_name =>
+      'Enter the auction name and tournament name';
+
+  @override
+  String get auction_validation_teams => 'Add at least 2 teams with names';
+
+  @override
+  String get auction_validation_team_names => 'Team names must be different';
+
+  @override
+  String get auction_validation_rules =>
+      'Budget, starting bid and increment must be above 0, and min squad can\'t be more than max squad';
+
+  @override
+  String get auction_players_title => 'Players';
+
+  @override
+  String auction_players_count(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count players',
+      one: '1 player',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get auction_players_empty =>
+      'No players yet. Add them one by one, paste a list, or upload photos named after the players.';
+
+  @override
+  String get auction_player_search => 'Search name, ID or number';
+
+  @override
+  String get auction_filter_all => 'All';
+
+  @override
+  String get auction_player_status_available => 'Available';
+
+  @override
+  String get auction_player_status_retained => 'Retained';
+
+  @override
+  String get auction_player_status_in_auction => 'In auction';
+
+  @override
+  String get auction_player_status_sold => 'Sold';
+
+  @override
+  String get auction_player_status_unsold => 'Unsold';
+
+  @override
+  String get auction_add_player => 'Add player';
+
+  @override
+  String get auction_edit_player => 'Edit player';
+
+  @override
+  String get auction_add_players_bulk => 'Add many';
+
+  @override
+  String get auction_upload_photos => 'Upload photos';
+
+  @override
+  String get auction_bulk_title => 'Add many players';
+
+  @override
+  String get auction_bulk_hint =>
+      'One player per line:\nName, Player ID, Number, Role, Base price\nOnly the name is required. Roles: bat, bowl, all, wk';
+
+  @override
+  String auction_bulk_result(int added, int skipped) {
+    return '$added added, $skipped duplicates skipped';
+  }
+
+  @override
+  String get auction_player_name => 'Player name';
+
+  @override
+  String get auction_player_code => 'Player ID';
+
+  @override
+  String get auction_player_number => 'Number';
+
+  @override
+  String get auction_player_base => 'Base price';
+
+  @override
+  String get auction_photo_add => 'Add photo';
+
+  @override
+  String get auction_photo_change => 'Change photo';
+
+  @override
+  String get auction_remove_player => 'Remove player';
+
+  @override
+  String auction_remove_player_confirm(String name) {
+    return 'Remove $name from the auction?';
+  }
+
+  @override
+  String get auction_photos_title => 'Match photos to players';
+
+  @override
+  String get auction_photos_help =>
+      'Photos are matched by file name: player ID, number or name, e.g. P001.jpg, 7.jpg or Arun Kumar.jpg.';
+
+  @override
+  String auction_photos_summary(int matched, int unmatched) {
+    return '$matched matched · $unmatched not matched';
+  }
+
+  @override
+  String get auction_photo_skip => 'Skip';
+
+  @override
+  String auction_photo_new_player(String name) {
+    return 'New player: $name';
+  }
+
+  @override
+  String auction_photos_upload(int count) {
+    return 'Upload $count';
+  }
+
+  @override
+  String auction_photos_done(int count) {
+    return '$count photos uploaded';
+  }
+
+  @override
+  String get auction_pick_player => 'Pick a player';
+
+  @override
+  String get auction_retained_title => 'Retained players';
+
+  @override
+  String get auction_retained_help =>
+      'Retained players join their team before bidding, skip the auction, and their cost comes out of the team budget.';
+
+  @override
+  String get auction_retain_add => 'Retain player';
+
+  @override
+  String get auction_retained_none => 'No retained players';
+
+  @override
+  String get auction_retain_price => 'Retained cost (pts)';
+
+  @override
+  String get auction_release => 'Release';
+
+  @override
+  String auction_budget_line(int spent, int remaining, int budget) {
+    return '$spent spent · $remaining left of $budget';
+  }
+
+  @override
+  String auction_remaining(int amount) {
+    return '$amount left';
+  }
+
+  @override
+  String get auction_tab_live => 'Live';
+
+  @override
+  String get auction_tab_teams => 'Teams';
+
+  @override
+  String get auction_tab_players => 'Players';
+
+  @override
+  String get auction_tab_history => 'History';
+
+  @override
+  String get auction_setup_title => 'Get the auction ready';
+
+  @override
+  String get auction_setup_details => 'Details and teams';
+
+  @override
+  String auction_setup_players(int count) {
+    return 'Players ($count)';
+  }
+
+  @override
+  String auction_setup_retained(int count) {
+    return 'Retained players ($count)';
+  }
+
+  @override
+  String get auction_publish => 'Publish';
+
+  @override
+  String get auction_publish_help =>
+      'Published auctions are visible to everyone, even without signing in.';
+
+  @override
+  String get auction_unpublish => 'Back to draft';
+
+  @override
+  String get auction_start => 'Start auction';
+
+  @override
+  String auction_starts_on(String date) {
+    return 'Starts $date';
+  }
+
+  @override
+  String get auction_not_started => 'The auction hasn\'t started yet.';
+
+  @override
+  String get auction_view_only => 'Live view · updates automatically';
+
+  @override
+  String auction_player_of(int current, int total) {
+    return 'Player $current of $total';
+  }
+
+  @override
+  String auction_base(int amount) {
+    return 'Base $amount pts';
+  }
+
+  @override
+  String get auction_current_bid => 'Current bid';
+
+  @override
+  String get auction_no_bids => 'No bids yet';
+
+  @override
+  String get auction_bidding_closed => 'Bidding not started';
+
+  @override
+  String auction_leading(String team) {
+    return '$team leading';
+  }
+
+  @override
+  String get auction_paused_banner => 'The auction is paused';
+
+  @override
+  String get auction_prev_player => 'Previous';
+
+  @override
+  String get auction_next_player => 'Next player';
+
+  @override
+  String get auction_start_bidding => 'Start bidding';
+
+  @override
+  String auction_bid_amount(int amount) {
+    return 'Bid $amount';
+  }
+
+  @override
+  String get auction_undo_bid => 'Undo bid';
+
+  @override
+  String get auction_sell => 'Sell player';
+
+  @override
+  String get auction_mark_unsold => 'Mark unsold';
+
+  @override
+  String get auction_pause => 'Pause';
+
+  @override
+  String get auction_resume => 'Resume';
+
+  @override
+  String auction_reopen_unsold(int count) {
+    return 'Re-auction unsold ($count)';
+  }
+
+  @override
+  String get auction_all_processed => 'Every player has been processed';
+
+  @override
+  String auction_last_sold(String player, String team, int amount) {
+    return '$player → $team · $amount pts';
+  }
+
+  @override
+  String get auction_count_sold => 'Sold';
+
+  @override
+  String get auction_count_unsold => 'Unsold';
+
+  @override
+  String get auction_count_retained => 'Retained';
+
+  @override
+  String get auction_count_left => 'Left';
+
+  @override
+  String get auction_tag_retained => 'RETAINED';
+
+  @override
+  String get auction_tag_sold => 'SOLD';
+
+  @override
+  String get auction_squad_empty => 'No players yet';
+
+  @override
+  String get auction_show_now => 'Put up now';
+
+  @override
+  String get auction_history_empty => 'No activity yet';
+
+  @override
+  String get auction_log_created => 'Auction created';
+
+  @override
+  String get auction_log_published => 'Auction published';
+
+  @override
+  String get auction_log_started => 'Auction started';
+
+  @override
+  String get auction_log_paused => 'Auction paused';
+
+  @override
+  String get auction_log_resumed => 'Auction resumed';
+
+  @override
+  String auction_log_shown(String player) {
+    return '$player is up';
+  }
+
+  @override
+  String auction_log_bidding_started(String player) {
+    return 'Bidding open for $player';
+  }
+
+  @override
+  String auction_log_bid(String team, int amount, String player) {
+    return '$team bid $amount for $player';
+  }
+
+  @override
+  String auction_log_bid_undone(int amount, String team) {
+    return 'Bid of $amount by $team undone';
+  }
+
+  @override
+  String auction_log_sold(String player, String team, int amount) {
+    return '$player sold to $team for $amount';
+  }
+
+  @override
+  String auction_log_unsold(String player) {
+    return '$player unsold';
+  }
+
+  @override
+  String get auction_log_reopened => 'Unsold players back in the pool';
+
+  @override
+  String auction_log_retained(String player, String team, int amount) {
+    return '$player retained by $team for $amount';
+  }
+
+  @override
+  String auction_log_released(String player) {
+    return '$player released';
+  }
+
+  @override
+  String get auction_log_completed =>
+      'Auction completed and tournament created';
+
+  @override
+  String get auction_share => 'Copy public link';
+
+  @override
+  String get auction_link_copied => 'Public link copied';
+
+  @override
+  String get auction_edit => 'Edit details';
+
+  @override
+  String get auction_manage_players => 'Manage players';
+
+  @override
+  String get auction_manage_retained => 'Retained players';
+
+  @override
+  String get auction_delete => 'Delete auction';
+
+  @override
+  String get auction_delete_confirm =>
+      'Delete this auction, its history and photos? A tournament already created from it is kept.';
+
+  @override
+  String get auction_complete => 'Complete auction';
+
+  @override
+  String auction_complete_message(String name, int teams) {
+    return 'This ends the auction and creates the tournament \"$name\" with $teams teams and their players. No matches, fixtures or dates are created.';
+  }
+
+  @override
+  String auction_complete_left(int count) {
+    return '$count players were never auctioned. They will be marked unsold.';
+  }
+
+  @override
+  String get auction_complete_blocked =>
+      'A player with bids is still up. Sell them or undo the bids first.';
+
+  @override
+  String get auction_complete_confirm => 'Complete and create tournament';
+
+  @override
+  String auction_tournament_created(String name) {
+    return 'Tournament created: $name';
+  }
+
+  @override
+  String get auction_open_tournament => 'Open tournament';
+
+  @override
+  String get auction_home => 'Home';
+
+  @override
+  String get auction_create_tournament_retry => 'Create tournament';
+
+  @override
+  String auction_create_tournament_retry_message(String name, int teams) {
+    return 'The auction is complete but its tournament wasn\'t created. Create \"$name\" with $teams teams and their players now. No matches, fixtures or dates are created.';
+  }
+
+  @override
+  String get auction_error_not_editable =>
+      'This can only be changed before the auction starts.';
+
+  @override
+  String get auction_error_not_live => 'The auction isn\'t live.';
+
+  @override
+  String get auction_error_paused => 'The auction is paused.';
+
+  @override
+  String get auction_error_no_player => 'No player is up.';
+
+  @override
+  String get auction_error_bidding_closed => 'Start bidding first.';
+
+  @override
+  String get auction_error_already_leading => 'Leading';
+
+  @override
+  String get auction_error_squad_full => 'Squad full';
+
+  @override
+  String get auction_error_over_budget => 'Over budget';
+
+  @override
+  String get auction_error_bid_moved => 'The bid changed. Try again.';
+
+  @override
+  String get auction_error_has_bids => 'This player already has bids.';
+
+  @override
+  String get auction_error_no_bid => 'No bids yet.';
+
+  @override
+  String get auction_error_player_unavailable =>
+      'This player isn\'t available.';
+
+  @override
+  String get auction_error_no_players_left => 'No players left in the pool.';
+
+  @override
+  String get auction_error_no_previous =>
+      'No earlier unsold player to go back to.';
+
+  @override
+  String get auction_error_need_teams => 'Add at least 2 teams.';
+
+  @override
+  String get auction_error_need_players => 'Add players to the auction first.';
+
+  @override
+  String get auction_error_duplicate_player =>
+      'A player with the same ID, or the same name and number, already exists.';
+
+  @override
+  String get auction_error_invalid_team =>
+      'That team has players assigned. Release them first.';
+
+  @override
+  String get auction_error_not_admin => 'Only auction admins can do this.';
+
+  @override
+  String get auction_error_already_completed =>
+      'The auction is already completed.';
+
+  @override
+  String get auction_error_incomplete =>
+      'Some players still need to be processed.';
+
+  @override
+  String get auction_error_too_many_players =>
+      'Too many players for one auction.';
+
+  @override
+  String get mascot_setting_title => 'Tiger guide';
+
+  @override
+  String mascot_welcome_named(String name) {
+    return 'Hi $name! Welcome back to Sports Tamil.';
+  }
+
+  @override
+  String get mascot_welcome_guest =>
+      'Hi there! Welcome to Sports Tamil. Let\'s play!';
+
+  @override
+  String get mascot_sign_in_options =>
+      'Pick a way to sign in, or jump in as a guest to play.';
+
+  @override
+  String get mascot_sign_in_required =>
+      'You\'ll need to sign in for this. It only takes a moment!';
+
+  @override
+  String get mascot_sign_in_to_create =>
+      'Sign in first, then you can create teams, matches and tournaments.';
+
+  @override
+  String get mascot_email_new_account => 'New here? Let\'s make your account!';
+
+  @override
+  String get mascot_email_looks_good => 'That email looks good!';
+
+  @override
+  String get mascot_password_hidden => 'I\'m not peeking at your password!';
+
+  @override
+  String get mascot_password_shown =>
+      'Password visible. Make sure nobody\'s watching!';
+
+  @override
+  String get mascot_wrong_password =>
+      'Hmm, that didn\'t work. Forgot your password? Tap \"Forgot password\" and I\'ll send a reset link.';
+
+  @override
+  String get mascot_email_in_use =>
+      'This email already has an account. Try signing in instead.';
+
+  @override
+  String get mascot_enter_email_first =>
+      'Type your email first, then tap \"Forgot password\".';
+
+  @override
+  String get mascot_reset_sent =>
+      'Reset link sent! Check your inbox and spam folder.';
+
+  @override
+  String get mascot_something_wrong =>
+      'Oops, something went wrong. Please try again.';
+
+  @override
+  String get mascot_login_success => 'You\'re in! Let\'s play.';
+
+  @override
+  String get mascot_registered => 'Account created! Welcome to the team.';
+
+  @override
+  String get mascot_guest_joined =>
+      'You\'re playing as Guest. Your scores will show as \"Guest\".';
+
+  @override
+  String get mascot_profile_intro =>
+      'Tell me your name so your friends can find you.';
+
+  @override
+  String mascot_profile_name(String name) {
+    return 'Nice to meet you, $name!';
+  }
+
+  @override
+  String mascot_profile_created(String name) {
+    return 'Welcome to Sports Tamil, $name!';
+  }
+
+  @override
+  String get mascot_profile_saved => 'Profile saved!';
 }

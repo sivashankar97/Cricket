@@ -5,21 +5,18 @@ import 'colors.dart';
 extension AppSurfaceStyle on AppColorScheme {
   bool get _isDark => themeMode == ThemeMode.dark;
 
-  /// iOS-style card background: white on grouped gray (light) or
-  /// elevated dark surface (dark). Relies on bg separation, not shadow.
-  Color get card => _isDark ? const Color(0xFF1C1C1E) : surface;
+  /// White card on lavender (light) or lighter indigo card on navy (dark).
+  Color get card => surface;
 
-  /// iOS cards use no floating shadow — just a hairline border or bg contrast.
-  /// Very subtle single-layer shadow only in dark mode for slight lift.
-  List<BoxShadow> get cardShadow => _isDark
-      ? [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 1,
-            offset: const Offset(0, 0.5),
-          ),
-        ]
-      : [];
+  /// Soft indigo lift, as in the Sports Tamil concept cards.
+  List<BoxShadow> get cardShadow => [
+        BoxShadow(
+          color: (_isDark ? Colors.black : brandNavyColor)
+              .withValues(alpha: _isDark ? 0.25 : 0.06),
+          blurRadius: 14,
+          offset: const Offset(0, 4),
+        ),
+      ];
 
   /// Chips and unselected tabs — no shadow on iOS; bg color does the job.
   List<BoxShadow> get chipShadow => [];
@@ -43,8 +40,7 @@ extension AppSurfaceStyle on AppColorScheme {
         ),
       ];
 
-  /// iOS-standard card decoration: radius 10, white bg, no shadow.
-  BoxDecoration cardDecoration({double radius = 10}) => BoxDecoration(
+  BoxDecoration cardDecoration({double radius = 14}) => BoxDecoration(
         color: card,
         borderRadius: BorderRadius.circular(radius),
         boxShadow: cardShadow,

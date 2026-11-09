@@ -1,5 +1,6 @@
 {
   "app_title": "Sports Tamil",
+
   "@_COMMON": {
   },
   "common_none_title": "None",
@@ -126,7 +127,6 @@
   "intro_get_your_cricket_title": "Get Your Cricket On!",
   "intro_get_your_cricket_description": "Turn backyard games into pro matches with our app. Create matches, manage teams, and track stats!",
   "intro_continue_btn_text": "Continue",
-
   "sign_in_verify_phone_number_title": "Enter phone number",
   "sign_in_verify_phone_number_description": "We’ll verify your phone number with a verification code.",
   "sign_in_phone_number_placeholder": "00000 00000",
@@ -136,6 +136,8 @@
   "sign_in_options_description": "Choose how you want to sign in.",
   "sign_in_email_option": "Continue with email",
   "sign_in_whatsapp_option": "Continue with WhatsApp",
+  "sign_in_guest_option": "Continue as guest",
+  "sign_in_guest_hint": "Play cricket without an account. Your scores show as \"Guest\".",
   "sign_in_whatsapp_subtitle": "Send 'Hi login' on WhatsApp to get your instant login link.",
   "sign_in_whatsapp_opened_title": "WhatsApp Chat Opened",
   "sign_in_whatsapp_opened_desc": "Send the prefilled message 'Hi login' in WhatsApp. You will receive a login link to continue.",
@@ -144,23 +146,25 @@
   "sign_in_whatsapp_enter_link_placeholder": "Paste login link or token here",
   "sign_in_whatsapp_submit_token_btn": "Verify & Sign In",
   "sign_in_email_title": "Sign in with email",
-  "sign_in_email_description": "Enter your email and we’ll send you a one-time code.",
-  "sign_in_email_code_title": "Check your email",
-  "sign_in_email_code_description": "Enter the 6-digit code sent to {email}.",
-  "@sign_in_email_code_description": {
+  "sign_in_email_description": "Sign in with your email and password.",
+  "sign_in_email_create_title": "Create your account",
+  "sign_in_email_create_description": "Use your email and choose a password with at least 6 characters.",
+  "sign_in_password_placeholder": "Password",
+  "sign_in_email_sign_in_btn": "Sign in",
+  "sign_in_email_create_btn": "Create account",
+  "sign_in_email_switch_to_create": "New here? Create an account",
+  "sign_in_email_switch_to_sign_in": "Already have an account? Sign in",
+  "sign_in_forgot_password": "Forgot password?",
+  "sign_in_reset_email_sent": "Password reset link sent to {email}. Check your inbox and spam folder.",
+  "@sign_in_reset_email_sent": {
     "placeholders": {
       "email": {
         "type": "String"
       }
     }
   },
+  "sign_in_reset_enter_email": "Enter your email first, then tap Forgot password.",
   "sign_in_email_placeholder": "Email",
-  "sign_in_email_code_placeholder": "000000",
-  "sign_in_send_code": "Send code",
-  "sign_in_verify_code": "Verify code",
-  "sign_in_resend_code": "Resend code",
-  "sign_in_change_email": "Use a different email",
-  "sign_in_email_bridge_pending": "Your email code is verified, but app sign-in is not enabled until the secure Firebase auth bridge is configured.",
   "sign_in_required_title": "Sign in to continue",
   "sign_in_required_description": "Sign in to see your matches, teams, stats, and profile.",
   "otp_verification_verification_title": "Verification code",
@@ -180,6 +184,64 @@
   "home_screen_create_team_btn": "Create team",
   "home_screen_set_up_tournament_title": "Set up a tournament in minutes.",
   "home_screen_create_tournament_btn": "Create tournament",
+  "home_global_cricket_title": "Global cricket",
+  "home_global_cricket_updated": "Updated {time} · CricketData.org",
+  "@home_global_cricket_updated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "home_global_cricket_live": "LIVE",
+  "global_cricket_international": "International",
+  "global_cricket_leagues": "Premier leagues",
+  "global_cricket_no_matches": "No matches right now",
+  "global_cricket_live": "Live",
+  "global_cricket_recent": "Recent",
+  "global_cricket_upcoming": "Upcoming",
+  "global_cricket_scorecard": "Scorecard",
+  "global_cricket_info": "Info",
+  "global_cricket_batter": "Batter",
+  "global_cricket_bowler": "Bowler",
+  "global_cricket_batting": "batting",
+  "global_cricket_info_match": "Match",
+  "global_cricket_info_series": "Series",
+  "global_cricket_info_date": "Date & time",
+  "global_cricket_info_venue": "Venue",
+  "global_cricket_info_toss": "Toss",
+  "global_cricket_info_format": "Format",
+  "global_cricket_toss_text": "{team} won the toss and chose to {choice}",
+  "@global_cricket_toss_text": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      },
+      "choice": {
+        "type": "String"
+      }
+    }
+  },
+  "global_cricket_starts": "Starts {time}",
+  "@global_cricket_starts": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "global_cricket_scorecard_updated": "Scorecard updated {time} · refreshes hourly while live",
+  "@global_cricket_scorecard_updated": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "global_cricket_scorecard_not_started": "The scorecard will appear once the match starts.",
+  "global_cricket_scorecard_sign_in": "Sign in to load the full scorecard.",
+  "global_cricket_scorecard_limit": "The full scorecard isn't available right now (free data limit). The live score above still updates every 30 minutes.",
+  "global_cricket_scorecard_loading": "Loading scorecard…",
   "home_screen_no_matches_title": "No Matches in this area!",
   "home_screen_no_matches_description_text": "Enjoy the freedom of creating your own cricket matches or teams.",
 
@@ -222,6 +284,32 @@
   "add_tournament_type_placeholder": "Select tournament type",
   "add_tournament_start_date": "Start Date",
   "add_tournament_end_date": "End Date",
+  "add_tournament_venue_title": "Venue",
+  "add_tournament_match_format_title": "Match Format",
+  "add_tournament_schedule_title": "Tournament Schedule",
+  "add_tournament_teams_hint": "Tap to pick teams from a tournament team pool",
+  "add_tournament_change_teams": "Change teams",
+  "add_tournament_city": "City",
+  "add_tournament_ground": "Ground / Venue",
+  "add_tournament_ball_type": "Ball Type",
+  "add_tournament_ball_type_placeholder": "Select ball type",
+  "add_tournament_overs": "Overs per match",
+  "add_tournament_overs_hint": "1 to {max}",
+  "@add_tournament_overs_hint": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "add_tournament_details_required": "Fill in city, ground, ball type and overs (1–{max}) to continue",
+  "@add_tournament_details_required": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
   "add_tournament_team_selection": "Team selection",
   "add_tournament_match_selection": "Match selection",
   "add_tournament_edit_banner": "Edit banner",
@@ -236,7 +324,6 @@
       "count": {}
     }
   },
-
   "tournament_list_empty_list_title": "No tournaments created",
   "tournament_list_empty_list_description": "Tap on the “ + ” icon to create a tournament",
   "tournament_list_match_title": "{count, plural, =0{No matches} =1{{count} Match} other{{count} Matches}}",
@@ -245,11 +332,9 @@
       "count": {}
     }
   },
-
   "team_selection_screen_title": "Select Teams",
   "team_selection_select_team_title": "Select teams",
   "team_selection_verify_team_to_add_title": "Verify teams to add",
-
   "match_selection_screen_title": "Select Matches",
   "match_selection_select_matches_title": "Select matches",
   "match_selection_round_title": "Round {round}",
@@ -279,7 +364,6 @@
   "tournament_detail_points_table_tab": "Points Table",
   "tournament_detail_edit_title": "Edit tournament",
   "tournament_detail_members_title": "Members",
-
   "tournament_detail_overview_info_title": "Tournament info",
   "tournament_detail_overview_name_title": "Tournament Name",
   "tournament_detail_overview_type_title": "Type",
@@ -287,11 +371,9 @@
   "tournament_detail_overview_teams_squads_title": "Teams Squads",
   "tournament_detail_overview_key_stats_title": "Key Stats",
   "tournament_detail_overview_featured_matches_title": "Featured Matches",
-
   "tournament_detail_teams_empty_title": "Select Your Teams!",
   "tournament_detail_teams_empty_description": "You haven't added any teams to this tournament yet. Please select or create teams to get started.",
   "tournament_detail_teams_select_btn": "Add teams",
-
   "tournament_detail_matches_empty_title": "Schedule Your Matches!",
   "tournament_detail_matches_empty_description": "Create matches to kick off your tournament and get the games started!",
   "tournament_detail_matches_filter_empty_title": "No Results Found",
@@ -323,12 +405,10 @@
   "tournament_schedule_spacing_same_day": "Same day (spaced 3 hours)",
   "tournament_schedule_spacing_consecutive": "Consecutive days",
   "tournament_schedule_no_pending": "No pending fixtures to schedule.",
-
   "tournament_detail_key_stat_most_runs_title": "Most Runs",
   "tournament_detail_key_stat_most_wickets_title": "Most Wickets",
   "tournament_detail_key_stat_most_fours_title": "Most Fours",
   "tournament_detail_key_stat_most_sixes_title": "Most Sixes",
-
   "key_stat_all": "All",
   "key_stat_filter_runs": "Runs",
   "key_stat_filter_wickets": "Wickets",
@@ -337,7 +417,6 @@
   "key_stat_filter_most_hundreds": "Most hundreds",
   "key_stat_filter_most_fifties": "Most fifties",
   "key_stat_filter_boundaries": "Boundaries",
-
   "tournament_detail_points_table_points_title": "Points",
   "tournament_detail_points_table_empty_title": "No Points Yet!",
   "tournament_detail_points_table_empty_description": "The points table will be updated once matches begin. Stay tuned for the latest standings!",
@@ -346,7 +425,6 @@
   "tournament_detail_points_table_losses": "L",
   "tournament_detail_points_table_pts": "Pts",
   "tournament_detail_points_table_nrr": "NRR",
-
   "tournament_detail_stats_empty_title": "No stats available yet!",
   "tournament_detail_stats_empty_description": "The players are warming up! Stay tuned for exciting stats as the team progresses.",
   "tournament_detail_stats_empty_filter_title": "No Stats Found",
@@ -354,7 +432,6 @@
   "tournament_detail_stats_player_title": "Player",
   "tournament_detail_stats_avg_title": "Avg",
   "tournament_detail_stats_runs_title": "Runs",
-
   "tournament_members_empty_title": "No members yet!",
   "tournament_members_empty_description": "Tap the + button to add members and start managing your tournament effectively!",
   "tournament_members_search_member_empty_title": "Assign Tournament Role",
@@ -364,7 +441,7 @@
   "tournament_members_remove_member": "Remove member",
   "tournament_members_transfer_ownership_description": "Search for a user to transfer tournament ownership. This grants them full management control. Choose someone who can effectively lead the tournament.",
 
-  "@_TOURNAMENT_TYPE":{
+  "@_TOURNAMENT_TYPE": {
   },
   "tournament_type_knock_out": "Knockout",
   "tournament_type_mini_robin": "Mini Robin",
@@ -372,14 +449,12 @@
   "tournament_type_double_out": "Double Out",
   "tournament_type_best_of_three": "Best Of three",
   "tournament_type_custom": "Custom",
-
   "tournament_type_knock_out_description": "Teams face off in a single elimination, with the loser immediately knocked out.\nMinimum {count} teams required.",
   "tournament_type_mini_robin_description": "A smaller round-robin format where each team plays once against all others.\nMinimum {count} teams required.",
   "tournament_type_box_league_description": "Teams are divided into groups, with top teams advancing to the knockout stage.\nMinimum {count} teams required.",
   "tournament_type_double_out_description": "Teams get two chances before being knocked out, with a winners and losers bracket.\nMinimum {count} teams required.",
   "tournament_type_best_of_three_description": "Teams play a series of matches, and the first to win the majority is the champion.\nMinimum {count} teams required.",
   "tournament_type_custom_description": "Fully flexible, create a structure that suits your needs.\nMinimum {count} teams required.",
-
   "add_team_screen_title": "Add Team",
   "add_team_edit_team_screen_title": "Edit Team",
   "add_team_add_as_member_description_text": "Add me as a team member",
@@ -389,13 +464,11 @@
   "add_team_players_text": "Players",
   "add_team_already_added": "Team already added",
   "add_team_add_hint_text": "Added user will be shown here, tap on '+' button to add team member.",
-
   "scan_qr_code": "Scan QR code",
   "scan_qr_code_description": "Place the QR code into the frame",
   "scan_qr_permission_title": "Allow camera access to use scanning features",
   "scan_qr_permission_description": "Please enable camera access in your device settings to use the scanning feature.",
   "scan_qr_permission_settings": "Go to settings",
-
   "add_team_member_screen_title": "Add Team Member",
   "add_team_member_details_title": "Details",
   "add_team_member_search_placeholder_text": "Search member name",
@@ -428,7 +501,6 @@
       }
     }
   },
-
   "team_list_add_members_title": "Add Members",
   "team_list_all_teams_title": "All teams",
   "team_list_created_by_me_title": "Created by me",
@@ -436,7 +508,6 @@
   "team_list_me_as_admin_title": "Me as admin",
   "team_list_no_teams_created_title": "No teams created",
   "team_list_empty_list_description": "Tap on the “ + ” icon to create a team",
-
   "match_list_no_match_here_title": "No matches here",
   "match_list_empty_list_description": "Tap on the “ + ” icon to create a match",
   "match_list_overs_title": "{overs, plural, =0{{overs} overs} =1{{overs} over} other{{overs} overs}}",
@@ -506,14 +577,12 @@
   "add_match_empty_fields_error": "Please fill the required details",
   "add_match_unselected_team_error": "Please select teams",
   "add_match_invalid_squad_error": "Please select valid squad",
-
   "search_user_hint_title": "Search user name",
   "search_user_empty_title": "Time to gather your officials!",
   "search_user_empty_description_text": "Search and assign officials for your next match. Get ready for cricket action!",
   "search_team_screen_title": "Search Team",
   "search_team_selection_error_text": "The team must have at least 2 players to add it in a match.",
   "search_team_search_placeholder_title": "Search team name",
-
   "power_play_text": "Power play {count}",
   "@power_play_text": {
     "description": "Power play {count}",
@@ -530,14 +599,11 @@
   "select_squad_rest_of_team_title": "Rest of The Team",
   "select_squad_empty_squad_text": "Select squad via adding it from team members list.",
   "select_squad_empty_team_member_text": "No team member added in this team, try to add people you know as a team member.",
-
   "add_toss_detail_screen_title": "Add Toss Detail",
   "add_toss_detail_who_won_toss_text": "Who won the toss?",
   "add_toss_detail_winner_elected_to_text": "Toss-winner elected to - ?",
-
   "add_substitute_search_substitute_title": "Who’s ready to step in?",
   "add_substitute_search_substitute_description": "Search and assign a substitute fielder to maintain your fielding edge.",
-
   "team_detail_screen_title": "Team Detail",
   "team_detail_member_tab_title": "Member",
   "team_detail_empty_matches_title": "No matches scheduled yet!",
@@ -600,7 +666,6 @@
   "team_detail_highest_runs_title": "Highest Runs",
   "team_detail_lowest_runs_title": "Lowest Runs",
   "team_detail_run_rate_title": "Run Rate",
-
   "user_detail_info_title": "Info",
   "user_detail_personal_information_title": "Personal information",
   "user_detail_participation_title": "Participation",
@@ -626,10 +691,8 @@
   "user_detail_catches_title": "Catches",
   "user_detail_run_out_title": "Run out",
   "user_detail_stumping_title": "Stumping",
-
   "match_status_yet_to_start_title": "Yet to start",
   "match_status_abandoned_title": "Abandoned",
-
   "wicket_type_bowled_title": "Bowled",
   "wicket_type_caught_title": "Caught",
   "wicket_type_caught_behind_title": "Caught Behind",
@@ -646,7 +709,6 @@
   "wicket_type_short_timed_out_title": "TO",
   "wicket_type_short_retired_title": "RT",
   "wicket_type_short_retired_hurt_title": "RTH",
-
   "match_detail_screen_title": "Match Detail",
   "match_detail_commentary_tab_title": "Commentary",
   "match_detail_scorecard_tab_title": "Scorecard",
@@ -658,7 +720,6 @@
   "match_detail_error_description_text": "The detailed will be available after the start of the match.",
   "match_detail_highlight_empty_title": "No highlights currently available.",
   "match_detail_highlight_empty_description_text": "No events recorded yet. Check back later for updates and highlights.",
-
   "match_info_match_title": "Match",
   "match_info_date_title": "Date",
   "match_info_toss_title": "Toss",
@@ -691,7 +752,6 @@
       }
     }
   },
-
   "match_commentary_bowler_to_batsman_text": "{bowler} to {batsman}",
   "@match_commentary_bowler_to_batsman_text": {
     "description": "{bowler} to {batsman}",
@@ -782,7 +842,6 @@
       }
     }
   },
-
   "match_scorecard_fall_of_wicket_text": "Fall of Wicket",
   "match_scorecard_over_text": "Over",
   "match_scorecard_run_text": "Run",
@@ -858,7 +917,6 @@
       }
     }
   },
-
   "match_squad_playing_title": "Playing",
   "match_squad_bench_title": "Bench",
   "match_highlight_filter_all_text": "All",
@@ -996,7 +1054,6 @@
     }
   },
   "score_board_need_run_text": "Need {count, plural, =0{{count} Runs} =1{{count} Run} other{{count} Runs}}",
-
   "score_board_run_need_in_ball_text": "Need {run} in {ball}",
   "@score_board_run_need_in_ball_text": {
     "description": "Need {run} in {ball}",
@@ -1009,7 +1066,6 @@
       }
     }
   },
-
   "fielding_position_deep_mid_wicket_title": "Deep mid wicket",
   "fielding_position_long_on_title": "Long on",
   "fielding_position_long_off_title": "Long off",
@@ -1018,7 +1074,6 @@
   "fielding_position_third_man_title": "Third man",
   "fielding_position_deep_fine_leg_title": "Deep fine leg",
   "fielding_position_deep_square_leg_title": "Deep square leg",
-
   "side_off_title": "OFF",
   "side_leg_title": "LEG",
 
@@ -1037,10 +1092,9 @@
   "edit_profile_gender_prefer_not_to_say_title": "Prefer not to say",
   "edit_profile_delete_account_btn_title": "Delete account",
   "edit_profile_delete_account_description_text": "This can not undone. if you delete your account, your data will be gone forever.",
-  "transfer_teams_title" : "Before You Go...",
-  "transfer_teams_description" : "We're sorry to see you go. Before deleting your account, please:\n• Assign new owners and admins for your teams or delete the teams\n• Transfer scoring for ongoing matches\n• Remove any scheduled matches\n•Transfer or assign responsibilities for ongoing tournaments\nThis will ensure everything is properly managed after you leave.",
-  "transfer_teams_go_to_my_cricket" : "Go to My Cricket",
-
+  "transfer_teams_title": "Before You Go...",
+  "transfer_teams_description": "We're sorry to see you go. Before deleting your account, please:\n• Assign new owners and admins for your teams or delete the teams\n• Transfer scoring for ongoing matches\n• Remove any scheduled matches\n•Transfer or assign responsibilities for ongoing tournaments\nThis will ensure everything is properly managed after you leave.",
+  "transfer_teams_go_to_my_cricket": "Go to My Cricket",
   "profile_settings_title": "Settings",
   "profile_setting_contact_support": "Contact support",
   "profile_setting_privacy_policy_title": "Privacy policy",
@@ -1052,15 +1106,15 @@
   "profile_setting_scan_to_play_description": "This QR code allows you to easily add the player to the team.",
   "profile_setting_use_scanner_description": "Use your phone camera or a QR code app to scan the code above and easily add the player to the team.",
   "profile_setting_share_app_message": "Elevate your cricket scoring game with Sports Tamil! 🏏\n\nEffortlessly score matches, track stats, and manage your teams.\n\n👉 Download Now:\n📱 Android: {androidLink}\n🍎 iOS: {iosLink}\n\nStart scoring smarter today!",
-  "@profile_setting_share_app_message" : {
+  "@profile_setting_share_app_message": {
     "placeholders": {
-        "androidLink": {
-          "type": "String"
-        },
-        "iosLink": {
-          "type": "String"
-        }
+      "androidLink": {
+        "type": "String"
+      },
+      "iosLink": {
+        "type": "String"
       }
+    }
   },
 
   "@_NOTIFICATION": {
@@ -1076,21 +1130,17 @@
   "contact_support_description_placeholder_text": "Description...",
   "contact_support_attachment": "Attachment (if any)",
   "large_attachment_upload_error_text": "Oops! Your file exceeds the maximum allowed size of 25 MB. Please choose a smaller file and try again.",
-
   "profile_complete_your_profile_title": "Complete your profile",
   "profile_complete_description_title": "Enhance your profile with more details to make it better!",
   "profile_complete_add_profile_picture": "Add profile picture",
   "profile_complete_add_personal_details": "Add personal details",
   "profile_complete_add_playing_style": "Add playing style",
-
   "image_picker_choose_option_title": "Choose an option",
   "image_picker_camera_option_text": "Camera",
   "image_picker_gallery_option_text": "Gallery",
   "image_picker_crop_image_title": "Crop Image",
-
   "batting_style_right_hand_bat_title": "Right hand bat",
   "batting_style_left_hand_bat_title": "Left hand bat",
-
   "bowling_style_right_arm_fast_title": "Right arm fast",
   "bowling_style_right_arm_medium_title": "Right arm medium",
   "bowling_style_left_arm_fast_title": "Left arm fast",
@@ -1099,7 +1149,6 @@
   "bowling_style_slow_left_arm_chinaman_title": "Slow left arm chinaman",
   "bowling_style_right_arm_off_break_title": "Right arm off break",
   "bowling_style_right_arm_leg_break_title": "Right arm leg break",
-
   "player_role_top_order_batter_title": "Top order batter",
   "player_role_middle_order_batter_title": "Middle order batter",
   "player_role_wicket_keeper_batter_title": "Wicket keeper batter",
@@ -1107,5 +1156,897 @@
   "player_role_bowler_title": "Bowler",
   "player_role_all_rounder_title": "All rounder",
   "player_role_lower_order_batter_title": "Lower order batter",
-  "player_role_opening_batter_title": "Opening batter"
+  "player_role_opening_batter_title": "Opening batter",
+  "tournament_teams_title": "Tournament Teams",
+  "tournament_teams_entry_description": "Pools of teams for each series, like GCPL or PSPL",
+  "tournament_teams_search_hint": "Search teams",
+  "tournament_teams_empty_title": "No teams yet",
+  "tournament_teams_empty_description": "Add your first team and its players once, then pick it in any tournament.",
+  "tournament_teams_add_first_team": "Add your first team",
+  "tournament_teams_add_team": "Add team",
+  "tournament_teams_edit_team": "Edit team",
+  "tournament_teams_no_search_result": "No teams match “{query}”",
+  "@tournament_teams_no_search_result": {
+    "placeholders": {
+      "query": {}
+    }
+  },
+  "tournament_teams_player_count": "{count, plural, =0{No players} =1{1 player} other{{count} players}}",
+  "@tournament_teams_player_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_teams_delete_title": "Delete team?",
+  "tournament_teams_delete_description": "{name} will be removed from your Tournament Teams.",
+  "@tournament_teams_delete_description": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "tournament_teams_in_use_title": "Team in use",
+  "tournament_teams_in_use_description": "{name} is part of {count, plural, =1{1 tournament} other{{count} tournaments}}. Remove it from those tournaments before deleting it.",
+  "@tournament_teams_in_use_description": {
+    "placeholders": {
+      "name": {},
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_team_name_label": "Team name *",
+  "tournament_team_short_name_label": "Short name / code",
+  "tournament_team_captain_label": "Captain",
+  "tournament_team_captain_placeholder": "Select captain (optional)",
+  "tournament_team_wicket_keeper_label": "Wicket-keeper",
+  "tournament_team_add_players": "Add players",
+  "tournament_team_players_empty_title": "No players yet",
+  "tournament_team_players_empty_description": "Add players so this team is ready for matches.",
+  "tournament_team_add_player": "Add player",
+  "tournament_team_edit_player": "Edit player",
+  "tournament_team_player_name_label": "Player name *",
+  "tournament_team_player_role_label": "Role",
+  "tournament_team_jersey_label": "Jersey number",
+  "tournament_team_make_captain": "Make captain",
+  "tournament_team_remove_captain": "Remove as captain",
+  "tournament_team_make_wicket_keeper": "Make wicket-keeper",
+  "tournament_team_remove_wicket_keeper": "Remove as wicket-keeper",
+  "tournament_team_remove_player_title": "Remove player?",
+  "tournament_team_remove_player_description": "{name} will be removed from this team.",
+  "@tournament_team_remove_player_description": {
+    "placeholders": {
+      "name": {}
+    }
+  },
+  "tournament_team_captain_short": "C",
+  "tournament_team_wicket_keeper_short": "WK",
+  "tournament_player_role_batsman": "Batsman",
+  "tournament_player_role_bowler": "Bowler",
+  "tournament_player_role_all_rounder": "All-rounder",
+  "tournament_player_role_wicket_keeper": "Wicket-keeper",
+  "tournament_team_picker_title": "Select teams",
+  "tournament_team_picker_select_all": "Select all",
+  "tournament_team_picker_clear": "Clear",
+  "tournament_team_picker_add_new": "+ Add new team",
+  "tournament_team_picker_min_teams": "Select at least 2 teams to continue",
+  "tournament_team_picker_done": "Continue with {count, plural, =1{1 team} other{{count} teams}}",
+  "@tournament_team_picker_done": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_team_picker_selected": "{count} selected",
+  "@tournament_team_picker_selected": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_team_picker_not_in_pool": "Not in Tournament Teams",
+  "tournament_team_picker_choose_pool": "Choose a pool to see its teams",
+  "tournament_team_picker_switch_pool_title": "Clear current selection?",
+  "tournament_team_picker_switch_pool_description": "Switching to {name} clears {count, plural, =1{1 selected team} other{{count} selected teams}}.",
+  "@tournament_team_picker_switch_pool_description": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_team_picker_switch": "Switch",
+  "team_pools_search_hint": "Search pools",
+  "team_pools_empty_title": "No pools yet",
+  "team_pools_empty_description": "Create a pool for each tournament series, like “GCPL Teams”, then add its teams and players.",
+  "team_pools_create_first": "Create your first pool",
+  "team_pools_new_pool": "New pool",
+  "team_pools_add_new": "+ New pool",
+  "team_pools_edit_pool": "Edit pool",
+  "team_pools_name_label": "Pool name *",
+  "team_pools_short_name_label": "Short code",
+  "team_pools_team_count": "{count, plural, =0{No teams} =1{1 team} other{{count} teams}}",
+  "@team_pools_team_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "team_pools_no_search_result": "No pools match “{query}”",
+  "@team_pools_no_search_result": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "team_pools_ungrouped": "Ungrouped teams",
+  "team_pools_ungrouped_description": "Teams created before pools. Move them into a pool.",
+  "team_pools_delete_title": "Delete pool?",
+  "team_pools_delete_description": "Delete {name} and its {count, plural, =0{teams} =1{1 team} other{{count} teams}}? Players are kept.",
+  "@team_pools_delete_description": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "team_pools_in_use_title": "Pool in use",
+  "team_pools_in_use_description": "{name} has teams in {count, plural, =1{1 tournament} other{{count} tournaments}}. Remove them from those tournaments before deleting the pool.",
+  "@team_pools_in_use_description": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "team_pools_move_to_pool": "Move to pool…",
+  "team_pools_team_actions": "Team actions",
+  "team_pools_no_other_pools": "Create another pool first.",
+  "team_pool_teams_empty_title": "No teams in this pool",
+  "team_pool_teams_empty_description": "Add the teams and players for this series.",
+  "error_duplicate_team_name": "A team with this name already exists in this pool.",
+  "error_duplicate_player_name": "This player is already in the team.",
+  "error_duplicate_jersey_number": "This jersey number is already taken in this team.",
+  "error_team_used_in_tournament": "This team is used in a tournament and can't be deleted.",
+  "error_duplicate_pool_name": "A pool with this name already exists.",
+  "error_pool_used_in_tournament": "This pool has teams used in a tournament and can't be deleted.",
+  "tab_play_title": "Play",
+  "play_screen_title": "Play Cricket",
+  "play_guest_title": "Playing as Guest",
+  "play_guest_description": "Your scores show as \"Guest\". Sign in to use your name and challenge friends.",
+  "play_guest_challenge_hint": "Sign in to challenge",
+  "play_daily_title": "Daily Challenge",
+  "play_daily_target": "Chase {target} in 2 overs",
+  "@play_daily_target": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "play_daily_best": "Your best today: {score}",
+  "@play_daily_best": {
+    "placeholders": {
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "play_daily_not_played": "Same balls for everyone today. Can you chase it?",
+  "play_daily_players": "{count, plural, =0{Be the first to play today} =1{1 player today} other{{count} players today}}",
+  "@play_daily_players": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "play_quick_play": "Quick Play",
+  "play_quick_play_hint": "2 overs · 3 wickets",
+  "play_challenge_friend": "Challenge",
+  "play_challenge_friend_hint": "Beat a friend's score",
+  "play_how_to": "Tap anywhere as the ball reaches the bat. Perfect timing hits a six; miss a ball on the stumps and you're bowled.",
+  "play_challenges_title": "Challenges",
+  "play_challenge_incoming": "{name} challenged you · beat {runs}",
+  "@play_challenge_incoming": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "runs": {
+        "type": "int"
+      }
+    }
+  },
+  "play_challenge_waiting": "Waiting for {name} · you scored {score}",
+  "@play_challenge_waiting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      }
+    }
+  },
+  "play_challenge_result": "{me} vs {other} · {name}",
+  "@play_challenge_result": {
+    "placeholders": {
+      "me": {
+        "type": "String"
+      },
+      "other": {
+        "type": "String"
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_challenge_play": "Play",
+  "play_result_won": "Won",
+  "play_result_lost": "Lost",
+  "play_result_tie": "Tie",
+  "play_leaderboard_title": "Leaderboard",
+  "play_leaderboard_today": "Today",
+  "play_leaderboard_week": "This week",
+  "play_leaderboard_empty": "No scores yet. Play a game to get on the board!",
+  "play_recent_title": "Recent Games",
+  "play_recent_empty": "Your games will show up here.",
+  "play_mode_solo": "Quick Play",
+  "play_mode_daily": "Daily",
+  "play_mode_challenge": "Challenge",
+  "play_balls": "{count} balls",
+  "@play_balls": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "play_select_opponent_title": "Challenge a friend",
+  "play_select_opponent_hint": "Search players by name",
+  "play_select_opponent_empty": "No players found",
+  "play_game_tap_to_start": "Tap to start",
+  "play_game_balls_left": "{count} balls left",
+  "@play_game_balls_left": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "play_game_need": "Need {runs} off {balls}",
+  "@play_game_need": {
+    "placeholders": {
+      "runs": {
+        "type": "int"
+      },
+      "balls": {
+        "type": "int"
+      }
+    }
+  },
+  "play_game_vs": "vs {name}",
+  "@play_game_vs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_shot_six": "SIX!",
+  "play_shot_four": "FOUR!",
+  "play_shot_two": "2 runs",
+  "play_shot_single": "1 run",
+  "play_shot_dot": "Dot ball",
+  "play_shot_out": "OUT!",
+  "play_timing_perfect": "Perfect timing",
+  "play_timing_early": "Early",
+  "play_timing_late": "Late",
+  "play_timing_left": "Left alone",
+  "play_end_title": "Innings over",
+  "play_end_score": "{runs}/{wickets} in {balls} balls",
+  "@play_end_score": {
+    "placeholders": {
+      "runs": {
+        "type": "int"
+      },
+      "wickets": {
+        "type": "int"
+      },
+      "balls": {
+        "type": "int"
+      }
+    }
+  },
+  "play_end_target_won": "Target chased!",
+  "play_end_target_lost": "Fell short of {target}",
+  "@play_end_target_lost": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "play_end_challenge_sent": "Challenge sent to {name}",
+  "@play_end_challenge_sent": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_end_challenge_won": "You beat {name}!",
+  "@play_end_challenge_won": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_end_challenge_lost": "{name} wins this one",
+  "@play_end_challenge_lost": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_end_challenge_tie": "It's a tie with {name}",
+  "@play_end_challenge_tie": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_end_saving": "Saving…",
+  "play_again": "Play again",
+  "play_done": "Done",
+  "play_retry_save": "Retry",
+  "profile_my_stats": "My stats",
+  "tab_auction_title": "Auction",
+  "auction_screen_title": "Player Auctions",
+  "auction_hero_title": "Run a player auction",
+  "auction_hero_subtitle": "Register players, set retained players and run live bidding. The tournament is created for you at the end.",
+  "auction_create_title": "Create auction",
+  "auction_sign_in_to_create": "Sign in to create",
+  "auction_section_mine": "My auctions",
+  "auction_section_live": "Live now",
+  "auction_section_upcoming": "Upcoming",
+  "auction_section_completed": "Completed",
+  "auction_empty": "No auctions yet.",
+  "auction_not_found": "This auction doesn't exist or isn't public yet.",
+  "auction_status_draft": "Draft",
+  "auction_status_upcoming": "Upcoming",
+  "auction_status_live": "Live",
+  "auction_status_paused": "Paused",
+  "auction_status_completed": "Completed",
+  "auction_tile_summary": "{teams} teams · {players} players",
+  "@auction_tile_summary": {
+    "placeholders": {
+      "teams": {
+        "type": "int"
+      },
+      "players": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_progress": "{done}/{total} processed",
+  "@auction_progress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_progress_label": "Auction progress",
+  "auction_pts": "{amount} pts",
+  "@auction_pts": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_edit_title": "Edit auction",
+  "auction_name_label": "Auction name",
+  "auction_name_hint": "e.g. GCPL Auction",
+  "auction_tournament_name_label": "Tournament name",
+  "auction_tournament_name_hint": "e.g. GCPL",
+  "auction_tournament_name_help": "The tournament created when the auction is completed gets this name.",
+  "auction_description_label": "Description",
+  "auction_description_hint": "Season, venue, anything players should know",
+  "auction_date_label": "Auction date",
+  "auction_date_pick": "Pick a date",
+  "auction_banner_add": "Add banner",
+  "auction_banner_change": "Change banner",
+  "auction_rules_title": "Budget and bidding",
+  "auction_team_budget": "Team budget (pts)",
+  "auction_base_price": "Starting bid (pts)",
+  "auction_bid_increment": "Bid increment (pts)",
+  "auction_min_squad": "Min squad (0 = none)",
+  "auction_max_squad": "Max squad (0 = no limit)",
+  "auction_show_budgets": "Show team budgets on the public screen",
+  "auction_teams_title": "Teams",
+  "auction_team_name": "Team {number} name",
+  "@auction_team_name": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_team_short": "Short",
+  "auction_add_team": "Add team",
+  "auction_teams_locked": "Teams can't change after the auction starts.",
+  "auction_admins_title": "Admins",
+  "auction_admins_help": "Admins can edit and run this auction.",
+  "auction_add_admin": "Add admin",
+  "auction_select_admin": "Select an admin",
+  "auction_creator": "Creator",
+  "auction_save": "Save",
+  "auction_validation_name": "Enter the auction name and tournament name",
+  "auction_validation_teams": "Add at least 2 teams with names",
+  "auction_validation_team_names": "Team names must be different",
+  "auction_validation_rules": "Budget, starting bid and increment must be above 0, and min squad can't be more than max squad",
+  "auction_players_title": "Players",
+  "auction_players_count": "{count, plural, =1{1 player} other{{count} players}}",
+  "@auction_players_count": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_players_empty": "No players yet. Add them one by one, paste a list, or upload photos named after the players.",
+  "auction_player_search": "Search name, ID or number",
+  "auction_filter_all": "All",
+  "auction_player_status_available": "Available",
+  "auction_player_status_retained": "Retained",
+  "auction_player_status_in_auction": "In auction",
+  "auction_player_status_sold": "Sold",
+  "auction_player_status_unsold": "Unsold",
+  "auction_add_player": "Add player",
+  "auction_edit_player": "Edit player",
+  "auction_add_players_bulk": "Add many",
+  "auction_upload_photos": "Upload photos",
+  "auction_bulk_title": "Add many players",
+  "auction_bulk_hint": "One player per line:\nName, Player ID, Number, Role, Base price\nOnly the name is required. Roles: bat, bowl, all, wk",
+  "auction_bulk_result": "{added} added, {skipped} duplicates skipped",
+  "@auction_bulk_result": {
+    "placeholders": {
+      "added": {
+        "type": "int"
+      },
+      "skipped": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_player_name": "Player name",
+  "auction_player_code": "Player ID",
+  "auction_player_number": "Number",
+  "auction_player_base": "Base price",
+  "auction_photo_add": "Add photo",
+  "auction_photo_change": "Change photo",
+  "auction_remove_player": "Remove player",
+  "auction_remove_player_confirm": "Remove {name} from the auction?",
+  "@auction_remove_player_confirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_photos_title": "Match photos to players",
+  "auction_photos_help": "Photos are matched by file name: player ID, number or name, e.g. P001.jpg, 7.jpg or Arun Kumar.jpg.",
+  "auction_photos_summary": "{matched} matched · {unmatched} not matched",
+  "@auction_photos_summary": {
+    "placeholders": {
+      "matched": {
+        "type": "int"
+      },
+      "unmatched": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_photo_skip": "Skip",
+  "auction_photo_new_player": "New player: {name}",
+  "@auction_photo_new_player": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_photos_upload": "Upload {count}",
+  "@auction_photos_upload": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_photos_done": "{count} photos uploaded",
+  "@auction_photos_done": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_pick_player": "Pick a player",
+  "auction_retained_title": "Retained players",
+  "auction_retained_help": "Retained players join their team before bidding, skip the auction, and their cost comes out of the team budget.",
+  "auction_retain_add": "Retain player",
+  "auction_retained_none": "No retained players",
+  "auction_retain_price": "Retained cost (pts)",
+  "auction_release": "Release",
+  "auction_budget_line": "{spent} spent · {remaining} left of {budget}",
+  "@auction_budget_line": {
+    "placeholders": {
+      "spent": {
+        "type": "int"
+      },
+      "remaining": {
+        "type": "int"
+      },
+      "budget": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_remaining": "{amount} left",
+  "@auction_remaining": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_tab_live": "Live",
+  "auction_tab_teams": "Teams",
+  "auction_tab_players": "Players",
+  "auction_tab_history": "History",
+  "auction_setup_title": "Get the auction ready",
+  "auction_setup_details": "Details and teams",
+  "auction_setup_players": "Players ({count})",
+  "@auction_setup_players": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_setup_retained": "Retained players ({count})",
+  "@auction_setup_retained": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_publish": "Publish",
+  "auction_publish_help": "Published auctions are visible to everyone, even without signing in.",
+  "auction_unpublish": "Back to draft",
+  "auction_start": "Start auction",
+  "auction_starts_on": "Starts {date}",
+  "@auction_starts_on": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_not_started": "The auction hasn't started yet.",
+  "auction_view_only": "Live view · updates automatically",
+  "auction_player_of": "Player {current} of {total}",
+  "@auction_player_of": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_base": "Base {amount} pts",
+  "@auction_base": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_current_bid": "Current bid",
+  "auction_no_bids": "No bids yet",
+  "auction_bidding_closed": "Bidding not started",
+  "auction_leading": "{team} leading",
+  "@auction_leading": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_paused_banner": "The auction is paused",
+  "auction_prev_player": "Previous",
+  "auction_next_player": "Next player",
+  "auction_start_bidding": "Start bidding",
+  "auction_bid_amount": "Bid {amount}",
+  "@auction_bid_amount": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_undo_bid": "Undo bid",
+  "auction_sell": "Sell player",
+  "auction_mark_unsold": "Mark unsold",
+  "auction_pause": "Pause",
+  "auction_resume": "Resume",
+  "auction_reopen_unsold": "Re-auction unsold ({count})",
+  "@auction_reopen_unsold": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_all_processed": "Every player has been processed",
+  "auction_last_sold": "{player} → {team} · {amount} pts",
+  "@auction_last_sold": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      },
+      "team": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_count_sold": "Sold",
+  "auction_count_unsold": "Unsold",
+  "auction_count_retained": "Retained",
+  "auction_count_left": "Left",
+  "auction_tag_retained": "RETAINED",
+  "auction_tag_sold": "SOLD",
+  "auction_squad_empty": "No players yet",
+  "auction_show_now": "Put up now",
+  "auction_history_empty": "No activity yet",
+  "auction_log_created": "Auction created",
+  "auction_log_published": "Auction published",
+  "auction_log_started": "Auction started",
+  "auction_log_paused": "Auction paused",
+  "auction_log_resumed": "Auction resumed",
+  "auction_log_shown": "{player} is up",
+  "@auction_log_shown": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_log_bidding_started": "Bidding open for {player}",
+  "@auction_log_bidding_started": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_log_bid": "{team} bid {amount} for {player}",
+  "@auction_log_bid": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      },
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_log_bid_undone": "Bid of {amount} by {team} undone",
+  "@auction_log_bid_undone": {
+    "placeholders": {
+      "amount": {
+        "type": "int"
+      },
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_log_sold": "{player} sold to {team} for {amount}",
+  "@auction_log_sold": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      },
+      "team": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_log_unsold": "{player} unsold",
+  "@auction_log_unsold": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_log_reopened": "Unsold players back in the pool",
+  "auction_log_retained": "{player} retained by {team} for {amount}",
+  "@auction_log_retained": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      },
+      "team": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_log_released": "{player} released",
+  "@auction_log_released": {
+    "placeholders": {
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_log_completed": "Auction completed and tournament created",
+  "auction_share": "Copy public link",
+  "auction_link_copied": "Public link copied",
+  "auction_edit": "Edit details",
+  "auction_manage_players": "Manage players",
+  "auction_manage_retained": "Retained players",
+  "auction_delete": "Delete auction",
+  "auction_delete_confirm": "Delete this auction, its history and photos? A tournament already created from it is kept.",
+  "auction_complete": "Complete auction",
+  "auction_complete_message": "This ends the auction and creates the tournament \"{name}\" with {teams} teams and their players. No matches, fixtures or dates are created.",
+  "@auction_complete_message": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "teams": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_complete_left": "{count} players were never auctioned. They will be marked unsold.",
+  "@auction_complete_left": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_complete_blocked": "A player with bids is still up. Sell them or undo the bids first.",
+  "auction_complete_confirm": "Complete and create tournament",
+  "auction_tournament_created": "Tournament created: {name}",
+  "@auction_tournament_created": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "auction_open_tournament": "Open tournament",
+  "auction_home": "Home",
+  "auction_create_tournament_retry": "Create tournament",
+  "auction_create_tournament_retry_message": "The auction is complete but its tournament wasn't created. Create \"{name}\" with {teams} teams and their players now. No matches, fixtures or dates are created.",
+  "@auction_create_tournament_retry_message": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "teams": {
+        "type": "int"
+      }
+    }
+  },
+  "auction_error_not_editable": "This can only be changed before the auction starts.",
+  "auction_error_not_live": "The auction isn't live.",
+  "auction_error_paused": "The auction is paused.",
+  "auction_error_no_player": "No player is up.",
+  "auction_error_bidding_closed": "Start bidding first.",
+  "auction_error_already_leading": "Leading",
+  "auction_error_squad_full": "Squad full",
+  "auction_error_over_budget": "Over budget",
+  "auction_error_bid_moved": "The bid changed. Try again.",
+  "auction_error_has_bids": "This player already has bids.",
+  "auction_error_no_bid": "No bids yet.",
+  "auction_error_player_unavailable": "This player isn't available.",
+  "auction_error_no_players_left": "No players left in the pool.",
+  "auction_error_no_previous": "No earlier unsold player to go back to.",
+  "auction_error_need_teams": "Add at least 2 teams.",
+  "auction_error_need_players": "Add players to the auction first.",
+  "auction_error_duplicate_player": "A player with the same ID, or the same name and number, already exists.",
+  "auction_error_invalid_team": "That team has players assigned. Release them first.",
+  "auction_error_not_admin": "Only auction admins can do this.",
+  "auction_error_already_completed": "The auction is already completed.",
+  "auction_error_incomplete": "Some players still need to be processed.",
+  "auction_error_too_many_players": "Too many players for one auction.",
+
+  "mascot_setting_title": "Tiger guide",
+  "mascot_welcome_named": "Hi {name}! Welcome back to Sports Tamil.",
+  "@mascot_welcome_named": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mascot_welcome_guest": "Hi there! Welcome to Sports Tamil. Let's play!",
+  "mascot_sign_in_options": "Pick a way to sign in, or jump in as a guest to play.",
+  "mascot_sign_in_required": "You'll need to sign in for this. It only takes a moment!",
+  "mascot_sign_in_to_create": "Sign in first, then you can create teams, matches and tournaments.",
+  "mascot_email_new_account": "New here? Let's make your account!",
+  "mascot_email_looks_good": "That email looks good!",
+  "mascot_password_hidden": "I'm not peeking at your password!",
+  "mascot_password_shown": "Password visible. Make sure nobody's watching!",
+  "mascot_wrong_password": "Hmm, that didn't work. Forgot your password? Tap \"Forgot password\" and I'll send a reset link.",
+  "mascot_email_in_use": "This email already has an account. Try signing in instead.",
+  "mascot_enter_email_first": "Type your email first, then tap \"Forgot password\".",
+  "mascot_reset_sent": "Reset link sent! Check your inbox and spam folder.",
+  "mascot_something_wrong": "Oops, something went wrong. Please try again.",
+  "mascot_login_success": "You're in! Let's play.",
+  "mascot_registered": "Account created! Welcome to the team.",
+  "mascot_guest_joined": "You're playing as Guest. Your scores will show as \"Guest\".",
+  "mascot_profile_intro": "Tell me your name so your friends can find you.",
+  "mascot_profile_name": "Nice to meet you, {name}!",
+  "@mascot_profile_name": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mascot_profile_created": "Welcome to Sports Tamil, {name}!",
+  "@mascot_profile_created": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mascot_profile_saved": "Profile saved!"
 }

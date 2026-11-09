@@ -77,6 +77,7 @@ class TeamSelectionView extends StatelessWidget {
                   state.teamB?.id ?? "INVALID ID"
                 ],
                 onlyUserTeams: type == TeamType.a,
+                tournamentId: notifier.tournamentId,
               ).push<TeamModel>(context);
               if (team != null && context.mounted) {
                 notifier.onTeamSelect(team, type);

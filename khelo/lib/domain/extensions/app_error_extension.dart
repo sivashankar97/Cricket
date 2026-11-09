@@ -15,6 +15,18 @@ extension AppErrorExtensions on Object {
           return context.l10n.sign_in_invalid_phone_number_text;
         case AppErrorL10nCodes.largeAttachmentUpload:
           return context.l10n.large_attachment_upload_error_text;
+        case AppErrorL10nCodes.duplicateTeamName:
+          return context.l10n.error_duplicate_team_name;
+        case AppErrorL10nCodes.duplicatePlayerName:
+          return context.l10n.error_duplicate_player_name;
+        case AppErrorL10nCodes.duplicateJerseyNumber:
+          return context.l10n.error_duplicate_jersey_number;
+        case AppErrorL10nCodes.teamUsedInTournament:
+          return context.l10n.error_team_used_in_tournament;
+        case AppErrorL10nCodes.duplicatePoolName:
+          return context.l10n.error_duplicate_pool_name;
+        case AppErrorL10nCodes.poolUsedInTournament:
+          return context.l10n.error_pool_used_in_tournament;
         default:
           return (this as AppError).message ??
               context.l10n.error_something_went_wrong;

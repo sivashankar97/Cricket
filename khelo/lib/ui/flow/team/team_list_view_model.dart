@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:data/api/team/team_model.dart';
 import 'package:data/service/team/team_service.dart';
+import 'package:data/service/tournament_team/tournament_team_service.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,6 +15,7 @@ final teamListViewStateProvider =
     StateNotifierProvider<TeamListViewNotifier, TeamListViewState>((ref) {
   final notifier = TeamListViewNotifier(
     ref.read(teamServiceProvider),
+    ref.read(tournamentTeamServiceProvider),
     ref.read(currentUserPod)?.id,
   );
   ref.listen(currentUserPod, (previous, next) {
@@ -22,17 +24,26 @@ final teamListViewStateProvider =
   return notifier;
 });
 
+const _pageSize = 10;
+
 class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
   final TeamService _teamService;
+  final TournamentTeamService _tournamentTeamService;
   StreamSubscription? _teamsStreamSubscription;
-  int _currentLimit = 10;
+  StreamSubscription? _tournamentTeamsSubscription;
+  Set<String> _tournamentTeamIds = {};
+  int _currentLimit = _pageSize;
   bool _hasMore = true;
   bool _isLoadingMore = false;
 
   bool get hasMore => _hasMore;
 
-  TeamListViewNotifier(this._teamService, String? userId)
-      : super(TeamListViewState(currentUserId: userId)) {
+  TeamListViewNotifier(
+    this._teamService,
+    this._tournamentTeamService,
+    String? userId,
+  ) : super(TeamListViewState(currentUserId: userId)) {
+    _listenTournamentTeams();
     loadTeamList();
   }
 
@@ -40,11 +51,28 @@ class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
     if (userId == null) {
       _teamsStreamSubscription?.cancel();
     }
-    _currentLimit = 10;
+    _currentLimit = _pageSize;
     _hasMore = true;
     _isLoadingMore = false;
     state = state.copyWith(currentUserId: userId);
+    _listenTournamentTeams();
     loadTeamList();
+  }
+
+  /// Tournament teams live in their pools, so the Teams tab hides them.
+  void _listenTournamentTeams() {
+    _tournamentTeamsSubscription?.cancel();
+    _tournamentTeamIds = {};
+    final userId = state.currentUserId;
+    if (userId == null) return;
+    _tournamentTeamsSubscription =
+        _tournamentTeamService.streamTeams(userId).listen((teams) {
+      _tournamentTeamIds = teams.map((team) => team.id).toSet();
+      _filterTeamList();
+    }, onError: (e) {
+      debugPrint(
+          "TeamListViewNotifier: error while loading tournament teams -> $e");
+    });
   }
 
   Future<void> loadTeamList() async {
@@ -87,19 +115,22 @@ class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
       return;
     }
     _isLoadingMore = true;
-    _currentLimit += 10;
+    _currentLimit += _pageSize;
     loadTeamList();
   }
 
   void _filterTeamList() {
+    final teams = state.teams
+        .where((team) => !_tournamentTeamIds.contains(team.id))
+        .toList();
     List<TeamModel> filteredTeams;
     switch (state.selectedFilter) {
       case TeamFilterOption.createdByMe:
-        filteredTeams = state.teams
+        filteredTeams = teams
             .where((element) => element.created_by == state.currentUserId)
             .toList();
       case TeamFilterOption.memberMe:
-        filteredTeams = state.teams
+        filteredTeams = teams
             .where((element) =>
                 element.created_by == state.currentUserId ||
                 (element.players
@@ -107,16 +138,21 @@ class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
                     .contains(state.currentUserId)))
             .toList();
       case TeamFilterOption.meAsAdmin:
-        filteredTeams = state.teams
+        filteredTeams = teams
             .where((element) => element.players.any((player) =>
                 player.id == state.currentUserId &&
                 player.role == TeamPlayerRole.admin))
             .toList();
       default:
-        filteredTeams = state.teams;
+        filteredTeams = teams;
     }
 
     state = state.copyWith(filteredTeams: filteredTeams);
+
+    // Hidden tournament teams can leave a page nearly empty; fetch more.
+    if (_hasMore && !state.loading && teams.length < _pageSize) {
+      Future.microtask(loadMore);
+    }
   }
 
   void onFilterOptionSelect(TeamFilterOption filter) {
@@ -133,6 +169,7 @@ class TeamListViewNotifier extends StateNotifier<TeamListViewState> {
   @override
   void dispose() {
     _teamsStreamSubscription?.cancel();
+    _tournamentTeamsSubscription?.cancel();
     super.dispose();
   }
 }

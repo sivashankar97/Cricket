@@ -659,6 +659,18 @@ abstract class AppLocalizations {
   /// **'Continue with WhatsApp'**
   String get sign_in_whatsapp_option;
 
+  /// No description provided for @sign_in_guest_option.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get sign_in_guest_option;
+
+  /// No description provided for @sign_in_guest_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Play cricket without an account. Your scores show as \"Guest\".'**
+  String get sign_in_guest_hint;
+
   /// No description provided for @sign_in_whatsapp_subtitle.
   ///
   /// In en, this message translates to:
@@ -710,62 +722,74 @@ abstract class AppLocalizations {
   /// No description provided for @sign_in_email_description.
   ///
   /// In en, this message translates to:
-  /// **'Enter your email and we’ll send you a one-time code.'**
+  /// **'Sign in with your email and password.'**
   String get sign_in_email_description;
 
-  /// No description provided for @sign_in_email_code_title.
+  /// No description provided for @sign_in_email_create_title.
   ///
   /// In en, this message translates to:
-  /// **'Check your email'**
-  String get sign_in_email_code_title;
+  /// **'Create your account'**
+  String get sign_in_email_create_title;
 
-  /// No description provided for @sign_in_email_code_description.
+  /// No description provided for @sign_in_email_create_description.
   ///
   /// In en, this message translates to:
-  /// **'Enter the 6-digit code sent to {email}.'**
-  String sign_in_email_code_description(String email);
+  /// **'Use your email and choose a password with at least 6 characters.'**
+  String get sign_in_email_create_description;
+
+  /// No description provided for @sign_in_password_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get sign_in_password_placeholder;
+
+  /// No description provided for @sign_in_email_sign_in_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in'**
+  String get sign_in_email_sign_in_btn;
+
+  /// No description provided for @sign_in_email_create_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Create account'**
+  String get sign_in_email_create_btn;
+
+  /// No description provided for @sign_in_email_switch_to_create.
+  ///
+  /// In en, this message translates to:
+  /// **'New here? Create an account'**
+  String get sign_in_email_switch_to_create;
+
+  /// No description provided for @sign_in_email_switch_to_sign_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? Sign in'**
+  String get sign_in_email_switch_to_sign_in;
+
+  /// No description provided for @sign_in_forgot_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get sign_in_forgot_password;
+
+  /// No description provided for @sign_in_reset_email_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Password reset link sent to {email}. Check your inbox and spam folder.'**
+  String sign_in_reset_email_sent(String email);
+
+  /// No description provided for @sign_in_reset_enter_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email first, then tap Forgot password.'**
+  String get sign_in_reset_enter_email;
 
   /// No description provided for @sign_in_email_placeholder.
   ///
   /// In en, this message translates to:
   /// **'Email'**
   String get sign_in_email_placeholder;
-
-  /// No description provided for @sign_in_email_code_placeholder.
-  ///
-  /// In en, this message translates to:
-  /// **'000000'**
-  String get sign_in_email_code_placeholder;
-
-  /// No description provided for @sign_in_send_code.
-  ///
-  /// In en, this message translates to:
-  /// **'Send code'**
-  String get sign_in_send_code;
-
-  /// No description provided for @sign_in_verify_code.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify code'**
-  String get sign_in_verify_code;
-
-  /// No description provided for @sign_in_resend_code.
-  ///
-  /// In en, this message translates to:
-  /// **'Resend code'**
-  String get sign_in_resend_code;
-
-  /// No description provided for @sign_in_change_email.
-  ///
-  /// In en, this message translates to:
-  /// **'Use a different email'**
-  String get sign_in_change_email;
-
-  /// No description provided for @sign_in_email_bridge_pending.
-  ///
-  /// In en, this message translates to:
-  /// **'Your email code is verified, but app sign-in is not enabled until the secure Firebase auth bridge is configured.'**
-  String get sign_in_email_bridge_pending;
 
   /// No description provided for @sign_in_required_title.
   ///
@@ -862,6 +886,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Create tournament'**
   String get home_screen_create_tournament_btn;
+
+  /// No description provided for @home_global_cricket_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Global cricket'**
+  String get home_global_cricket_title;
+
+  /// No description provided for @home_global_cricket_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Updated {time} · CricketData.org'**
+  String home_global_cricket_updated(String time);
+
+  /// No description provided for @home_global_cricket_live.
+  ///
+  /// In en, this message translates to:
+  /// **'LIVE'**
+  String get home_global_cricket_live;
+
+  /// No description provided for @global_cricket_international.
+  ///
+  /// In en, this message translates to:
+  /// **'International'**
+  String get global_cricket_international;
+
+  /// No description provided for @global_cricket_leagues.
+  ///
+  /// In en, this message translates to:
+  /// **'Premier leagues'**
+  String get global_cricket_leagues;
+
+  /// No description provided for @global_cricket_no_matches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches right now'**
+  String get global_cricket_no_matches;
+
+  /// No description provided for @global_cricket_live.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get global_cricket_live;
+
+  /// No description provided for @global_cricket_recent.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent'**
+  String get global_cricket_recent;
+
+  /// No description provided for @global_cricket_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get global_cricket_upcoming;
+
+  /// No description provided for @global_cricket_scorecard.
+  ///
+  /// In en, this message translates to:
+  /// **'Scorecard'**
+  String get global_cricket_scorecard;
+
+  /// No description provided for @global_cricket_info.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get global_cricket_info;
+
+  /// No description provided for @global_cricket_batter.
+  ///
+  /// In en, this message translates to:
+  /// **'Batter'**
+  String get global_cricket_batter;
+
+  /// No description provided for @global_cricket_bowler.
+  ///
+  /// In en, this message translates to:
+  /// **'Bowler'**
+  String get global_cricket_bowler;
+
+  /// No description provided for @global_cricket_batting.
+  ///
+  /// In en, this message translates to:
+  /// **'batting'**
+  String get global_cricket_batting;
+
+  /// No description provided for @global_cricket_info_match.
+  ///
+  /// In en, this message translates to:
+  /// **'Match'**
+  String get global_cricket_info_match;
+
+  /// No description provided for @global_cricket_info_series.
+  ///
+  /// In en, this message translates to:
+  /// **'Series'**
+  String get global_cricket_info_series;
+
+  /// No description provided for @global_cricket_info_date.
+  ///
+  /// In en, this message translates to:
+  /// **'Date & time'**
+  String get global_cricket_info_date;
+
+  /// No description provided for @global_cricket_info_venue.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue'**
+  String get global_cricket_info_venue;
+
+  /// No description provided for @global_cricket_info_toss.
+  ///
+  /// In en, this message translates to:
+  /// **'Toss'**
+  String get global_cricket_info_toss;
+
+  /// No description provided for @global_cricket_info_format.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get global_cricket_info_format;
+
+  /// No description provided for @global_cricket_toss_text.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} won the toss and chose to {choice}'**
+  String global_cricket_toss_text(String team, String choice);
+
+  /// No description provided for @global_cricket_starts.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts {time}'**
+  String global_cricket_starts(String time);
+
+  /// No description provided for @global_cricket_scorecard_updated.
+  ///
+  /// In en, this message translates to:
+  /// **'Scorecard updated {time} · refreshes hourly while live'**
+  String global_cricket_scorecard_updated(String time);
+
+  /// No description provided for @global_cricket_scorecard_not_started.
+  ///
+  /// In en, this message translates to:
+  /// **'The scorecard will appear once the match starts.'**
+  String get global_cricket_scorecard_not_started;
+
+  /// No description provided for @global_cricket_scorecard_sign_in.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to load the full scorecard.'**
+  String get global_cricket_scorecard_sign_in;
+
+  /// No description provided for @global_cricket_scorecard_limit.
+  ///
+  /// In en, this message translates to:
+  /// **'The full scorecard isn\'t available right now (free data limit). The live score above still updates every 30 minutes.'**
+  String get global_cricket_scorecard_limit;
+
+  /// No description provided for @global_cricket_scorecard_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading scorecard…'**
+  String get global_cricket_scorecard_loading;
 
   /// No description provided for @home_screen_no_matches_title.
   ///
@@ -994,6 +1180,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'End Date'**
   String get add_tournament_end_date;
+
+  /// No description provided for @add_tournament_venue_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Venue'**
+  String get add_tournament_venue_title;
+
+  /// No description provided for @add_tournament_match_format_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Match Format'**
+  String get add_tournament_match_format_title;
+
+  /// No description provided for @add_tournament_schedule_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament Schedule'**
+  String get add_tournament_schedule_title;
+
+  /// No description provided for @add_tournament_teams_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to pick teams from a tournament team pool'**
+  String get add_tournament_teams_hint;
+
+  /// No description provided for @add_tournament_change_teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Change teams'**
+  String get add_tournament_change_teams;
+
+  /// No description provided for @add_tournament_city.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get add_tournament_city;
+
+  /// No description provided for @add_tournament_ground.
+  ///
+  /// In en, this message translates to:
+  /// **'Ground / Venue'**
+  String get add_tournament_ground;
+
+  /// No description provided for @add_tournament_ball_type.
+  ///
+  /// In en, this message translates to:
+  /// **'Ball Type'**
+  String get add_tournament_ball_type;
+
+  /// No description provided for @add_tournament_ball_type_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select ball type'**
+  String get add_tournament_ball_type_placeholder;
+
+  /// No description provided for @add_tournament_overs.
+  ///
+  /// In en, this message translates to:
+  /// **'Overs per match'**
+  String get add_tournament_overs;
+
+  /// No description provided for @add_tournament_overs_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'1 to {max}'**
+  String add_tournament_overs_hint(int max);
+
+  /// No description provided for @add_tournament_details_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in city, ground, ball type and overs (1–{max}) to continue'**
+  String add_tournament_details_required(int max);
 
   /// No description provided for @add_tournament_team_selection.
   ///
@@ -4207,6 +4465,2148 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opening batter'**
   String get player_role_opening_batter_title;
+
+  /// No description provided for @tournament_teams_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament Teams'**
+  String get tournament_teams_title;
+
+  /// No description provided for @tournament_teams_entry_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Pools of teams for each series, like GCPL or PSPL'**
+  String get tournament_teams_entry_description;
+
+  /// No description provided for @tournament_teams_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search teams'**
+  String get tournament_teams_search_hint;
+
+  /// No description provided for @tournament_teams_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No teams yet'**
+  String get tournament_teams_empty_title;
+
+  /// No description provided for @tournament_teams_empty_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first team and its players once, then pick it in any tournament.'**
+  String get tournament_teams_empty_description;
+
+  /// No description provided for @tournament_teams_add_first_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your first team'**
+  String get tournament_teams_add_first_team;
+
+  /// No description provided for @tournament_teams_add_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Add team'**
+  String get tournament_teams_add_team;
+
+  /// No description provided for @tournament_teams_edit_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit team'**
+  String get tournament_teams_edit_team;
+
+  /// No description provided for @tournament_teams_no_search_result.
+  ///
+  /// In en, this message translates to:
+  /// **'No teams match “{query}”'**
+  String tournament_teams_no_search_result(Object query);
+
+  /// No description provided for @tournament_teams_player_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No players} =1{1 player} other{{count} players}}'**
+  String tournament_teams_player_count(int count);
+
+  /// No description provided for @tournament_teams_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete team?'**
+  String get tournament_teams_delete_title;
+
+  /// No description provided for @tournament_teams_delete_description.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed from your Tournament Teams.'**
+  String tournament_teams_delete_description(Object name);
+
+  /// No description provided for @tournament_teams_in_use_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Team in use'**
+  String get tournament_teams_in_use_title;
+
+  /// No description provided for @tournament_teams_in_use_description.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is part of {count, plural, =1{1 tournament} other{{count} tournaments}}. Remove it from those tournaments before deleting it.'**
+  String tournament_teams_in_use_description(Object name, int count);
+
+  /// No description provided for @tournament_team_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Team name *'**
+  String get tournament_team_name_label;
+
+  /// No description provided for @tournament_team_short_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Short name / code'**
+  String get tournament_team_short_name_label;
+
+  /// No description provided for @tournament_team_captain_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Captain'**
+  String get tournament_team_captain_label;
+
+  /// No description provided for @tournament_team_captain_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select captain (optional)'**
+  String get tournament_team_captain_placeholder;
+
+  /// No description provided for @tournament_team_wicket_keeper_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Wicket-keeper'**
+  String get tournament_team_wicket_keeper_label;
+
+  /// No description provided for @tournament_team_add_players.
+  ///
+  /// In en, this message translates to:
+  /// **'Add players'**
+  String get tournament_team_add_players;
+
+  /// No description provided for @tournament_team_players_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No players yet'**
+  String get tournament_team_players_empty_title;
+
+  /// No description provided for @tournament_team_players_empty_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Add players so this team is ready for matches.'**
+  String get tournament_team_players_empty_description;
+
+  /// No description provided for @tournament_team_add_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Add player'**
+  String get tournament_team_add_player;
+
+  /// No description provided for @tournament_team_edit_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit player'**
+  String get tournament_team_edit_player;
+
+  /// No description provided for @tournament_team_player_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Player name *'**
+  String get tournament_team_player_name_label;
+
+  /// No description provided for @tournament_team_player_role_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Role'**
+  String get tournament_team_player_role_label;
+
+  /// No description provided for @tournament_team_jersey_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Jersey number'**
+  String get tournament_team_jersey_label;
+
+  /// No description provided for @tournament_team_make_captain.
+  ///
+  /// In en, this message translates to:
+  /// **'Make captain'**
+  String get tournament_team_make_captain;
+
+  /// No description provided for @tournament_team_remove_captain.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove as captain'**
+  String get tournament_team_remove_captain;
+
+  /// No description provided for @tournament_team_make_wicket_keeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Make wicket-keeper'**
+  String get tournament_team_make_wicket_keeper;
+
+  /// No description provided for @tournament_team_remove_wicket_keeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove as wicket-keeper'**
+  String get tournament_team_remove_wicket_keeper;
+
+  /// No description provided for @tournament_team_remove_player_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove player?'**
+  String get tournament_team_remove_player_title;
+
+  /// No description provided for @tournament_team_remove_player_description.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will be removed from this team.'**
+  String tournament_team_remove_player_description(Object name);
+
+  /// No description provided for @tournament_team_captain_short.
+  ///
+  /// In en, this message translates to:
+  /// **'C'**
+  String get tournament_team_captain_short;
+
+  /// No description provided for @tournament_team_wicket_keeper_short.
+  ///
+  /// In en, this message translates to:
+  /// **'WK'**
+  String get tournament_team_wicket_keeper_short;
+
+  /// No description provided for @tournament_player_role_batsman.
+  ///
+  /// In en, this message translates to:
+  /// **'Batsman'**
+  String get tournament_player_role_batsman;
+
+  /// No description provided for @tournament_player_role_bowler.
+  ///
+  /// In en, this message translates to:
+  /// **'Bowler'**
+  String get tournament_player_role_bowler;
+
+  /// No description provided for @tournament_player_role_all_rounder.
+  ///
+  /// In en, this message translates to:
+  /// **'All-rounder'**
+  String get tournament_player_role_all_rounder;
+
+  /// No description provided for @tournament_player_role_wicket_keeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Wicket-keeper'**
+  String get tournament_player_role_wicket_keeper;
+
+  /// No description provided for @tournament_team_picker_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Select teams'**
+  String get tournament_team_picker_title;
+
+  /// No description provided for @tournament_team_picker_select_all.
+  ///
+  /// In en, this message translates to:
+  /// **'Select all'**
+  String get tournament_team_picker_select_all;
+
+  /// No description provided for @tournament_team_picker_clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get tournament_team_picker_clear;
+
+  /// No description provided for @tournament_team_picker_add_new.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Add new team'**
+  String get tournament_team_picker_add_new;
+
+  /// No description provided for @tournament_team_picker_min_teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Select at least 2 teams to continue'**
+  String get tournament_team_picker_min_teams;
+
+  /// No description provided for @tournament_team_picker_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue with {count, plural, =1{1 team} other{{count} teams}}'**
+  String tournament_team_picker_done(int count);
+
+  /// No description provided for @tournament_team_picker_selected.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String tournament_team_picker_selected(int count);
+
+  /// No description provided for @tournament_team_picker_not_in_pool.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in Tournament Teams'**
+  String get tournament_team_picker_not_in_pool;
+
+  /// No description provided for @tournament_team_picker_choose_pool.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a pool to see its teams'**
+  String get tournament_team_picker_choose_pool;
+
+  /// No description provided for @tournament_team_picker_switch_pool_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear current selection?'**
+  String get tournament_team_picker_switch_pool_title;
+
+  /// No description provided for @tournament_team_picker_switch_pool_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Switching to {name} clears {count, plural, =1{1 selected team} other{{count} selected teams}}.'**
+  String tournament_team_picker_switch_pool_description(String name, int count);
+
+  /// No description provided for @tournament_team_picker_switch.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch'**
+  String get tournament_team_picker_switch;
+
+  /// No description provided for @team_pools_search_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search pools'**
+  String get team_pools_search_hint;
+
+  /// No description provided for @team_pools_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No pools yet'**
+  String get team_pools_empty_title;
+
+  /// No description provided for @team_pools_empty_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a pool for each tournament series, like “GCPL Teams”, then add its teams and players.'**
+  String get team_pools_empty_description;
+
+  /// No description provided for @team_pools_create_first.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first pool'**
+  String get team_pools_create_first;
+
+  /// No description provided for @team_pools_new_pool.
+  ///
+  /// In en, this message translates to:
+  /// **'New pool'**
+  String get team_pools_new_pool;
+
+  /// No description provided for @team_pools_add_new.
+  ///
+  /// In en, this message translates to:
+  /// **'+ New pool'**
+  String get team_pools_add_new;
+
+  /// No description provided for @team_pools_edit_pool.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pool'**
+  String get team_pools_edit_pool;
+
+  /// No description provided for @team_pools_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Pool name *'**
+  String get team_pools_name_label;
+
+  /// No description provided for @team_pools_short_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Short code'**
+  String get team_pools_short_name_label;
+
+  /// No description provided for @team_pools_team_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No teams} =1{1 team} other{{count} teams}}'**
+  String team_pools_team_count(int count);
+
+  /// No description provided for @team_pools_no_search_result.
+  ///
+  /// In en, this message translates to:
+  /// **'No pools match “{query}”'**
+  String team_pools_no_search_result(String query);
+
+  /// No description provided for @team_pools_ungrouped.
+  ///
+  /// In en, this message translates to:
+  /// **'Ungrouped teams'**
+  String get team_pools_ungrouped;
+
+  /// No description provided for @team_pools_ungrouped_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams created before pools. Move them into a pool.'**
+  String get team_pools_ungrouped_description;
+
+  /// No description provided for @team_pools_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete pool?'**
+  String get team_pools_delete_title;
+
+  /// No description provided for @team_pools_delete_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name} and its {count, plural, =0{teams} =1{1 team} other{{count} teams}}? Players are kept.'**
+  String team_pools_delete_description(String name, int count);
+
+  /// No description provided for @team_pools_in_use_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pool in use'**
+  String get team_pools_in_use_title;
+
+  /// No description provided for @team_pools_in_use_description.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} has teams in {count, plural, =1{1 tournament} other{{count} tournaments}}. Remove them from those tournaments before deleting the pool.'**
+  String team_pools_in_use_description(String name, int count);
+
+  /// No description provided for @team_pools_move_to_pool.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to pool…'**
+  String get team_pools_move_to_pool;
+
+  /// No description provided for @team_pools_team_actions.
+  ///
+  /// In en, this message translates to:
+  /// **'Team actions'**
+  String get team_pools_team_actions;
+
+  /// No description provided for @team_pools_no_other_pools.
+  ///
+  /// In en, this message translates to:
+  /// **'Create another pool first.'**
+  String get team_pools_no_other_pools;
+
+  /// No description provided for @team_pool_teams_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No teams in this pool'**
+  String get team_pool_teams_empty_title;
+
+  /// No description provided for @team_pool_teams_empty_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Add the teams and players for this series.'**
+  String get team_pool_teams_empty_description;
+
+  /// No description provided for @error_duplicate_team_name.
+  ///
+  /// In en, this message translates to:
+  /// **'A team with this name already exists in this pool.'**
+  String get error_duplicate_team_name;
+
+  /// No description provided for @error_duplicate_player_name.
+  ///
+  /// In en, this message translates to:
+  /// **'This player is already in the team.'**
+  String get error_duplicate_player_name;
+
+  /// No description provided for @error_duplicate_jersey_number.
+  ///
+  /// In en, this message translates to:
+  /// **'This jersey number is already taken in this team.'**
+  String get error_duplicate_jersey_number;
+
+  /// No description provided for @error_team_used_in_tournament.
+  ///
+  /// In en, this message translates to:
+  /// **'This team is used in a tournament and can\'t be deleted.'**
+  String get error_team_used_in_tournament;
+
+  /// No description provided for @error_duplicate_pool_name.
+  ///
+  /// In en, this message translates to:
+  /// **'A pool with this name already exists.'**
+  String get error_duplicate_pool_name;
+
+  /// No description provided for @error_pool_used_in_tournament.
+  ///
+  /// In en, this message translates to:
+  /// **'This pool has teams used in a tournament and can\'t be deleted.'**
+  String get error_pool_used_in_tournament;
+
+  /// No description provided for @tab_play_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get tab_play_title;
+
+  /// No description provided for @play_screen_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Play Cricket'**
+  String get play_screen_title;
+
+  /// No description provided for @play_guest_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing as Guest'**
+  String get play_guest_title;
+
+  /// No description provided for @play_guest_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Your scores show as \"Guest\". Sign in to use your name and challenge friends.'**
+  String get play_guest_description;
+
+  /// No description provided for @play_guest_challenge_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to challenge'**
+  String get play_guest_challenge_hint;
+
+  /// No description provided for @play_daily_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Challenge'**
+  String get play_daily_title;
+
+  /// No description provided for @play_daily_target.
+  ///
+  /// In en, this message translates to:
+  /// **'Chase {target} in 2 overs'**
+  String play_daily_target(int target);
+
+  /// No description provided for @play_daily_best.
+  ///
+  /// In en, this message translates to:
+  /// **'Your best today: {score}'**
+  String play_daily_best(String score);
+
+  /// No description provided for @play_daily_not_played.
+  ///
+  /// In en, this message translates to:
+  /// **'Same balls for everyone today. Can you chase it?'**
+  String get play_daily_not_played;
+
+  /// No description provided for @play_daily_players.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{Be the first to play today} =1{1 player today} other{{count} players today}}'**
+  String play_daily_players(int count);
+
+  /// No description provided for @play_quick_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Play'**
+  String get play_quick_play;
+
+  /// No description provided for @play_quick_play_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'2 overs · 3 wickets'**
+  String get play_quick_play_hint;
+
+  /// No description provided for @play_challenge_friend.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge'**
+  String get play_challenge_friend;
+
+  /// No description provided for @play_challenge_friend_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Beat a friend\'s score'**
+  String get play_challenge_friend_hint;
+
+  /// No description provided for @play_how_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap anywhere as the ball reaches the bat. Perfect timing hits a six; miss a ball on the stumps and you\'re bowled.'**
+  String get play_how_to;
+
+  /// No description provided for @play_challenges_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenges'**
+  String get play_challenges_title;
+
+  /// No description provided for @play_challenge_incoming.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} challenged you · beat {runs}'**
+  String play_challenge_incoming(String name, int runs);
+
+  /// No description provided for @play_challenge_waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name} · you scored {score}'**
+  String play_challenge_waiting(String name, String score);
+
+  /// No description provided for @play_challenge_result.
+  ///
+  /// In en, this message translates to:
+  /// **'{me} vs {other} · {name}'**
+  String play_challenge_result(String me, String other, String name);
+
+  /// No description provided for @play_challenge_play.
+  ///
+  /// In en, this message translates to:
+  /// **'Play'**
+  String get play_challenge_play;
+
+  /// No description provided for @play_result_won.
+  ///
+  /// In en, this message translates to:
+  /// **'Won'**
+  String get play_result_won;
+
+  /// No description provided for @play_result_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost'**
+  String get play_result_lost;
+
+  /// No description provided for @play_result_tie.
+  ///
+  /// In en, this message translates to:
+  /// **'Tie'**
+  String get play_result_tie;
+
+  /// No description provided for @play_leaderboard_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboard'**
+  String get play_leaderboard_title;
+
+  /// No description provided for @play_leaderboard_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get play_leaderboard_today;
+
+  /// No description provided for @play_leaderboard_week.
+  ///
+  /// In en, this message translates to:
+  /// **'This week'**
+  String get play_leaderboard_week;
+
+  /// No description provided for @play_leaderboard_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No scores yet. Play a game to get on the board!'**
+  String get play_leaderboard_empty;
+
+  /// No description provided for @play_recent_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent Games'**
+  String get play_recent_title;
+
+  /// No description provided for @play_recent_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Your games will show up here.'**
+  String get play_recent_empty;
+
+  /// No description provided for @play_mode_solo.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick Play'**
+  String get play_mode_solo;
+
+  /// No description provided for @play_mode_daily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get play_mode_daily;
+
+  /// No description provided for @play_mode_challenge.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge'**
+  String get play_mode_challenge;
+
+  /// No description provided for @play_balls.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} balls'**
+  String play_balls(int count);
+
+  /// No description provided for @play_select_opponent_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge a friend'**
+  String get play_select_opponent_title;
+
+  /// No description provided for @play_select_opponent_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search players by name'**
+  String get play_select_opponent_hint;
+
+  /// No description provided for @play_select_opponent_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No players found'**
+  String get play_select_opponent_empty;
+
+  /// No description provided for @play_game_tap_to_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to start'**
+  String get play_game_tap_to_start;
+
+  /// No description provided for @play_game_balls_left.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} balls left'**
+  String play_game_balls_left(int count);
+
+  /// No description provided for @play_game_need.
+  ///
+  /// In en, this message translates to:
+  /// **'Need {runs} off {balls}'**
+  String play_game_need(int runs, int balls);
+
+  /// No description provided for @play_game_vs.
+  ///
+  /// In en, this message translates to:
+  /// **'vs {name}'**
+  String play_game_vs(String name);
+
+  /// No description provided for @play_shot_six.
+  ///
+  /// In en, this message translates to:
+  /// **'SIX!'**
+  String get play_shot_six;
+
+  /// No description provided for @play_shot_four.
+  ///
+  /// In en, this message translates to:
+  /// **'FOUR!'**
+  String get play_shot_four;
+
+  /// No description provided for @play_shot_two.
+  ///
+  /// In en, this message translates to:
+  /// **'2 runs'**
+  String get play_shot_two;
+
+  /// No description provided for @play_shot_single.
+  ///
+  /// In en, this message translates to:
+  /// **'1 run'**
+  String get play_shot_single;
+
+  /// No description provided for @play_shot_dot.
+  ///
+  /// In en, this message translates to:
+  /// **'Dot ball'**
+  String get play_shot_dot;
+
+  /// No description provided for @play_shot_out.
+  ///
+  /// In en, this message translates to:
+  /// **'OUT!'**
+  String get play_shot_out;
+
+  /// No description provided for @play_timing_perfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect timing'**
+  String get play_timing_perfect;
+
+  /// No description provided for @play_timing_early.
+  ///
+  /// In en, this message translates to:
+  /// **'Early'**
+  String get play_timing_early;
+
+  /// No description provided for @play_timing_late.
+  ///
+  /// In en, this message translates to:
+  /// **'Late'**
+  String get play_timing_late;
+
+  /// No description provided for @play_timing_left.
+  ///
+  /// In en, this message translates to:
+  /// **'Left alone'**
+  String get play_timing_left;
+
+  /// No description provided for @play_end_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Innings over'**
+  String get play_end_title;
+
+  /// No description provided for @play_end_score.
+  ///
+  /// In en, this message translates to:
+  /// **'{runs}/{wickets} in {balls} balls'**
+  String play_end_score(int runs, int wickets, int balls);
+
+  /// No description provided for @play_end_target_won.
+  ///
+  /// In en, this message translates to:
+  /// **'Target chased!'**
+  String get play_end_target_won;
+
+  /// No description provided for @play_end_target_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'Fell short of {target}'**
+  String play_end_target_lost(int target);
+
+  /// No description provided for @play_end_challenge_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge sent to {name}'**
+  String play_end_challenge_sent(String name);
+
+  /// No description provided for @play_end_challenge_won.
+  ///
+  /// In en, this message translates to:
+  /// **'You beat {name}!'**
+  String play_end_challenge_won(String name);
+
+  /// No description provided for @play_end_challenge_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wins this one'**
+  String play_end_challenge_lost(String name);
+
+  /// No description provided for @play_end_challenge_tie.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a tie with {name}'**
+  String play_end_challenge_tie(String name);
+
+  /// No description provided for @play_end_saving.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get play_end_saving;
+
+  /// No description provided for @play_again.
+  ///
+  /// In en, this message translates to:
+  /// **'Play again'**
+  String get play_again;
+
+  /// No description provided for @play_done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get play_done;
+
+  /// No description provided for @play_retry_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get play_retry_save;
+
+  /// No description provided for @profile_my_stats.
+  ///
+  /// In en, this message translates to:
+  /// **'My stats'**
+  String get profile_my_stats;
+
+  /// No description provided for @tab_auction_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction'**
+  String get tab_auction_title;
+
+  /// No description provided for @auction_screen_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Player Auctions'**
+  String get auction_screen_title;
+
+  /// No description provided for @auction_hero_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Run a player auction'**
+  String get auction_hero_title;
+
+  /// No description provided for @auction_hero_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register players, set retained players and run live bidding. The tournament is created for you at the end.'**
+  String get auction_hero_subtitle;
+
+  /// No description provided for @auction_create_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Create auction'**
+  String get auction_create_title;
+
+  /// No description provided for @auction_sign_in_to_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to create'**
+  String get auction_sign_in_to_create;
+
+  /// No description provided for @auction_section_mine.
+  ///
+  /// In en, this message translates to:
+  /// **'My auctions'**
+  String get auction_section_mine;
+
+  /// No description provided for @auction_section_live.
+  ///
+  /// In en, this message translates to:
+  /// **'Live now'**
+  String get auction_section_live;
+
+  /// No description provided for @auction_section_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get auction_section_upcoming;
+
+  /// No description provided for @auction_section_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get auction_section_completed;
+
+  /// No description provided for @auction_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No auctions yet.'**
+  String get auction_empty;
+
+  /// No description provided for @auction_not_found.
+  ///
+  /// In en, this message translates to:
+  /// **'This auction doesn\'t exist or isn\'t public yet.'**
+  String get auction_not_found;
+
+  /// No description provided for @auction_status_draft.
+  ///
+  /// In en, this message translates to:
+  /// **'Draft'**
+  String get auction_status_draft;
+
+  /// No description provided for @auction_status_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get auction_status_upcoming;
+
+  /// No description provided for @auction_status_live.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get auction_status_live;
+
+  /// No description provided for @auction_status_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get auction_status_paused;
+
+  /// No description provided for @auction_status_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get auction_status_completed;
+
+  /// No description provided for @auction_tile_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{teams} teams · {players} players'**
+  String auction_tile_summary(int teams, int players);
+
+  /// No description provided for @auction_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done}/{total} processed'**
+  String auction_progress(int done, int total);
+
+  /// No description provided for @auction_progress_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction progress'**
+  String get auction_progress_label;
+
+  /// No description provided for @auction_pts.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} pts'**
+  String auction_pts(int amount);
+
+  /// No description provided for @auction_edit_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit auction'**
+  String get auction_edit_title;
+
+  /// No description provided for @auction_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction name'**
+  String get auction_name_label;
+
+  /// No description provided for @auction_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. GCPL Auction'**
+  String get auction_name_hint;
+
+  /// No description provided for @auction_tournament_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament name'**
+  String get auction_tournament_name_label;
+
+  /// No description provided for @auction_tournament_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. GCPL'**
+  String get auction_tournament_name_hint;
+
+  /// No description provided for @auction_tournament_name_help.
+  ///
+  /// In en, this message translates to:
+  /// **'The tournament created when the auction is completed gets this name.'**
+  String get auction_tournament_name_help;
+
+  /// No description provided for @auction_description_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get auction_description_label;
+
+  /// No description provided for @auction_description_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Season, venue, anything players should know'**
+  String get auction_description_hint;
+
+  /// No description provided for @auction_date_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction date'**
+  String get auction_date_label;
+
+  /// No description provided for @auction_date_pick.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date'**
+  String get auction_date_pick;
+
+  /// No description provided for @auction_banner_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add banner'**
+  String get auction_banner_add;
+
+  /// No description provided for @auction_banner_change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change banner'**
+  String get auction_banner_change;
+
+  /// No description provided for @auction_rules_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget and bidding'**
+  String get auction_rules_title;
+
+  /// No description provided for @auction_team_budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Team budget (pts)'**
+  String get auction_team_budget;
+
+  /// No description provided for @auction_base_price.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting bid (pts)'**
+  String get auction_base_price;
+
+  /// No description provided for @auction_bid_increment.
+  ///
+  /// In en, this message translates to:
+  /// **'Bid increment (pts)'**
+  String get auction_bid_increment;
+
+  /// No description provided for @auction_min_squad.
+  ///
+  /// In en, this message translates to:
+  /// **'Min squad (0 = none)'**
+  String get auction_min_squad;
+
+  /// No description provided for @auction_max_squad.
+  ///
+  /// In en, this message translates to:
+  /// **'Max squad (0 = no limit)'**
+  String get auction_max_squad;
+
+  /// No description provided for @auction_show_budgets.
+  ///
+  /// In en, this message translates to:
+  /// **'Show team budgets on the public screen'**
+  String get auction_show_budgets;
+
+  /// No description provided for @auction_teams_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get auction_teams_title;
+
+  /// No description provided for @auction_team_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Team {number} name'**
+  String auction_team_name(int number);
+
+  /// No description provided for @auction_team_short.
+  ///
+  /// In en, this message translates to:
+  /// **'Short'**
+  String get auction_team_short;
+
+  /// No description provided for @auction_add_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Add team'**
+  String get auction_add_team;
+
+  /// No description provided for @auction_teams_locked.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams can\'t change after the auction starts.'**
+  String get auction_teams_locked;
+
+  /// No description provided for @auction_admins_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins'**
+  String get auction_admins_title;
+
+  /// No description provided for @auction_admins_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Admins can edit and run this auction.'**
+  String get auction_admins_help;
+
+  /// No description provided for @auction_add_admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Add admin'**
+  String get auction_add_admin;
+
+  /// No description provided for @auction_select_admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an admin'**
+  String get auction_select_admin;
+
+  /// No description provided for @auction_creator.
+  ///
+  /// In en, this message translates to:
+  /// **'Creator'**
+  String get auction_creator;
+
+  /// No description provided for @auction_save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get auction_save;
+
+  /// No description provided for @auction_validation_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the auction name and tournament name'**
+  String get auction_validation_name;
+
+  /// No description provided for @auction_validation_teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least 2 teams with names'**
+  String get auction_validation_teams;
+
+  /// No description provided for @auction_validation_team_names.
+  ///
+  /// In en, this message translates to:
+  /// **'Team names must be different'**
+  String get auction_validation_team_names;
+
+  /// No description provided for @auction_validation_rules.
+  ///
+  /// In en, this message translates to:
+  /// **'Budget, starting bid and increment must be above 0, and min squad can\'t be more than max squad'**
+  String get auction_validation_rules;
+
+  /// No description provided for @auction_players_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Players'**
+  String get auction_players_title;
+
+  /// No description provided for @auction_players_count.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 player} other{{count} players}}'**
+  String auction_players_count(int count);
+
+  /// No description provided for @auction_players_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No players yet. Add them one by one, paste a list, or upload photos named after the players.'**
+  String get auction_players_empty;
+
+  /// No description provided for @auction_player_search.
+  ///
+  /// In en, this message translates to:
+  /// **'Search name, ID or number'**
+  String get auction_player_search;
+
+  /// No description provided for @auction_filter_all.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get auction_filter_all;
+
+  /// No description provided for @auction_player_status_available.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get auction_player_status_available;
+
+  /// No description provided for @auction_player_status_retained.
+  ///
+  /// In en, this message translates to:
+  /// **'Retained'**
+  String get auction_player_status_retained;
+
+  /// No description provided for @auction_player_status_in_auction.
+  ///
+  /// In en, this message translates to:
+  /// **'In auction'**
+  String get auction_player_status_in_auction;
+
+  /// No description provided for @auction_player_status_sold.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold'**
+  String get auction_player_status_sold;
+
+  /// No description provided for @auction_player_status_unsold.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsold'**
+  String get auction_player_status_unsold;
+
+  /// No description provided for @auction_add_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Add player'**
+  String get auction_add_player;
+
+  /// No description provided for @auction_edit_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit player'**
+  String get auction_edit_player;
+
+  /// No description provided for @auction_add_players_bulk.
+  ///
+  /// In en, this message translates to:
+  /// **'Add many'**
+  String get auction_add_players_bulk;
+
+  /// No description provided for @auction_upload_photos.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload photos'**
+  String get auction_upload_photos;
+
+  /// No description provided for @auction_bulk_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Add many players'**
+  String get auction_bulk_title;
+
+  /// No description provided for @auction_bulk_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'One player per line:\nName, Player ID, Number, Role, Base price\nOnly the name is required. Roles: bat, bowl, all, wk'**
+  String get auction_bulk_hint;
+
+  /// No description provided for @auction_bulk_result.
+  ///
+  /// In en, this message translates to:
+  /// **'{added} added, {skipped} duplicates skipped'**
+  String auction_bulk_result(int added, int skipped);
+
+  /// No description provided for @auction_player_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Player name'**
+  String get auction_player_name;
+
+  /// No description provided for @auction_player_code.
+  ///
+  /// In en, this message translates to:
+  /// **'Player ID'**
+  String get auction_player_code;
+
+  /// No description provided for @auction_player_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Number'**
+  String get auction_player_number;
+
+  /// No description provided for @auction_player_base.
+  ///
+  /// In en, this message translates to:
+  /// **'Base price'**
+  String get auction_player_base;
+
+  /// No description provided for @auction_photo_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get auction_photo_add;
+
+  /// No description provided for @auction_photo_change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get auction_photo_change;
+
+  /// No description provided for @auction_remove_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove player'**
+  String get auction_remove_player;
+
+  /// No description provided for @auction_remove_player_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from the auction?'**
+  String auction_remove_player_confirm(String name);
+
+  /// No description provided for @auction_photos_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Match photos to players'**
+  String get auction_photos_title;
+
+  /// No description provided for @auction_photos_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos are matched by file name: player ID, number or name, e.g. P001.jpg, 7.jpg or Arun Kumar.jpg.'**
+  String get auction_photos_help;
+
+  /// No description provided for @auction_photos_summary.
+  ///
+  /// In en, this message translates to:
+  /// **'{matched} matched · {unmatched} not matched'**
+  String auction_photos_summary(int matched, int unmatched);
+
+  /// No description provided for @auction_photo_skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get auction_photo_skip;
+
+  /// No description provided for @auction_photo_new_player.
+  ///
+  /// In en, this message translates to:
+  /// **'New player: {name}'**
+  String auction_photo_new_player(String name);
+
+  /// No description provided for @auction_photos_upload.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload {count}'**
+  String auction_photos_upload(int count);
+
+  /// No description provided for @auction_photos_done.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} photos uploaded'**
+  String auction_photos_done(int count);
+
+  /// No description provided for @auction_pick_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a player'**
+  String get auction_pick_player;
+
+  /// No description provided for @auction_retained_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Retained players'**
+  String get auction_retained_title;
+
+  /// No description provided for @auction_retained_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Retained players join their team before bidding, skip the auction, and their cost comes out of the team budget.'**
+  String get auction_retained_help;
+
+  /// No description provided for @auction_retain_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Retain player'**
+  String get auction_retain_add;
+
+  /// No description provided for @auction_retained_none.
+  ///
+  /// In en, this message translates to:
+  /// **'No retained players'**
+  String get auction_retained_none;
+
+  /// No description provided for @auction_retain_price.
+  ///
+  /// In en, this message translates to:
+  /// **'Retained cost (pts)'**
+  String get auction_retain_price;
+
+  /// No description provided for @auction_release.
+  ///
+  /// In en, this message translates to:
+  /// **'Release'**
+  String get auction_release;
+
+  /// No description provided for @auction_budget_line.
+  ///
+  /// In en, this message translates to:
+  /// **'{spent} spent · {remaining} left of {budget}'**
+  String auction_budget_line(int spent, int remaining, int budget);
+
+  /// No description provided for @auction_remaining.
+  ///
+  /// In en, this message translates to:
+  /// **'{amount} left'**
+  String auction_remaining(int amount);
+
+  /// No description provided for @auction_tab_live.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get auction_tab_live;
+
+  /// No description provided for @auction_tab_teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get auction_tab_teams;
+
+  /// No description provided for @auction_tab_players.
+  ///
+  /// In en, this message translates to:
+  /// **'Players'**
+  String get auction_tab_players;
+
+  /// No description provided for @auction_tab_history.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get auction_tab_history;
+
+  /// No description provided for @auction_setup_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Get the auction ready'**
+  String get auction_setup_title;
+
+  /// No description provided for @auction_setup_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Details and teams'**
+  String get auction_setup_details;
+
+  /// No description provided for @auction_setup_players.
+  ///
+  /// In en, this message translates to:
+  /// **'Players ({count})'**
+  String auction_setup_players(int count);
+
+  /// No description provided for @auction_setup_retained.
+  ///
+  /// In en, this message translates to:
+  /// **'Retained players ({count})'**
+  String auction_setup_retained(int count);
+
+  /// No description provided for @auction_publish.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish'**
+  String get auction_publish;
+
+  /// No description provided for @auction_publish_help.
+  ///
+  /// In en, this message translates to:
+  /// **'Published auctions are visible to everyone, even without signing in.'**
+  String get auction_publish_help;
+
+  /// No description provided for @auction_unpublish.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to draft'**
+  String get auction_unpublish;
+
+  /// No description provided for @auction_start.
+  ///
+  /// In en, this message translates to:
+  /// **'Start auction'**
+  String get auction_start;
+
+  /// No description provided for @auction_starts_on.
+  ///
+  /// In en, this message translates to:
+  /// **'Starts {date}'**
+  String auction_starts_on(String date);
+
+  /// No description provided for @auction_not_started.
+  ///
+  /// In en, this message translates to:
+  /// **'The auction hasn\'t started yet.'**
+  String get auction_not_started;
+
+  /// No description provided for @auction_view_only.
+  ///
+  /// In en, this message translates to:
+  /// **'Live view · updates automatically'**
+  String get auction_view_only;
+
+  /// No description provided for @auction_player_of.
+  ///
+  /// In en, this message translates to:
+  /// **'Player {current} of {total}'**
+  String auction_player_of(int current, int total);
+
+  /// No description provided for @auction_base.
+  ///
+  /// In en, this message translates to:
+  /// **'Base {amount} pts'**
+  String auction_base(int amount);
+
+  /// No description provided for @auction_current_bid.
+  ///
+  /// In en, this message translates to:
+  /// **'Current bid'**
+  String get auction_current_bid;
+
+  /// No description provided for @auction_no_bids.
+  ///
+  /// In en, this message translates to:
+  /// **'No bids yet'**
+  String get auction_no_bids;
+
+  /// No description provided for @auction_bidding_closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bidding not started'**
+  String get auction_bidding_closed;
+
+  /// No description provided for @auction_leading.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} leading'**
+  String auction_leading(String team);
+
+  /// No description provided for @auction_paused_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'The auction is paused'**
+  String get auction_paused_banner;
+
+  /// No description provided for @auction_prev_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get auction_prev_player;
+
+  /// No description provided for @auction_next_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Next player'**
+  String get auction_next_player;
+
+  /// No description provided for @auction_start_bidding.
+  ///
+  /// In en, this message translates to:
+  /// **'Start bidding'**
+  String get auction_start_bidding;
+
+  /// No description provided for @auction_bid_amount.
+  ///
+  /// In en, this message translates to:
+  /// **'Bid {amount}'**
+  String auction_bid_amount(int amount);
+
+  /// No description provided for @auction_undo_bid.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo bid'**
+  String get auction_undo_bid;
+
+  /// No description provided for @auction_sell.
+  ///
+  /// In en, this message translates to:
+  /// **'Sell player'**
+  String get auction_sell;
+
+  /// No description provided for @auction_mark_unsold.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark unsold'**
+  String get auction_mark_unsold;
+
+  /// No description provided for @auction_pause.
+  ///
+  /// In en, this message translates to:
+  /// **'Pause'**
+  String get auction_pause;
+
+  /// No description provided for @auction_resume.
+  ///
+  /// In en, this message translates to:
+  /// **'Resume'**
+  String get auction_resume;
+
+  /// No description provided for @auction_reopen_unsold.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-auction unsold ({count})'**
+  String auction_reopen_unsold(int count);
+
+  /// No description provided for @auction_all_processed.
+  ///
+  /// In en, this message translates to:
+  /// **'Every player has been processed'**
+  String get auction_all_processed;
+
+  /// No description provided for @auction_last_sold.
+  ///
+  /// In en, this message translates to:
+  /// **'{player} → {team} · {amount} pts'**
+  String auction_last_sold(String player, String team, int amount);
+
+  /// No description provided for @auction_count_sold.
+  ///
+  /// In en, this message translates to:
+  /// **'Sold'**
+  String get auction_count_sold;
+
+  /// No description provided for @auction_count_unsold.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsold'**
+  String get auction_count_unsold;
+
+  /// No description provided for @auction_count_retained.
+  ///
+  /// In en, this message translates to:
+  /// **'Retained'**
+  String get auction_count_retained;
+
+  /// No description provided for @auction_count_left.
+  ///
+  /// In en, this message translates to:
+  /// **'Left'**
+  String get auction_count_left;
+
+  /// No description provided for @auction_tag_retained.
+  ///
+  /// In en, this message translates to:
+  /// **'RETAINED'**
+  String get auction_tag_retained;
+
+  /// No description provided for @auction_tag_sold.
+  ///
+  /// In en, this message translates to:
+  /// **'SOLD'**
+  String get auction_tag_sold;
+
+  /// No description provided for @auction_squad_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No players yet'**
+  String get auction_squad_empty;
+
+  /// No description provided for @auction_show_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Put up now'**
+  String get auction_show_now;
+
+  /// No description provided for @auction_history_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'No activity yet'**
+  String get auction_history_empty;
+
+  /// No description provided for @auction_log_created.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction created'**
+  String get auction_log_created;
+
+  /// No description provided for @auction_log_published.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction published'**
+  String get auction_log_published;
+
+  /// No description provided for @auction_log_started.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction started'**
+  String get auction_log_started;
+
+  /// No description provided for @auction_log_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction paused'**
+  String get auction_log_paused;
+
+  /// No description provided for @auction_log_resumed.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction resumed'**
+  String get auction_log_resumed;
+
+  /// No description provided for @auction_log_shown.
+  ///
+  /// In en, this message translates to:
+  /// **'{player} is up'**
+  String auction_log_shown(String player);
+
+  /// No description provided for @auction_log_bidding_started.
+  ///
+  /// In en, this message translates to:
+  /// **'Bidding open for {player}'**
+  String auction_log_bidding_started(String player);
+
+  /// No description provided for @auction_log_bid.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} bid {amount} for {player}'**
+  String auction_log_bid(String team, int amount, String player);
+
+  /// No description provided for @auction_log_bid_undone.
+  ///
+  /// In en, this message translates to:
+  /// **'Bid of {amount} by {team} undone'**
+  String auction_log_bid_undone(int amount, String team);
+
+  /// No description provided for @auction_log_sold.
+  ///
+  /// In en, this message translates to:
+  /// **'{player} sold to {team} for {amount}'**
+  String auction_log_sold(String player, String team, int amount);
+
+  /// No description provided for @auction_log_unsold.
+  ///
+  /// In en, this message translates to:
+  /// **'{player} unsold'**
+  String auction_log_unsold(String player);
+
+  /// No description provided for @auction_log_reopened.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsold players back in the pool'**
+  String get auction_log_reopened;
+
+  /// No description provided for @auction_log_retained.
+  ///
+  /// In en, this message translates to:
+  /// **'{player} retained by {team} for {amount}'**
+  String auction_log_retained(String player, String team, int amount);
+
+  /// No description provided for @auction_log_released.
+  ///
+  /// In en, this message translates to:
+  /// **'{player} released'**
+  String auction_log_released(String player);
+
+  /// No description provided for @auction_log_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'Auction completed and tournament created'**
+  String get auction_log_completed;
+
+  /// No description provided for @auction_share.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy public link'**
+  String get auction_share;
+
+  /// No description provided for @auction_link_copied.
+  ///
+  /// In en, this message translates to:
+  /// **'Public link copied'**
+  String get auction_link_copied;
+
+  /// No description provided for @auction_edit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit details'**
+  String get auction_edit;
+
+  /// No description provided for @auction_manage_players.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage players'**
+  String get auction_manage_players;
+
+  /// No description provided for @auction_manage_retained.
+  ///
+  /// In en, this message translates to:
+  /// **'Retained players'**
+  String get auction_manage_retained;
+
+  /// No description provided for @auction_delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete auction'**
+  String get auction_delete;
+
+  /// No description provided for @auction_delete_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this auction, its history and photos? A tournament already created from it is kept.'**
+  String get auction_delete_confirm;
+
+  /// No description provided for @auction_complete.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete auction'**
+  String get auction_complete;
+
+  /// No description provided for @auction_complete_message.
+  ///
+  /// In en, this message translates to:
+  /// **'This ends the auction and creates the tournament \"{name}\" with {teams} teams and their players. No matches, fixtures or dates are created.'**
+  String auction_complete_message(String name, int teams);
+
+  /// No description provided for @auction_complete_left.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} players were never auctioned. They will be marked unsold.'**
+  String auction_complete_left(int count);
+
+  /// No description provided for @auction_complete_blocked.
+  ///
+  /// In en, this message translates to:
+  /// **'A player with bids is still up. Sell them or undo the bids first.'**
+  String get auction_complete_blocked;
+
+  /// No description provided for @auction_complete_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete and create tournament'**
+  String get auction_complete_confirm;
+
+  /// No description provided for @auction_tournament_created.
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament created: {name}'**
+  String auction_tournament_created(String name);
+
+  /// No description provided for @auction_open_tournament.
+  ///
+  /// In en, this message translates to:
+  /// **'Open tournament'**
+  String get auction_open_tournament;
+
+  /// No description provided for @auction_home.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get auction_home;
+
+  /// No description provided for @auction_create_tournament_retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Create tournament'**
+  String get auction_create_tournament_retry;
+
+  /// No description provided for @auction_create_tournament_retry_message.
+  ///
+  /// In en, this message translates to:
+  /// **'The auction is complete but its tournament wasn\'t created. Create \"{name}\" with {teams} teams and their players now. No matches, fixtures or dates are created.'**
+  String auction_create_tournament_retry_message(String name, int teams);
+
+  /// No description provided for @auction_error_not_editable.
+  ///
+  /// In en, this message translates to:
+  /// **'This can only be changed before the auction starts.'**
+  String get auction_error_not_editable;
+
+  /// No description provided for @auction_error_not_live.
+  ///
+  /// In en, this message translates to:
+  /// **'The auction isn\'t live.'**
+  String get auction_error_not_live;
+
+  /// No description provided for @auction_error_paused.
+  ///
+  /// In en, this message translates to:
+  /// **'The auction is paused.'**
+  String get auction_error_paused;
+
+  /// No description provided for @auction_error_no_player.
+  ///
+  /// In en, this message translates to:
+  /// **'No player is up.'**
+  String get auction_error_no_player;
+
+  /// No description provided for @auction_error_bidding_closed.
+  ///
+  /// In en, this message translates to:
+  /// **'Start bidding first.'**
+  String get auction_error_bidding_closed;
+
+  /// No description provided for @auction_error_already_leading.
+  ///
+  /// In en, this message translates to:
+  /// **'Leading'**
+  String get auction_error_already_leading;
+
+  /// No description provided for @auction_error_squad_full.
+  ///
+  /// In en, this message translates to:
+  /// **'Squad full'**
+  String get auction_error_squad_full;
+
+  /// No description provided for @auction_error_over_budget.
+  ///
+  /// In en, this message translates to:
+  /// **'Over budget'**
+  String get auction_error_over_budget;
+
+  /// No description provided for @auction_error_bid_moved.
+  ///
+  /// In en, this message translates to:
+  /// **'The bid changed. Try again.'**
+  String get auction_error_bid_moved;
+
+  /// No description provided for @auction_error_has_bids.
+  ///
+  /// In en, this message translates to:
+  /// **'This player already has bids.'**
+  String get auction_error_has_bids;
+
+  /// No description provided for @auction_error_no_bid.
+  ///
+  /// In en, this message translates to:
+  /// **'No bids yet.'**
+  String get auction_error_no_bid;
+
+  /// No description provided for @auction_error_player_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This player isn\'t available.'**
+  String get auction_error_player_unavailable;
+
+  /// No description provided for @auction_error_no_players_left.
+  ///
+  /// In en, this message translates to:
+  /// **'No players left in the pool.'**
+  String get auction_error_no_players_left;
+
+  /// No description provided for @auction_error_no_previous.
+  ///
+  /// In en, this message translates to:
+  /// **'No earlier unsold player to go back to.'**
+  String get auction_error_no_previous;
+
+  /// No description provided for @auction_error_need_teams.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least 2 teams.'**
+  String get auction_error_need_teams;
+
+  /// No description provided for @auction_error_need_players.
+  ///
+  /// In en, this message translates to:
+  /// **'Add players to the auction first.'**
+  String get auction_error_need_players;
+
+  /// No description provided for @auction_error_duplicate_player.
+  ///
+  /// In en, this message translates to:
+  /// **'A player with the same ID, or the same name and number, already exists.'**
+  String get auction_error_duplicate_player;
+
+  /// No description provided for @auction_error_invalid_team.
+  ///
+  /// In en, this message translates to:
+  /// **'That team has players assigned. Release them first.'**
+  String get auction_error_invalid_team;
+
+  /// No description provided for @auction_error_not_admin.
+  ///
+  /// In en, this message translates to:
+  /// **'Only auction admins can do this.'**
+  String get auction_error_not_admin;
+
+  /// No description provided for @auction_error_already_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'The auction is already completed.'**
+  String get auction_error_already_completed;
+
+  /// No description provided for @auction_error_incomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Some players still need to be processed.'**
+  String get auction_error_incomplete;
+
+  /// No description provided for @auction_error_too_many_players.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many players for one auction.'**
+  String get auction_error_too_many_players;
+
+  /// No description provided for @mascot_setting_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Tiger guide'**
+  String get mascot_setting_title;
+
+  /// No description provided for @mascot_welcome_named.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi {name}! Welcome back to Sports Tamil.'**
+  String mascot_welcome_named(String name);
+
+  /// No description provided for @mascot_welcome_guest.
+  ///
+  /// In en, this message translates to:
+  /// **'Hi there! Welcome to Sports Tamil. Let\'s play!'**
+  String get mascot_welcome_guest;
+
+  /// No description provided for @mascot_sign_in_options.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a way to sign in, or jump in as a guest to play.'**
+  String get mascot_sign_in_options;
+
+  /// No description provided for @mascot_sign_in_required.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ll need to sign in for this. It only takes a moment!'**
+  String get mascot_sign_in_required;
+
+  /// No description provided for @mascot_sign_in_to_create.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in first, then you can create teams, matches and tournaments.'**
+  String get mascot_sign_in_to_create;
+
+  /// No description provided for @mascot_email_new_account.
+  ///
+  /// In en, this message translates to:
+  /// **'New here? Let\'s make your account!'**
+  String get mascot_email_new_account;
+
+  /// No description provided for @mascot_email_looks_good.
+  ///
+  /// In en, this message translates to:
+  /// **'That email looks good!'**
+  String get mascot_email_looks_good;
+
+  /// No description provided for @mascot_password_hidden.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'m not peeking at your password!'**
+  String get mascot_password_hidden;
+
+  /// No description provided for @mascot_password_shown.
+  ///
+  /// In en, this message translates to:
+  /// **'Password visible. Make sure nobody\'s watching!'**
+  String get mascot_password_shown;
+
+  /// No description provided for @mascot_wrong_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Hmm, that didn\'t work. Forgot your password? Tap \"Forgot password\" and I\'ll send a reset link.'**
+  String get mascot_wrong_password;
+
+  /// No description provided for @mascot_email_in_use.
+  ///
+  /// In en, this message translates to:
+  /// **'This email already has an account. Try signing in instead.'**
+  String get mascot_email_in_use;
+
+  /// No description provided for @mascot_enter_email_first.
+  ///
+  /// In en, this message translates to:
+  /// **'Type your email first, then tap \"Forgot password\".'**
+  String get mascot_enter_email_first;
+
+  /// No description provided for @mascot_reset_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset link sent! Check your inbox and spam folder.'**
+  String get mascot_reset_sent;
+
+  /// No description provided for @mascot_something_wrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Oops, something went wrong. Please try again.'**
+  String get mascot_something_wrong;
+
+  /// No description provided for @mascot_login_success.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re in! Let\'s play.'**
+  String get mascot_login_success;
+
+  /// No description provided for @mascot_registered.
+  ///
+  /// In en, this message translates to:
+  /// **'Account created! Welcome to the team.'**
+  String get mascot_registered;
+
+  /// No description provided for @mascot_guest_joined.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re playing as Guest. Your scores will show as \"Guest\".'**
+  String get mascot_guest_joined;
+
+  /// No description provided for @mascot_profile_intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell me your name so your friends can find you.'**
+  String get mascot_profile_intro;
+
+  /// No description provided for @mascot_profile_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Nice to meet you, {name}!'**
+  String mascot_profile_name(String name);
+
+  /// No description provided for @mascot_profile_created.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Sports Tamil, {name}!'**
+  String mascot_profile_created(String name);
+
+  /// No description provided for @mascot_profile_saved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile saved!'**
+  String get mascot_profile_saved;
 }
 
 class _AppLocalizationsDelegate

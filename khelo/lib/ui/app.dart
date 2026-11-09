@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:khelo/components/mascot/mascot_overlay.dart';
 import 'package:khelo/l10n/app_localizations.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/platform.dart';
@@ -56,17 +57,15 @@ class _AppState extends ConsumerState<App> {
             return CupertinoApp.router(
               debugShowCheckedModeBanner: false,
               routerConfig: _router,
+              builder: (context, child) => MascotOverlay(child: child!),
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               theme: CupertinoThemeData(
                 brightness: context.brightness,
-                // iOS blue as the system accent
                 primaryColor: colorScheme.primary,
                 primaryContrastingColor: colorScheme.onPrimary,
-                // Nav bar: slightly translucent white / near-black
-                barBackgroundColor: isDarkMode
-                    ? const Color(0xF0000000)
-                    : const Color(0xF2F9F9F9),
+                barBackgroundColor:
+                    colorScheme.groupedBackground.withValues(alpha: 0.95),
                 // Grouped screen background
                 scaffoldBackgroundColor: colorScheme.groupedBackground,
                 applyThemeToAll: true,
@@ -97,6 +96,7 @@ class _AppState extends ConsumerState<App> {
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
               routerConfig: _router,
+              builder: (context, child) => MascotOverlay(child: child!),
               localizationsDelegates: AppLocalizations.localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
               theme: materialThemeDataLight,

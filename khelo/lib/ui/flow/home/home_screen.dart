@@ -1,24 +1,30 @@
 import 'package:data/api/leaderboard/leaderboard_model.dart';
+import 'package:data/api/match/match_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
 import 'package:data/api/user/user_models.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/empty_screen.dart';
 import 'package:khelo/components/error_screen.dart';
 import 'package:khelo/components/image_avatar.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/enum_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/home/components/match_item.dart';
 import 'package:khelo/ui/flow/home/components/tournament_item.dart';
+import 'package:khelo/ui/flow/home/global_cricket/global_cricket_section.dart';
 import 'package:khelo/ui/flow/home/home_view_model.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
 import 'package:style/text/app_text_style.dart';
+import 'package:style/theme/colors.dart';
+import 'package:style/theme/shadows.dart';
 
 import '../../../gen/assets.gen.dart';
 
@@ -30,12 +36,45 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  /// Home rows show only the latest few; "View all" lists the rest.
+  static const _homeRowLimit = 5;
+
   late HomeViewNotifier notifier;
+
+  /// Upcoming soonest first; live and finished most recent first.
+  List<MatchModel> _homeOrder(
+    MatchStatusLabel label,
+    List<MatchModel> matches,
+  ) {
+    DateTime timeOf(MatchModel m) =>
+        m.start_at ?? m.start_time ?? m.updated_at ?? DateTime(0);
+    final sorted = [...matches]..sort((a, b) =>
+        label == MatchStatusLabel.upcoming
+            ? timeOf(a).compareTo(timeOf(b))
+            : (b.updated_at ?? timeOf(b)).compareTo(a.updated_at ?? timeOf(a)));
+    return sorted;
+  }
 
   @override
   void initState() {
     super.initState();
     notifier = ref.read(homeViewStateProvider.notifier);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _greet());
+  }
+
+  void _greet() {
+    if (!mounted) return;
+    final name = ref.read(currentUserPod)?.name?.trim().split(' ').first;
+    ref.read(mascotProvider.notifier).show(
+          MascotPose.welcome,
+          name == null || name.isEmpty
+              ? context.l10n.mascot_welcome_guest
+              : context.l10n.mascot_welcome_named(name),
+          onceKey: 'home_welcome',
+          onlyWhenIdle: true,
+          delay: const Duration(milliseconds: 900),
+          duration: const Duration(seconds: 5),
+        );
   }
 
   @override
@@ -44,7 +83,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final cs = context.colorScheme;
 
     return AppPage(
-      titleWidget: Image.asset(Assets.images.appLogoText, height: 36),
+      titleWidget: SvgPicture.asset(
+        Assets.images.appLogoWordmark,
+        height: 40,
+        theme: SvgTheme(currentColor: cs.textPrimary),
+      ),
       actions: state.matches.isNotEmpty
           ? [
               actionButton(
@@ -80,8 +123,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
 
     return ListView(
-      padding: context.mediaQueryPadding +
-          const EdgeInsets.only(top: 8, bottom: 24),
+      padding:
+          context.mediaQueryPadding + const EdgeInsets.only(top: 8, bottom: 24),
       children: [
         // ── Quick Actions ────────────────────────────────────────────────────
         _quickActionsRow(context),
@@ -91,6 +134,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (state.tournaments.isNotEmpty) ...[
           _tournamentSection(context, state.tournaments),
         ],
+
+        // ── Global cricket (CricketData.org) ─────────────────────────────────
+        GlobalCricketSection(
+          header: (title, onViewAll) => _sectionHeader(
+            context,
+            title: title,
+            showViewAll: true,
+            onViewAll: onViewAll,
+          ),
+        ),
 
         // ── Leaderboard ──────────────────────────────────────────────────────
         if (state.leaderboard.isNotEmpty) ...[
@@ -142,16 +195,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             context,
             label: context.l10n.home_screen_create_tournament_btn,
             icon: CupertinoIcons.rosette,
-            onTap: () =>
-                _pushWhenSignedIn(context, AppRoute.addTournament()),
+            onTap: () => _pushWhenSignedIn(context, AppRoute.addTournament()),
           ),
         ],
       ),
     );
   }
 
-  /// iOS-style compact tinted action chip — primary-tinted background,
-  /// SF-style icon, and a short label.
+  /// Card chip with a glowing mint icon circle, like the concept's
+  /// Fixtures / Results / Tours rows.
   Widget _actionChip(
     BuildContext context, {
     required String label,
@@ -162,20 +214,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return OnTapScale(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
         decoration: BoxDecoration(
-          color: cs.primary.withValues(alpha: 0.10),
-          borderRadius: BorderRadius.circular(14),
+          color: cs.card,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: cs.cardShadow,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 18, color: cs.primary),
-            const SizedBox(width: 8),
+            Container(
+              height: 32,
+              width: 32,
+              decoration: BoxDecoration(
+                color: brandRedColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: brandRedColor.withValues(alpha: 0.4),
+                    blurRadius: 8,
+                  ),
+                ],
+              ),
+              child: Icon(icon, size: 16, color: textPrimaryDarkColor),
+            ),
+            const SizedBox(width: 10),
             Text(
               label,
               style: AppTextStyle.subtitle2.copyWith(
-                color: cs.primary,
+                color: cs.textPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -189,6 +256,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     if (ref.read(hasUserSession)) {
       route.push(context);
     } else {
+      ref.read(mascotProvider.notifier).show(
+            MascotPose.help,
+            context.l10n.mascot_sign_in_to_create,
+            lift: MascotController.signInOptionsLift,
+          );
       AppRoute.phoneLogin.push(context);
     }
   }
@@ -211,7 +283,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: Text(
               title,
-              style: AppTextStyle.subtitle1.copyWith(color: cs.textPrimary),
+              style: AppTextStyle.header4.copyWith(
+                color: cs.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
           if (showViewAll)
@@ -235,13 +310,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     BuildContext context,
     List<TournamentModel> tournaments,
   ) {
+    final recent = [...tournaments]
+      ..sort((a, b) => b.start_date.compareTo(a.start_date));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionHeader(
           context,
           title: context.l10n.common_tournaments,
-          showViewAll: tournaments.length > 2,
+          showViewAll: true,
           onViewAll: () => AppRoute.viewAll(isTournament: true).push(context),
         ),
         SingleChildScrollView(
@@ -250,7 +327,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: tournaments
+            children: recent
+                .take(_homeRowLimit)
                 .map((t) => TournamentItem(
                       tournament: t,
                       size: const Size.fromWidth(320),
@@ -294,16 +372,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _leaderboardCard(BuildContext context, LeaderboardModel lb) {
     final cs = context.colorScheme;
     return OnTapScale(
-      onTap: () =>
-          AppRoute.leaderboard(selectedField: lb.type).push(context),
+      onTap: () => AppRoute.leaderboard(selectedField: lb.type).push(context),
       child: Container(
         width: 300,
         margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: cs.surface,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: cs.cardDecoration(radius: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -416,7 +490,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             _sectionHeader(
               context,
               title: entry.key.getString(context),
-              showViewAll: entry.value.length > 3,
+              showViewAll: true,
               onViewAll: () =>
                   AppRoute.viewAll(status: entry.key).push(context),
             ),
@@ -425,7 +499,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               clipBehavior: Clip.none,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Row(
-                children: entry.value
+                children: _homeOrder(entry.key, entry.value)
+                    .take(_homeRowLimit)
                     .map((match) => MatchItem(match: match))
                     .toList(),
               ),
@@ -436,4 +511,3 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 }
-

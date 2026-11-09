@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:data/api/team/team_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
+import 'package:data/extensions/list_extensions.dart';
 import 'package:data/extensions/string_extensions.dart';
 import 'package:data/service/team/team_service.dart';
 import 'package:data/service/tournament/tournament_service.dart';
@@ -61,6 +62,13 @@ class SearchTeamViewNotifier extends StateNotifier<SearchTeamState> {
     }
   }
 
+  /// Inside a tournament only its teams can be picked; old tournaments
+  /// without saved teams fall back to the normal list.
+  List<String>? get _tournamentTeamIds {
+    final ids = state.tournament?.team_ids ?? const [];
+    return ids.isEmpty ? null : ids;
+  }
+
   Future<void> getTournament() async {
     if (_tournamentId == null) return;
 
@@ -68,14 +76,44 @@ class SearchTeamViewNotifier extends StateNotifier<SearchTeamState> {
       final tournament =
           await _tournamentService.getTournamentById(_tournamentId!);
       state = state.copyWith(tournament: tournament);
+      if (_tournamentTeamIds != null) await _loadTournamentTeams();
     } catch (e) {
       debugPrint(
           "SearchTeamViewNotifier: error while getting tournament -> $e");
     }
   }
 
+  Future<void> _loadTournamentTeams() async {
+    final ids = _tournamentTeamIds;
+    if (ids == null) return;
+    _streamSubscription?.cancel();
+    state = state.copyWith(loading: true);
+    try {
+      final teams = <TeamModel>[];
+      for (final chunk in ids.chunked(10)) {
+        teams.addAll(await _teamService.getTeamsByIds(chunk));
+      }
+      teams.sort(
+          (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+      state = state.copyWith(
+        userTeams:
+            teams.where((team) => !_excludedIds.contains(team.id)).toList(),
+        loading: false,
+        error: null,
+      );
+    } catch (e) {
+      state = state.copyWith(loading: false, error: e);
+      debugPrint(
+          "SearchTeamViewNotifier: error while loading tournament teams -> $e");
+    }
+  }
+
   Future<void> _loadTeamList() async {
     if (_currentUserId == null) return;
+    if (_tournamentTeamIds != null) {
+      await _loadTournamentTeams();
+      return;
+    }
     _streamSubscription?.cancel();
     state = state.copyWith(loading: true);
     _streamSubscription =
@@ -96,7 +134,12 @@ class SearchTeamViewNotifier extends StateNotifier<SearchTeamState> {
 
     try {
       List<TeamModel> filteredResult;
-      if (_onlyUserTeams) {
+      if (_tournamentTeamIds != null) {
+        filteredResult = state.userTeams
+            .where((team) => team.name.caseAndSpaceInsensitive
+                .contains(searchKey.caseAndSpaceInsensitive))
+            .toList();
+      } else if (_onlyUserTeams) {
         filteredResult = state.userTeams
             .where((team) => team.name.caseAndSpaceInsensitive
                 .startsWith(searchKey.caseAndSpaceInsensitive))

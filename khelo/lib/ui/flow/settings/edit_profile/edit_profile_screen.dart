@@ -8,6 +8,7 @@ import 'package:khelo/components/action_bottom_sheet.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/confirmation_dialog.dart';
 import 'package:khelo/components/error_snackbar.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
 import 'package:khelo/components/profile_image_avatar.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/enum_extensions.dart';
@@ -42,6 +43,17 @@ class EditProfileScreen extends ConsumerWidget {
     _observeIsSaved(context, ref);
     _observeShowDeleteConfirmationDialog(context, ref, notifier.onDeleteTap);
     _observeShowTransferTeamsSheet(context, ref);
+    if (isToCreateAccount) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        ref.read(mascotProvider.notifier).show(
+              MascotPose.help,
+              context.l10n.mascot_profile_intro,
+              onceKey: 'profile_intro',
+              delay: const Duration(milliseconds: 600),
+            );
+      });
+    }
 
     return AppPage(
       title: isToCreateAccount
@@ -87,7 +99,7 @@ class EditProfileScreen extends ConsumerWidget {
                       }
                     }),
                 const SizedBox(height: 24),
-                _userContactDetailsView(context, notifier, state),
+                _userContactDetailsView(context, ref, notifier, state),
                 const SizedBox(height: 24),
                 _userPersonalDetailsView(context, notifier, state),
                 const SizedBox(height: 24),
@@ -118,6 +130,7 @@ class EditProfileScreen extends ConsumerWidget {
 
   Widget _userContactDetailsView(
     BuildContext context,
+    WidgetRef ref,
     EditProfileViewNotifier notifier,
     EditProfileState state,
   ) {
@@ -125,7 +138,8 @@ class EditProfileScreen extends ConsumerWidget {
       children: [
         _textInputField(context, notifier,
             placeholderText: context.l10n.edit_profile_name_placeholder,
-            controller: state.nameController),
+            controller: state.nameController,
+            onChanged: (name) => _greetName(context, ref, name)),
         const SizedBox(height: 8),
         _textInputField(context, notifier,
             placeholderText: context.l10n.edit_profile_email_placeholder,
@@ -145,10 +159,14 @@ class EditProfileScreen extends ConsumerWidget {
     required String placeholderText,
     required TextEditingController controller,
     TextInputType? keyboardType,
+    ValueChanged<String>? onChanged,
   }) {
     return AppTextField(
       controller: controller,
-      onChanged: (value) => notifier.onValueChange(),
+      onChanged: (value) {
+        notifier.onValueChange();
+        onChanged?.call(value);
+      },
       keyboardType: keyboardType,
       style: AppTextStyle.subtitle3
           .copyWith(color: context.colorScheme.textPrimary),
@@ -333,10 +351,34 @@ class EditProfileScreen extends ConsumerWidget {
     });
   }
 
+  void _greetName(BuildContext context, WidgetRef ref, String name) {
+    final first = name.trim().split(' ').first;
+    if (first.length < 2) return;
+    ref.read(mascotProvider.notifier).show(
+          MascotPose.welcome,
+          context.l10n.mascot_profile_name(first),
+          delay: const Duration(milliseconds: 900),
+          duration: const Duration(seconds: 3),
+        );
+  }
+
   void _observeIsSaved(BuildContext context, WidgetRef ref) {
     ref.listen(editProfileStateProvider.select((state) => state.isSaved),
         (previous, next) {
       if (next) {
+        final name = ref
+            .read(editProfileStateProvider)
+            .nameController
+            .text
+            .trim()
+            .split(' ')
+            .first;
+        ref.read(mascotProvider.notifier).show(
+              isToCreateAccount ? MascotPose.celebrate : MascotPose.saved,
+              isToCreateAccount
+                  ? context.l10n.mascot_profile_created(name)
+                  : context.l10n.mascot_profile_saved,
+            );
         if (isToCreateAccount) {
           AppRoute.main.go(context);
         } else {

@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
 
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
@@ -11,6 +14,15 @@ import '../../storage/provider/preferences_provider.dart';
 import '../user/user_service.dart';
 
 final firebaseAuthProvider = Provider((ref) => FirebaseAuth.instance);
+
+/// Firebase uid of a guest (anonymous sign-in), or null when there's no guest.
+/// Guests have no `users` profile, so [hasUserSession] stays false for them.
+final guestUserIdProvider = StreamProvider<String?>(
+  (ref) => ref
+      .watch(firebaseAuthProvider)
+      .authStateChanges()
+      .map((user) => user != null && user.isAnonymous ? user.uid : null),
+);
 
 final authServiceProvider = Provider((ref) {
   return AuthService(
@@ -140,6 +152,38 @@ class AuthService {
     }
   }
 
+  /// Signs in without an account so the Play tab can be used as "Guest".
+  Future<void> signInAsGuest() async {
+    try {
+      await _auth.signInAnonymously();
+    } on FirebaseAuthException catch (error, stack) {
+      throw AppError(
+        statusCode: error.code,
+        message: const ['operation-not-allowed', 'admin-restricted-operation']
+                .contains(error.code)
+            ? 'Guest play is not available yet.'
+            : _emailAuthMessage(error.code),
+        stackTrace: stack,
+      );
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  Future<void> sendPasswordResetEmail(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email.trim());
+    } on FirebaseAuthException catch (error, stack) {
+      throw AppError(
+        statusCode: error.code,
+        message: _emailAuthMessage(error.code),
+        stackTrace: stack,
+      );
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
   String _emailAuthMessage(String code) {
     switch (code) {
       case 'email-already-in-use':
@@ -200,25 +244,35 @@ class AuthService {
     }
   }
 
-  Future<void> signInWithWhatsAppPhone(String phoneNumber) async {
+  /// Exchanges the one-time code from the WhatsApp login link (sent by the
+  /// service in `khelo/whatsapp_login`) for a Firebase custom token.
+  Future<void> signInWithWhatsAppCode(
+    String code, {
+    required String apiBaseUrl,
+  }) async {
+    final http.Response response;
     try {
-      final trimmed = phoneNumber.trim();
-      User? user = _auth.currentUser;
-      if (user == null) {
-        final anonCredential = await _auth.signInAnonymously();
-        user = anonCredential.user;
-      }
-      if (user != null) {
-        final (appUser, session) = await _userService.upsertUser(
-          uid: user.uid,
-          phone: trimmed,
-        );
-        _currentUserNotifier.state = appUser.toJsonString();
-        _userSessionNotifier.state = session.toJsonString();
-      }
+      response = await http.post(
+        Uri.parse('$apiBaseUrl/exchange'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'code': code.trim()}),
+      );
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
+    if (response.statusCode == 400) {
+      throw const AppError(
+        message:
+            'This login link has expired or was already used. Send "Hi login" on WhatsApp again.',
+      );
+    }
+    if (response.statusCode != 200) {
+      throw AppError(
+        message: 'WhatsApp login is unavailable (${response.statusCode}).',
+      );
+    }
+    final token = (jsonDecode(response.body) as Map<String, dynamic>)['token'];
+    await signInWithCustomToken(token as String);
   }
 
   Future<void> _onVerificationSuccess(

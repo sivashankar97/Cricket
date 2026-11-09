@@ -163,8 +163,8 @@ class MatchDetailCell extends StatelessWidget {
                 children: [
                   TextSpan(
                     text: '  (${matchTeam.over})',
-                    style: AppTextStyle.caption
-                        .copyWith(color: cs.textSecondary),
+                    style:
+                        AppTextStyle.caption.copyWith(color: cs.textSecondary),
                   ),
                 ],
               ),

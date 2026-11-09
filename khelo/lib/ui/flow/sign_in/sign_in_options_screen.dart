@@ -2,8 +2,10 @@ import 'package:data/service/auth/auth_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/error_snackbar.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:style/animations/on_tap_scale.dart';
@@ -15,21 +17,36 @@ import 'package:style/text/app_text_field.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const String kWhatsAppLoginNumber = '94776887978';
-const String kWhatsAppDisplayNumber = '+94 77 688 7978';
-const String kWhatsAppPrefillMessage = 'Hi login';
+import 'whatsapp_login.dart';
 
 class SignInOptionsScreen extends ConsumerStatefulWidget {
   const SignInOptionsScreen({super.key});
 
   @override
-  ConsumerState<SignInOptionsScreen> createState() => _SignInOptionsScreenState();
+  ConsumerState<SignInOptionsScreen> createState() =>
+      _SignInOptionsScreenState();
 }
 
 class _SignInOptionsScreenState extends ConsumerState<SignInOptionsScreen> {
   bool _hasOpenedWhatsApp = false;
   bool _isVerifyingToken = false;
+  bool _isJoiningAsGuest = false;
   final TextEditingController _tokenController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(mascotProvider.notifier).show(
+            MascotPose.help,
+            context.l10n.mascot_sign_in_options,
+            delay: const Duration(milliseconds: 600),
+            onlyWhenIdle: true,
+            lift: MascotController.signInOptionsLift,
+          );
+    });
+  }
 
   @override
   void dispose() {
@@ -39,7 +56,8 @@ class _SignInOptionsScreenState extends ConsumerState<SignInOptionsScreen> {
 
   Future<void> _openWhatsApp() async {
     final encodedMessage = Uri.encodeComponent(kWhatsAppPrefillMessage);
-    final whatsappUrl = Uri.parse('https://wa.me/$kWhatsAppLoginNumber?text=$encodedMessage');
+    final whatsappUrl =
+        Uri.parse('https://wa.me/$kWhatsAppLoginNumber?text=$encodedMessage');
 
     try {
       final launched = await launchUrl(
@@ -61,7 +79,8 @@ class _SignInOptionsScreenState extends ConsumerState<SignInOptionsScreen> {
       if (mounted) {
         showErrorSnackBar(
           context: context,
-          error: 'Could not open WhatsApp. Please check if WhatsApp is installed.',
+          error:
+              'Could not open WhatsApp. Please check if WhatsApp is installed.',
         );
       }
     }
@@ -72,30 +91,9 @@ class _SignInOptionsScreenState extends ConsumerState<SignInOptionsScreen> {
     if (input.isEmpty) return;
 
     setState(() => _isVerifyingToken = true);
-    final authService = ref.read(authServiceProvider);
 
     try {
-      // Check if user pasted a full URL like ...?token=XYZ or ?phone=+94...
-      String token = input;
-      String? phone;
-
-      if (input.contains('token=')) {
-        final uri = Uri.tryParse(input);
-        token = uri?.queryParameters['token'] ?? input;
-      } else if (input.contains('phone=')) {
-        final uri = Uri.tryParse(input);
-        phone = uri?.queryParameters['phone'];
-      }
-
-      if (phone != null && phone.isNotEmpty) {
-        await authService.signInWithWhatsAppPhone(phone);
-      } else {
-        await authService.signInWithCustomToken(token);
-      }
-
-      if (mounted) {
-        AppRoute.main.go(context);
-      }
+      await signInWithWhatsAppCode(context, ref, whatsAppCodeFromInput(input));
     } catch (e) {
       if (mounted) {
         setState(() => _isVerifyingToken = false);
@@ -128,7 +126,6 @@ class _SignInOptionsScreenState extends ConsumerState<SignInOptionsScreen> {
                 style: AppTextStyle.subtitle1.copyWith(color: cs.textDisabled),
               ),
               const SizedBox(height: 24),
-
               if (_hasOpenedWhatsApp) ...[
                 _whatsAppConfirmationCard(context),
               ],
@@ -146,11 +143,66 @@ class _SignInOptionsScreenState extends ConsumerState<SignInOptionsScreen> {
                   foreground: cs.textPrimary,
                   onPressed: () => AppRoute.emailLogin.push(context),
                 ),
+                if (ref.watch(guestUserIdProvider).valueOrNull == null) ...[
+                  const SizedBox(height: 4),
+                  _guestButton(context),
+                ],
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _continueAsGuest() async {
+    setState(() => _isJoiningAsGuest = true);
+    try {
+      await ref.read(authServiceProvider).signInAsGuest();
+      if (!mounted) return;
+      ref.read(mascotProvider.notifier).show(
+            MascotPose.celebrate,
+            context.l10n.mascot_guest_joined,
+            duration: const Duration(seconds: 5),
+          );
+      context.canPop() ? context.pop() : AppRoute.main.go(context);
+    } catch (e) {
+      if (mounted) {
+        ref.read(mascotProvider.notifier).show(
+              MascotPose.error,
+              context.l10n.mascot_something_wrong,
+              lift: MascotController.signInOptionsLift,
+            );
+        setState(() => _isJoiningAsGuest = false);
+        showErrorSnackBar(context: context, error: e);
+      }
+    }
+  }
+
+  Widget _guestButton(BuildContext context) {
+    final cs = context.colorScheme;
+    return Column(
+      children: [
+        _isJoiningAsGuest
+            ? const Padding(
+                padding: EdgeInsets.all(12),
+                child: AppProgressIndicator(
+                  size: AppProgressIndicatorSize.small,
+                ),
+              )
+            : TextButton(
+                onPressed: _continueAsGuest,
+                child: Text(
+                  context.l10n.sign_in_guest_option,
+                  style: AppTextStyle.button.copyWith(color: cs.primary),
+                ),
+              ),
+        Text(
+          context.l10n.sign_in_guest_hint,
+          textAlign: TextAlign.center,
+          style: AppTextStyle.caption.copyWith(color: cs.textSecondary),
+        ),
+      ],
     );
   }
 
@@ -230,7 +282,8 @@ class _SignInOptionsScreenState extends ConsumerState<SignInOptionsScreen> {
                     ),
                     Text(
                       'Sent to $kWhatsAppDisplayNumber',
-                      style: AppTextStyle.caption.copyWith(color: cs.textSecondary),
+                      style: AppTextStyle.caption
+                          .copyWith(color: cs.textSecondary),
                     ),
                   ],
                 ),
@@ -248,14 +301,16 @@ class _SignInOptionsScreenState extends ConsumerState<SignInOptionsScreen> {
               Expanded(
                 child: AppTextField(
                   controller: _tokenController,
-                  hintText: context.l10n.sign_in_whatsapp_enter_link_placeholder,
+                  hintText:
+                      context.l10n.sign_in_whatsapp_enter_link_placeholder,
                 ),
               ),
               const SizedBox(width: 8),
               if (_isVerifyingToken)
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: AppProgressIndicator(size: AppProgressIndicatorSize.small),
+                  child: AppProgressIndicator(
+                      size: AppProgressIndicatorSize.small),
                 )
               else
                 IconButton(

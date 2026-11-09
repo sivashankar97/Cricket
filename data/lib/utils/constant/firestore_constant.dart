@@ -17,6 +17,7 @@ class FireStoreConst {
   static const String leaderboardCollection = "leaderboard";
   static const String matchEventsCollection = "match_events";
   static const String partnershipsCollection = "partnerships";
+  static const String teamPoolsCollection = "team_pools";
 
   // matches field const
   static const String id = "id";
@@ -58,6 +59,19 @@ class FireStoreConst {
   static const String createdBy = "created_by";
   static const String nameLowercase = "name_lowercase";
   static const String profileImageUrl = "profile_img_url";
+  static const String nameInitial = "name_initial";
+  static const String createdAt = "created_at";
+  static const String createdTime = "created_time";
+  static const String isTournamentTeam = "is_tournament_team";
+  static const String captainId = "captain_id";
+  static const String wicketKeeperId = "wicket_keeper_id";
+  static const String playerRole = "player_role";
+  static const String battingStyle = "batting_style";
+  static const String bowlingStyle = "bowling_style";
+  static const String jerseyNumber = "jersey_number";
+  static const String poolId = "pool_id";
+  static const String shortName = "short_name";
+  static const String logo = "logo";
   static const String stat = "stat";
 
   // users field const

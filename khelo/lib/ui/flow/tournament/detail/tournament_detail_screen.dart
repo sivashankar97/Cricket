@@ -1,4 +1,3 @@
-import 'package:data/api/team/team_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +12,7 @@ import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_points_ta
 import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_stats_tab.dart';
 import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_teams_tab.dart';
 import 'package:khelo/ui/flow/tournament/detail/tournament_detail_view_model.dart';
+import 'package:khelo/ui/flow/tournament/team_picker/tournament_team_picker_view_model.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:style/animations/app_animations.dart';
 import 'package:style/button/action_button.dart';
@@ -212,11 +212,11 @@ class _TournamentDetailScreenState
         title: context.l10n.tournament_detail_teams_select_btn,
         onTap: () async {
           context.pop();
-          final selectedTeams = await AppRoute.teamSelection(
+          final result = await AppRoute.tournamentTeamPicker(
                   selectedTeams: state.tournament!.teams)
-              .push<List<TeamModel>>(context);
-          if (context.mounted && selectedTeams != null) {
-            notifier.onTeamsSelected(selectedTeams);
+              .push<TournamentTeamPickerResult>(context);
+          if (context.mounted && result != null) {
+            notifier.onTeamsSelected(result);
           }
         },
       ),

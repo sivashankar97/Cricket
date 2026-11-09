@@ -1,4 +1,5 @@
 import 'package:data/api/team/team_model.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,6 +13,7 @@ import 'package:khelo/domain/extensions/string_extensions.dart';
 import 'package:khelo/domain/extensions/widget_extension.dart';
 import 'package:khelo/ui/flow/team/search_team/components/team_member_sheet.dart';
 import 'package:khelo/ui/flow/team/search_team/search_team_view_model.dart';
+import 'package:khelo/ui/flow/team/search_team/team_pool_names_provider.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/extensions/context_extensions.dart';
@@ -60,23 +62,24 @@ class _SearchTeamScreenState extends ConsumerState<SearchTeamScreen> {
     return AppPage(
       title: context.l10n.search_team_screen_title,
       actions: [
-        actionButton(
-          context,
-          onPressed: () async {
-            final team = await AppRoute.scannerScreen(
-              target: ScanTarget.team,
-              addedIds: widget.excludedIds ?? [],
-            ).push<TeamModel>(context);
-            if (context.mounted && team != null) notifier.onTeamCellTap(team);
-          },
-          icon: SvgPicture.asset(
-            Assets.images.icQrCode,
-            colorFilter: ColorFilter.mode(
-              context.colorScheme.textPrimary,
-              BlendMode.srcIn,
+        if (!_limitedToTournament(state))
+          actionButton(
+            context,
+            onPressed: () async {
+              final team = await AppRoute.scannerScreen(
+                target: ScanTarget.team,
+                addedIds: widget.excludedIds ?? [],
+              ).push<TeamModel>(context);
+              if (context.mounted && team != null) notifier.onTeamCellTap(team);
+            },
+            icon: SvgPicture.asset(
+              Assets.images.icQrCode,
+              colorFilter: ColorFilter.mode(
+                context.colorScheme.textPrimary,
+                BlendMode.srcIn,
+              ),
             ),
           ),
-        ),
         actionButton(
           context,
           onPressed: state.selectedTeam != null
@@ -106,6 +109,9 @@ class _SearchTeamScreenState extends ConsumerState<SearchTeamScreen> {
       ),
     );
   }
+
+  bool _limitedToTournament(SearchTeamState state) =>
+      state.tournament?.team_ids.isNotEmpty ?? false;
 
   Future<void> _handleSaveAction(
     BuildContext context,
@@ -159,7 +165,9 @@ class _SearchTeamScreenState extends ConsumerState<SearchTeamScreen> {
         ],
         const SizedBox(height: 16),
         Text(
-          context.l10n.common_your_teams_title,
+          _limitedToTournament(state)
+              ? state.tournament!.name
+              : context.l10n.common_your_teams_title,
           style: AppTextStyle.header2
               .copyWith(color: context.colorScheme.textSecondary),
         ),
@@ -172,8 +180,10 @@ class _SearchTeamScreenState extends ConsumerState<SearchTeamScreen> {
             const SizedBox(height: 8),
           ],
         ],
-        const SizedBox(height: 8),
-        createTeamCell(context)
+        if (!_limitedToTournament(state)) ...[
+          const SizedBox(height: 8),
+          createTeamCell(context),
+        ],
       ],
     );
   }
@@ -183,6 +193,7 @@ class _SearchTeamScreenState extends ConsumerState<SearchTeamScreen> {
     SearchTeamState state,
     TeamModel team,
   ) {
+    final poolName = ref.watch(teamPoolNamesProvider)[team.id];
     return OnTapScale(
       onTap: () => notifier.onTeamCellTap(team),
       onLongTap: () => TeamMemberSheet.show<bool>(context, team: team),
@@ -196,10 +207,20 @@ class _SearchTeamScreenState extends ConsumerState<SearchTeamScreen> {
             imageUrl: team.profile_img_url,
             size: 40,
           ),
-          title: Text(
-            team.name,
-            style: AppTextStyle.subtitle2
-                .copyWith(color: context.colorScheme.textPrimary),
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                team.name,
+                style: AppTextStyle.subtitle2
+                    .copyWith(color: context.colorScheme.textPrimary),
+              ),
+              if (poolName != null) ...[
+                const SizedBox(height: 4),
+                _poolBadge(context, poolName),
+              ],
+            ],
           ),
           subtitle: Text.rich(
             TextSpan(
@@ -231,6 +252,36 @@ class _SearchTeamScreenState extends ConsumerState<SearchTeamScreen> {
               ? RoundedCheckBox(isSelected: true, onTap: null)
               : null,
         ),
+      ),
+    );
+  }
+
+  Widget _poolBadge(BuildContext context, String poolName) {
+    final cs = context.colorScheme;
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 220),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: cs.primary.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(CupertinoIcons.rosette, size: 12, color: cs.primary),
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              poolName,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.caption.copyWith(
+                color: cs.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

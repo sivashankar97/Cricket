@@ -52,8 +52,7 @@ class AppPage extends StatelessWidget {
         navigationBar: _hasNavBar
             ? CustomCupertinoNavigationBar(
                 leading: leading,
-                padding:
-                    padding ?? const EdgeInsets.symmetric(horizontal: 8),
+                padding: padding ?? const EdgeInsets.symmetric(horizontal: 8),
                 backgroundColor: appBarBackgroundColor,
                 middle: titleWidget ?? _titleWidget(),
                 trailing: _trailingActions(),
@@ -83,16 +82,14 @@ class AppPage extends StatelessWidget {
         backgroundColor: context.colorScheme.groupedBackground,
         appBar: _hasNavBar
             ? AppBar(
-                backgroundColor:
-                    appBarBackgroundColor ?? context.colorScheme.surface,
+                backgroundColor: appBarBackgroundColor ??
+                    context.colorScheme.groupedBackground,
                 surfaceTintColor: Colors.transparent,
                 elevation: 0,
                 scrolledUnderElevation: 0,
-                toolbarHeight:
-                    kToolbarHeight + (padding?.vertical ?? 0),
+                toolbarHeight: kToolbarHeight + (padding?.vertical ?? 0),
                 title: Padding(
-                  padding:
-                      padding ?? const EdgeInsets.symmetric(horizontal: 8),
+                  padding: padding ?? const EdgeInsets.symmetric(horizontal: 8),
                   child: titleWidget ?? _titleWidget(),
                 ),
                 actions: actions,
@@ -112,7 +109,10 @@ class AppPage extends StatelessWidget {
       );
 
   bool get _hasNavBar =>
-      title != null || titleWidget != null || actions != null || leading != null;
+      title != null ||
+      titleWidget != null ||
+      actions != null ||
+      leading != null;
 
   Widget? _titleWidget() => title != null
       ? Text(

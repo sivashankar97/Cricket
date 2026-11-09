@@ -1,4 +1,3 @@
-import 'package:data/service/auth/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/components/app_page.dart';
@@ -8,15 +7,12 @@ import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
 import 'package:style/text/app_text_style.dart';
 
-class WhatsAppLoginRedirectScreen extends ConsumerStatefulWidget {
-  final String? token;
-  final String? phone;
+import 'whatsapp_login.dart';
 
-  const WhatsAppLoginRedirectScreen({
-    super.key,
-    this.token,
-    this.phone,
-  });
+class WhatsAppLoginRedirectScreen extends ConsumerStatefulWidget {
+  final String? code;
+
+  const WhatsAppLoginRedirectScreen({super.key, this.code});
 
   @override
   ConsumerState<WhatsAppLoginRedirectScreen> createState() =>
@@ -34,20 +30,13 @@ class _WhatsAppLoginRedirectScreenState
   }
 
   Future<void> _handleLogin() async {
-    final authService = ref.read(authServiceProvider);
+    final code = widget.code;
+    if (code == null || code.isEmpty) {
+      setState(() => _error = 'This login link is incomplete.');
+      return;
+    }
     try {
-      if (widget.token != null && widget.token!.isNotEmpty) {
-        await authService.signInWithCustomToken(widget.token!);
-      } else if (widget.phone != null && widget.phone!.isNotEmpty) {
-        await authService.signInWithWhatsAppPhone(widget.phone!);
-      } else {
-        setState(() => _error = 'No login token or phone provided in the link.');
-        return;
-      }
-
-      if (mounted) {
-        AppRoute.main.go(context);
-      }
+      await signInWithWhatsAppCode(context, ref, code);
     } catch (e) {
       if (mounted) {
         setState(() => _error = e.toString());

@@ -1,0 +1,16 @@
+{
+  "name": "sportstamil-whatsapp-login",
+  "private": true,
+  "description": "Replies to 'Hi login' on WhatsApp with a one-time Sports Tamil sign-in link",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test test/server.test.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}

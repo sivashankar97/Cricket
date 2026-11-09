@@ -1,12 +1,18 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Guests (anonymous sign-in) may only use the Play tab; see play_games.
+    function isGuest() {
+      return request.auth != null
+        && request.auth.token.firebase.sign_in_provider == 'anonymous';
+    }
     function signedIn() {
-      return request.auth != null;
+      return request.auth != null && !isGuest();
     }
 
-    match /{document=**} {
-      allow read, write: if signedIn();
+    // Everything except auctions and their photos: any signed-in user.
+    match /{collection}/{document=**} {
+      allow read, write: if signedIn() && !(collection in ['auctions', 'photos']);
     }
 
     match /matches/{document=**} {
@@ -36,8 +42,63 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
     }
+    // Shared CricketData.org cache for the Home "Global cricket" section.
+    match /global_cricket/{document=**} {
+      allow read: if true;
+    }
     match /users/{userId}/user_stat/{document=**} {
       allow read: if true;
+    }
+
+    // Play tab scores: guests read the leaderboard and save their own solo /
+    // daily games, always under the name "Guest" (no challenges).
+    match /play_games/{gameId} {
+      allow read: if isGuest();
+      allow create: if isGuest()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.user_name == 'Guest'
+        && request.resource.data.user_image == null
+        && request.resource.data.challenge_id == null;
+    }
+
+    // Player auctions: published ones are public; drafts only for admins.
+    // Only the auction's admins can change it; only the creator can change
+    // the admin list or delete it.
+    function auctionAdmins(auctionId) {
+      return get(/databases/$(database)/documents/auctions/$(auctionId)).data.admin_ids;
+    }
+
+    match /auctions/{auctionId} {
+      allow read: if resource.data.status in ['upcoming', 'live', 'paused', 'completed']
+        || (signedIn() && request.auth.uid in resource.data.admin_ids);
+      allow create: if signedIn()
+        && request.resource.data.created_by == request.auth.uid
+        && request.auth.uid in request.resource.data.admin_ids
+        && request.resource.data.status == 'draft';
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.admin_ids
+        && request.resource.data.created_by == resource.data.created_by
+        && (request.resource.data.admin_ids == resource.data.admin_ids
+            || request.auth.uid == resource.data.created_by);
+      allow delete: if signedIn() && request.auth.uid == resource.data.created_by;
+
+      // getAfter: the first entry is written in the batch that creates the auction.
+      match /log/{entryId} {
+        allow read: if true;
+        allow create: if signedIn() && request.auth.uid in
+          getAfter(/databases/$(database)/documents/auctions/$(auctionId)).data.admin_ids;
+        allow delete: if signedIn() && request.auth.uid ==
+          get(/databases/$(database)/documents/auctions/$(auctionId)).data.created_by;
+      }
+    }
+
+    // Compressed player / banner photos for auctions.
+    match /photos/{photoId} {
+      allow read: if true;
+      allow create, update: if signedIn()
+        && request.auth.uid in auctionAdmins(request.resource.data.auction_id);
+      allow delete: if signedIn()
+        && request.auth.uid in auctionAdmins(resource.data.auction_id);
     }
   }
 }

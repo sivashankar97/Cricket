@@ -1,0 +1,27 @@
+---
+description: Keep the Obsidian vault in vault/ up to date after every code change
+alwaysApply: true
+---
+
+# Update the Obsidian vault every time
+
+The project docs live in the Obsidian vault at `vault/` (entry note: `vault/Home.md`).
+Whenever you change code, config, data model, routes, deployment or test steps, update the vault in the same task, before your final reply.
+
+## What to update
+- **Feature behavior or UI** → the feature note (e.g. `Tournament Teams.md`, `Match Rules.md`, `Authentication.md`). Keep "Where in the app", "Rules", "Code" and "Open items" current.
+- **New feature** → create a new note with that same structure and link it from `Home.md` under "Features".
+- **Firestore collections or fields** → `Firestore Data Model.md`.
+- **Modules, state, routing** → `Architecture.md`. **Run/build steps** → `Dev Setup.md`. **Hosting** → `Deployment.md`.
+- **New manual test steps** → `Testing Checklist.md` (checkbox list under the feature heading).
+- **Bugs, limitations, workarounds found** → `Known Issues.md`; tick or remove items once fixed.
+
+## How to write
+- Use Obsidian wikilinks between notes: `[[Firestore Data Model]]`, and a "Back to [[Home]]" line at the top of each note.
+- Short bullets in plain English; code paths in backticks.
+- Edit existing notes rather than adding duplicates; remove statements that are no longer true.
+- Never put secrets, passwords, tokens, emails of real users or service keys in the vault.
+- Don't edit `vault/.obsidian/` settings files.
+
+## Final reply
+Mention which vault notes you updated (one line).

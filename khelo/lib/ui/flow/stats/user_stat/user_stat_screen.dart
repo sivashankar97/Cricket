@@ -17,7 +17,9 @@ import '../../team/user_detail/component/user_detail_batting_content.dart';
 import '../../team/user_detail/component/user_detail_bowling_content.dart';
 
 class UserStatScreen extends ConsumerStatefulWidget {
-  const UserStatScreen({super.key});
+  final bool showTitle;
+
+  const UserStatScreen({super.key, this.showTitle = false});
 
   @override
   ConsumerState createState() => _UserStatScreenState();
@@ -55,6 +57,7 @@ class _UserStatScreenState extends ConsumerState<UserStatScreen>
   @override
   Widget build(BuildContext context) {
     return AppPage(
+      title: widget.showTitle ? context.l10n.common_stats_title : null,
       body: Builder(builder: (context) => _body(context)),
     );
   }

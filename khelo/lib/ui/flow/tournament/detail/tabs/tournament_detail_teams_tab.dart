@@ -12,10 +12,11 @@ import '../../../../../components/empty_screen.dart';
 import '../../../../../components/image_avatar.dart';
 import '../../../../../gen/assets.gen.dart';
 import '../../../../app_route.dart';
+import '../../team_picker/tournament_team_picker_view_model.dart';
 import '../tournament_detail_view_model.dart';
 
 class TournamentDetailTeamsTab extends ConsumerWidget {
-  final Function(List<TeamModel>) onSelected;
+  final Function(TournamentTeamPickerResult) onSelected;
 
   const TournamentDetailTeamsTab({
     super.key,
@@ -34,11 +35,11 @@ class TournamentDetailTeamsTab extends ConsumerWidget {
                 .any((element) => element.id == state.currentUserId),
         buttonTitle: context.l10n.tournament_detail_teams_select_btn,
         onTap: () async {
-          final selectedTeams = await AppRoute.teamSelection(
+          final result = await AppRoute.tournamentTeamPicker(
                   selectedTeams: state.tournament!.teams)
-              .push<List<TeamModel>>(context);
-          if (context.mounted && selectedTeams != null) {
-            onSelected.call(selectedTeams);
+              .push<TournamentTeamPickerResult>(context);
+          if (context.mounted && result != null) {
+            onSelected.call(result);
           }
         },
       );

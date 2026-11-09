@@ -10,11 +10,11 @@
 class $AssetsImagesGen {
   const $AssetsImagesGen();
 
-  /// File path: assets/images/app_logo_splash.png
-  String get appLogoSplash => 'assets/images/app_logo_splash.png';
+  /// File path: assets/images/app_logo_wordmark.svg
+  String get appLogoWordmark => 'assets/images/app_logo_wordmark.svg';
 
-  /// File path: assets/images/app_logo_text.png
-  String get appLogoText => 'assets/images/app_logo_text.png';
+  /// File path: assets/images/app_logo_mark.svg
+  String get appLogoMark => 'assets/images/app_logo_mark.svg';
 
   /// File path: assets/images/batsman.svg
   String get batsman => 'assets/images/batsman.svg';
@@ -24,9 +24,6 @@ class $AssetsImagesGen {
 
   /// File path: assets/images/ic_about_us.svg
   String get icAboutUs => 'assets/images/ic_about_us.svg';
-
-  /// File path: assets/images/ic_app_logo.svg
-  String get icAppLogo => 'assets/images/ic_app_logo.svg';
 
   /// File path: assets/images/ic_arrow_down.svg
   String get icArrowDown => 'assets/images/ic_arrow_down.svg';
@@ -157,17 +154,34 @@ class $AssetsImagesGen {
   /// File path: assets/images/other_ball.svg
   String get otherBall => 'assets/images/other_ball.svg';
 
+  /// File path: assets/images/splash_comma.svg
+  String get splashComma => 'assets/images/splash_comma.svg';
+
+  /// File path: assets/images/splash_dot.svg
+  String get splashDot => 'assets/images/splash_dot.svg';
+
+  /// File path: assets/images/splash_mark.svg
+  String get splashMark => 'assets/images/splash_mark.svg';
+
+  /// File path: assets/images/splash_sports.svg
+  String get splashSports => 'assets/images/splash_sports.svg';
+
+  /// File path: assets/images/splash_swoosh.svg
+  String get splashSwoosh => 'assets/images/splash_swoosh.svg';
+
+  /// File path: assets/images/splash_tamil.svg
+  String get splashTamil => 'assets/images/splash_tamil.svg';
+
   /// File path: assets/images/tennis_ball.svg
   String get tennisBall => 'assets/images/tennis_ball.svg';
 
   /// List of all assets
   List<String> get values => [
-        appLogoSplash,
-        appLogoText,
+        appLogoMark,
+        appLogoWordmark,
         batsman,
         bowler,
         icAboutUs,
-        icAppLogo,
         icArrowDown,
         icArrowForward,
         icBatSelected,
@@ -211,6 +225,12 @@ class $AssetsImagesGen {
         introGraphicLight,
         leatherBall,
         otherBall,
+        splashComma,
+        splashDot,
+        splashMark,
+        splashSports,
+        splashSwoosh,
+        splashTamil,
         tennisBall
       ];
 }

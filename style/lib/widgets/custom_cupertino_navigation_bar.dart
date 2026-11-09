@@ -35,11 +35,8 @@ class CustomCupertinoNavigationBar extends StatelessWidget
       isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
     );
 
-    // iOS nav bar background: slightly translucent white / dark
     final bgColor = backgroundColor ??
-        (isDark
-            ? const Color(0xF0000000) // 94% opaque true-black
-            : const Color(0xF2F9F9F9)); // ~95% opaque white
+        context.colorScheme.groupedBackground.withValues(alpha: 0.95);
 
     return Container(
       padding: padding,

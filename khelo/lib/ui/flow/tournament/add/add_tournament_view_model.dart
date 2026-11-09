@@ -1,14 +1,18 @@
+import 'package:data/api/match/match_model.dart';
 import 'package:data/api/team/team_model.dart';
+import 'package:data/api/tournament/tournament_details.dart';
 import 'package:data/api/tournament/tournament_model.dart';
 import 'package:data/errors/app_error.dart';
 import 'package:data/service/file_upload/file_upload_service.dart';
 import 'package:data/service/tournament/tournament_service.dart';
+import 'package:data/service/tournament_team/tournament_team_service.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:data/utils/constant/firebase_storage_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:khelo/domain/extensions/file_extension.dart';
+import 'package:khelo/ui/flow/tournament/team_picker/tournament_team_picker_view_model.dart';
 
 part 'add_tournament_view_model.freezed.dart';
 
@@ -17,6 +21,7 @@ final addTournamentStateProvider = StateNotifierProvider.autoDispose<
   final notifier = AddTournamentViewNotifier(
     ref.read(tournamentServiceProvider),
     ref.read(fileUploadServiceProvider),
+    ref.read(tournamentTeamServiceProvider),
     ref.read(currentUserPod)?.id,
   );
   ref.listen(currentUserPod, (previous, next) {
@@ -28,10 +33,29 @@ final addTournamentStateProvider = StateNotifierProvider.autoDispose<
 class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
   final FileUploadService _fileUploadService;
   final TournamentService _tournamentService;
+  final TournamentTeamService _tournamentTeamService;
+
+  /// Pool the teams were picked from; written to the tournament after saving.
+  String? _poolId;
+  bool _poolPicked = false;
+
+  final cityController = TextEditingController();
+  final groundController = TextEditingController();
+  final oversController = TextEditingController();
+  BallType? ballType;
+  TournamentDetails _initialDetails = const TournamentDetails();
+
+  TournamentDetails get details => TournamentDetails(
+        city: cityController.text.trim(),
+        ground: groundController.text.trim(),
+        ballType: ballType,
+        oversPerMatch: int.tryParse(oversController.text.trim()),
+      );
 
   AddTournamentViewNotifier(
     this._tournamentService,
     this._fileUploadService,
+    this._tournamentTeamService,
     String? userId,
   ) : super(AddTournamentState(
           startDate: DateTime.now(),
@@ -58,6 +82,29 @@ class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
       selectedType: editedTournament?.type ?? TournamentType.knockOut,
       teams: editedTournament?.teams ?? [],
     );
+    if (editedTournament != null) _loadDetails(editedTournament.id);
+  }
+
+  Future<void> _loadDetails(String tournamentId) async {
+    try {
+      final details =
+          await _tournamentService.getTournamentDetails(tournamentId);
+      if (!mounted) return;
+      _initialDetails = details;
+      cityController.text = details.city ?? '';
+      groundController.text = details.ground ?? '';
+      oversController.text = details.oversPerMatch?.toString() ?? '';
+      ballType = details.ballType;
+      onChange();
+    } catch (e) {
+      debugPrint(
+          "AddTournamentViewNotifier: error while loading details -> $e");
+    }
+  }
+
+  void onBallType(BallType type) {
+    ballType = type;
+    onChange();
   }
 
   Future<void> onImageChange({
@@ -92,7 +139,11 @@ class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
 
     state = state.copyWith(
       enableButton: name.isNotEmpty &&
-          (_editedTournament?.name != name ||
+          details.isComplete &&
+          (_editedTournament != null ||
+              state.teams.length >= minTournamentTeams) &&
+          (details != _initialDetails ||
+              _editedTournament?.name != name ||
               _editedTournament?.type != state.selectedType ||
               _editedTournament?.start_date != state.startDate ||
               _editedTournament?.end_date != state.endDate ||
@@ -140,6 +191,11 @@ class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
         state = state.copyWith(showDateError: true, loading: false);
         return;
       }
+      final details = this.details;
+      if (!details.isComplete) {
+        state = state.copyWith(loading: false);
+        return;
+      }
 
       final tournamentId = _tournamentService.generateTournamentId;
       final name = state.nameController.text.trim();
@@ -184,6 +240,10 @@ class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
       );
 
       await _tournamentService.createTournament(tournament);
+      await _tournamentService.saveTournamentDetails(tournament.id, details);
+      if (_poolPicked) {
+        await _tournamentTeamService.setTournamentPool(tournament.id, _poolId);
+      }
 
       state = state.copyWith(
           pop: true, loading: false, error: null, showDateError: false);
@@ -194,7 +254,9 @@ class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
     }
   }
 
-  void onSelectTeam(List<TeamModel> selectedTeams) {
+  void onSelectTeam(List<TeamModel> selectedTeams, {String? poolId}) {
+    _poolId = poolId;
+    _poolPicked = true;
     state = state.copyWith(teams: selectedTeams);
     onChange();
   }
@@ -212,6 +274,9 @@ class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
   @override
   void dispose() {
     state.nameController.dispose();
+    cityController.dispose();
+    groundController.dispose();
+    oversController.dispose();
     super.dispose();
   }
 }

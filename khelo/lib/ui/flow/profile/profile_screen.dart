@@ -7,6 +7,7 @@ import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/confirmation_dialog.dart';
 import 'package:khelo/components/error_snackbar.dart';
 import 'package:khelo/components/image_avatar.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/profile/components/complete_profile_progress.dart';
@@ -201,11 +202,34 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         children: [
           _settingItem(
             context,
+            icon: Assets.images.icStats,
+            title: context.l10n.profile_my_stats,
+            showChevron: true,
+            onTap: () => AppRoute.userStats().push(context),
+          ),
+          _hairlineDivider(context),
+          _settingItem(
+            context,
             icon: Assets.images.icNotificationBell,
             title: context.l10n.notification_title,
             child: toggleButton(context,
                 defaultEnabled: state.enableUserNotification,
                 onTap: (_) => notifier.onToggleUserNotificationChange()),
+          ),
+          _hairlineDivider(context),
+          _settingItem(
+            context,
+            leading: Icon(
+              Icons.pets_rounded,
+              size: 22,
+              color: context.colorScheme.textPrimary,
+            ),
+            title: context.l10n.mascot_setting_title,
+            child: toggleButton(context,
+                defaultEnabled: ref.read(mascotEnabledPod), onTap: (enabled) {
+              ref.read(mascotEnabledPod.notifier).state = enabled;
+              if (!enabled) ref.read(mascotProvider.notifier).hide();
+            }),
           ),
           _hairlineDivider(context),
           _settingItem(
@@ -280,7 +304,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
 
   Widget _settingItem(
     BuildContext context, {
-    required String icon,
+    String? icon,
+    Widget? leading,
     Color? color,
     required String title,
     VoidCallback? onTap,
@@ -293,13 +318,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen>
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
         child: Row(
           children: [
-            SvgPicture.asset(
-              icon,
-              height: 22,
-              width: 22,
-              colorFilter: ColorFilter.mode(
-                  color ?? context.colorScheme.textPrimary, BlendMode.srcIn),
-            ),
+            leading ??
+                SvgPicture.asset(
+                  icon!,
+                  height: 22,
+                  width: 22,
+                  colorFilter: ColorFilter.mode(
+                      color ?? context.colorScheme.textPrimary,
+                      BlendMode.srcIn),
+                ),
             const SizedBox(width: 14),
             Expanded(
               child: Text(

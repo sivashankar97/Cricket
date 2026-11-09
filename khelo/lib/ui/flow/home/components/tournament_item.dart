@@ -7,6 +7,7 @@ import 'package:khelo/ui/app_route.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
+import 'package:style/theme/colors.dart';
 import 'package:style/theme/shadows.dart';
 
 import '../../../../components/match_status_tag.dart';
@@ -16,7 +17,6 @@ import '../../../../gen/assets.gen.dart';
 /// iOS-style tournament card for the home screen horizontal list.
 ///
 /// Banner image fills 55% height. Footer has name + status badge + date.
-/// 12pt radius, no shadow — white card on grouped background.
 class TournamentItem extends StatelessWidget {
   final TournamentModel tournament;
   final EdgeInsets margin;
@@ -40,10 +40,7 @@ class TournamentItem extends StatelessWidget {
         width: width,
         margin: margin,
         clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: context.colorScheme.card,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        decoration: context.colorScheme.cardDecoration(radius: 18),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -69,19 +66,40 @@ class TournamentItem extends StatelessWidget {
   Widget _banner(BuildContext context, double width) {
     final bannerUrl = tournament.banner_img_url;
     if (bannerUrl == null) {
-      return ColoredBox(
-        // Primary tinted placeholder instead of solid red
-        color: context.colorScheme.primaryVariantOnSurface,
-        child: Center(
-          child: SvgPicture.asset(
-            Assets.images.icTournaments,
-            height: 32,
-            width: 32,
-            colorFilter: ColorFilter.mode(
-              context.colorScheme.primary,
-              BlendMode.srcATop,
-            ),
+      return DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [brandNavyCardColor, brandNavyColor],
           ),
+        ),
+        child: Stack(
+          children: [
+            Positioned(
+              right: -24,
+              top: -24,
+              child: Container(
+                height: 96,
+                width: 96,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: brandRedColor.withValues(alpha: 0.85),
+                ),
+              ),
+            ),
+            Center(
+              child: SvgPicture.asset(
+                Assets.images.icTournaments,
+                height: 32,
+                width: 32,
+                colorFilter: const ColorFilter.mode(
+                  textPrimaryDarkColor,
+                  BlendMode.srcATop,
+                ),
+              ),
+            ),
+          ],
         ),
       );
     }

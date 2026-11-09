@@ -1,6 +1,8 @@
 import 'package:data/api/match/match_model.dart';
 import 'package:data/api/team/team_model.dart';
+import 'package:data/api/tournament/tournament_details.dart';
 import 'package:data/api/tournament/tournament_model.dart';
+import 'package:data/service/tournament/tournament_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/components/won_by_message_text.dart';
@@ -17,6 +19,11 @@ import 'package:style/text/app_text_style.dart';
 
 import '../../../../../components/image_avatar.dart';
 import '../tournament_detail_view_model.dart';
+
+final _tournamentDetailsProvider = StreamProvider.autoDispose
+    .family<TournamentDetails, String>((ref, tournamentId) => ref
+        .read(tournamentServiceProvider)
+        .streamTournamentDetails(tournamentId));
 
 class TournamentDetailOverviewTab extends ConsumerWidget {
   final PageController controller;
@@ -36,7 +43,13 @@ class TournamentDetailOverviewTab extends ConsumerWidget {
         _featuredMatchesView(context, state.matches),
         _keyStatsView(context, state.keyStats),
         _teamsSquadsView(context, state.tournament!.teams),
-        _infoView(context, state.tournament!),
+        _infoView(
+          context,
+          state.tournament!,
+          ref
+              .watch(_tournamentDetailsProvider(state.tournament!.id))
+              .valueOrNull,
+        ),
       ],
     );
   }
@@ -332,7 +345,20 @@ class TournamentDetailOverviewTab extends ConsumerWidget {
     );
   }
 
-  Widget _infoView(BuildContext context, TournamentModel tournament) {
+  Widget _infoView(
+    BuildContext context,
+    TournamentModel tournament,
+    TournamentDetails? details,
+  ) {
+    final detailRows = <(String, String?)>[
+      (context.l10n.add_tournament_city, details?.city),
+      (context.l10n.add_tournament_ground, details?.ground),
+      (
+        context.l10n.add_tournament_ball_type,
+        details?.ballType?.getString(context)
+      ),
+      (context.l10n.add_tournament_overs, details?.oversPerMatch?.toString()),
+    ].where((row) => row.$2?.trim().isNotEmpty ?? false);
     return Padding(
       padding: const EdgeInsets.only(top: 24),
       child: Column(
@@ -370,6 +396,10 @@ class TournamentDetailOverviewTab extends ConsumerWidget {
                   context.l10n.tournament_detail_overview_type_title,
                   tournament.type.getString(context),
                 ),
+                for (final (title, value) in detailRows) ...[
+                  Divider(color: context.colorScheme.outline, height: 1),
+                  _infoCellView(context, title, value!),
+                ],
               ],
             ),
           ),

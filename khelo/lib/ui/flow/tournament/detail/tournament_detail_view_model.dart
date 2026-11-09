@@ -1,16 +1,18 @@
 import 'dart:async';
 
 import 'package:data/api/match/match_model.dart';
-import 'package:data/api/team/team_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
 import 'package:data/service/match/match_service.dart';
 import 'package:data/service/tournament/tournament_service.dart';
+import 'package:data/service/tournament_team/tournament_team_service.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:data/utils/combine_latest.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
+
+import '../team_picker/tournament_team_picker_view_model.dart';
 
 part 'tournament_detail_view_model.freezed.dart';
 
@@ -19,6 +21,7 @@ final tournamentDetailStateProvider = StateNotifierProvider.autoDispose<
   (ref) => TournamentDetailStateViewNotifier(
     ref.read(tournamentServiceProvider),
     ref.read(matchServiceProvider),
+    ref.read(tournamentTeamServiceProvider),
     ref.read(currentUserPod)?.id,
   ),
 );
@@ -27,12 +30,14 @@ class TournamentDetailStateViewNotifier
     extends StateNotifier<TournamentDetailState> {
   final TournamentService _tournamentService;
   final MatchService _matchService;
+  final TournamentTeamService _tournamentTeamService;
   StreamSubscription? _tournamentSubscription;
   StreamSubscription? _matchSubscription;
 
   TournamentDetailStateViewNotifier(
     this._tournamentService,
     this._matchService,
+    this._tournamentTeamService,
     String? userId,
   ) : super(TournamentDetailState(currentUserId: userId));
 
@@ -86,11 +91,15 @@ class TournamentDetailStateViewNotifier
     }
   }
 
-  void onTeamsSelected(List<TeamModel> teams) async {
+  void onTeamsSelected(TournamentTeamPickerResult result) async {
     if (state.tournament == null) return;
     try {
-      final teamIds = teams.map((e) => e.id).toList();
+      final teamIds = result.teams.map((e) => e.id).toList();
       await _tournamentService.updateTeamIds(state.tournament!.id, teamIds);
+      await _tournamentTeamService.setTournamentPool(
+        state.tournament!.id,
+        result.poolId,
+      );
     } catch (e) {
       state = state.copyWith(actionError: e);
       debugPrint(

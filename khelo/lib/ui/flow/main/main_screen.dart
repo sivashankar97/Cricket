@@ -1,3 +1,4 @@
+import 'package:data/service/auth/auth_service.dart';
 import 'package:data/service/device/device_service.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,8 +10,9 @@ import 'package:khelo/components/sign_in_required_view.dart';
 import 'package:khelo/gen/assets.gen.dart';
 import 'package:khelo/ui/flow/app_links/app_links_handler.dart';
 import 'package:khelo/ui/flow/my_game/my_game_tab_screen.dart';
+import 'package:khelo/ui/flow/play/play_screen.dart';
 import 'package:khelo/ui/flow/profile/profile_screen.dart';
-import 'package:khelo/ui/flow/stats/user_stat/user_stat_screen.dart';
+import 'package:khelo/ui/flow/auction/auction_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:style/animations/fade_indexed_stack.dart';
 import 'package:style/extensions/context_extensions.dart';
@@ -69,14 +71,20 @@ class _MainScreenState extends ConsumerState<MainScreen>
   Widget build(BuildContext context) {
     _observerShowNotificationPermissionPrompt(context);
     final hasSession = ref.watch(hasUserSession);
+    final isGuest = ref.watch(guestUserIdProvider).valueOrNull != null;
+    ref.listen(guestUserIdProvider, (previous, next) {
+      final wasGuest = previous?.valueOrNull != null;
+      if (!wasGuest && next.valueOrNull != null) changeTab(2);
+    });
     final List<Widget> widgets = <Widget>[
       const HomeScreen(),
       hasSession
           ? const MyGameTabScreen()
           : SignInRequiredView(title: context.l10n.my_cricket_screen_title),
-      hasSession
-          ? const UserStatScreen()
-          : SignInRequiredView(title: context.l10n.common_stats_title),
+      hasSession || isGuest
+          ? const PlayScreen()
+          : SignInRequiredView(title: context.l10n.play_screen_title),
+      const AuctionScreen(),
       hasSession
           ? ProfileScreen(changeTabToMyCricket: () {
               changeTab(1);
@@ -149,26 +157,36 @@ class _MainScreenState extends ConsumerState<MainScreen>
           children: widgets,
         ),
         bottomNavigationBar: AppBottomNavigationBar(
-          tabs: _tabItems(context),
+          leading: Padding(
+            padding: const EdgeInsets.all(3),
+            child: SvgPicture.asset(Assets.images.appLogoMark),
+          ),
+          tabs: _tabItems(context, onPrimaryBar: true),
           builder: (BuildContext context, void Function(int) onTabTap) {
             onTabChange = onTabTap;
           },
         ),
       );
 
-  List<TabItem> _tabItems(BuildContext context) => [
+  List<TabItem> _tabItems(BuildContext context, {bool onPrimaryBar = false}) =>
+      [
         TabItem(
-          tabIcon: _tabImage(context, imagePath: Assets.images.icHome),
+          tabIcon: _tabImage(context,
+              onPrimaryBar: onPrimaryBar, imagePath: Assets.images.icHome),
           tabActiveIcon: _tabImage(context,
-              imagePath: Assets.images.icHome, isActive: true),
+              onPrimaryBar: onPrimaryBar,
+              imagePath: Assets.images.icHome,
+              isActive: true),
           tabLabel: context.l10n.home_screen_title,
           route: '',
           onTap: () => setState(() => _currentTab = 0),
         ),
         TabItem(
-          tabIcon: _tabImage(context, imagePath: Assets.images.icCricket),
+          tabIcon: _tabImage(context,
+              onPrimaryBar: onPrimaryBar, imagePath: Assets.images.icCricket),
           tabActiveIcon: _tabImage(
             context,
+            onPrimaryBar: onPrimaryBar,
             imagePath: Assets.images.icCricket,
             isActive: true,
           ),
@@ -177,20 +195,37 @@ class _MainScreenState extends ConsumerState<MainScreen>
           onTap: () => setState(() => _currentTab = 1),
         ),
         TabItem(
-          tabIcon: _tabImage(context, imagePath: Assets.images.icStats),
-          tabActiveIcon: _tabImage(context,
-              imagePath: Assets.images.icStats, isActive: true),
-          tabLabel: context.l10n.common_stats_title,
+          tabIcon: _tabIcon(context,
+              onPrimaryBar: onPrimaryBar, icon: CupertinoIcons.game_controller),
+          tabActiveIcon: _tabIcon(context,
+              onPrimaryBar: onPrimaryBar,
+              icon: CupertinoIcons.game_controller_solid,
+              isActive: true),
+          tabLabel: context.l10n.tab_play_title,
           route: '',
           onTap: () => setState(() => _currentTab = 2),
         ),
         TabItem(
-          tabIcon: _tabImage(context, imagePath: Assets.images.icProfile),
-          tabActiveIcon: _tabImage(context,
-              imagePath: Assets.images.icProfile, isActive: true),
-          tabLabel: context.l10n.tab_profile_title,
+          tabIcon: _tabIcon(context,
+              onPrimaryBar: onPrimaryBar, icon: CupertinoIcons.hammer),
+          tabActiveIcon: _tabIcon(context,
+              onPrimaryBar: onPrimaryBar,
+              icon: CupertinoIcons.hammer_fill,
+              isActive: true),
+          tabLabel: context.l10n.tab_auction_title,
           route: '',
           onTap: () => setState(() => _currentTab = 3),
+        ),
+        TabItem(
+          tabIcon: _tabImage(context,
+              onPrimaryBar: onPrimaryBar, imagePath: Assets.images.icProfile),
+          tabActiveIcon: _tabImage(context,
+              onPrimaryBar: onPrimaryBar,
+              imagePath: Assets.images.icProfile,
+              isActive: true),
+          tabLabel: context.l10n.tab_profile_title,
+          route: '',
+          onTap: () => setState(() => _currentTab = 4),
         ),
       ];
 
@@ -200,16 +235,33 @@ class _MainScreenState extends ConsumerState<MainScreen>
     BuildContext context, {
     required String imagePath,
     bool isActive = false,
+    bool onPrimaryBar = false,
   }) {
-    final color = isActive
-        ? context.colorScheme.primary
-        : context.colorScheme.textDisabled;
+    final color = onPrimaryBar
+        ? context.colorScheme.onPrimary
+        : isActive
+            ? context.colorScheme.primary
+            : context.colorScheme.textDisabled;
     return SvgPicture.asset(
       imagePath,
       height: 24,
       width: 24,
       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
+  }
+
+  Widget _tabIcon(
+    BuildContext context, {
+    required IconData icon,
+    bool isActive = false,
+    bool onPrimaryBar = false,
+  }) {
+    final color = onPrimaryBar
+        ? context.colorScheme.onPrimary
+        : isActive
+            ? context.colorScheme.primary
+            : context.colorScheme.textDisabled;
+    return Icon(icon, size: 24, color: color);
   }
 
   void changeTab(int tabNumber) {

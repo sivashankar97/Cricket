@@ -2,56 +2,73 @@ import 'package:flutter/material.dart';
 
 import '../text/app_text_style.dart';
 
-// ── iOS HIG System Colors ────────────────────────────────────────────────────
+// ── Sports Tamil palette, taken from the logo: navy, red, white ─────────────
 
-// Primary accent — iOS system blue
-const primaryLightColor = Color(0xFF007AFF);
-const primaryDarkColor = Color(0xFF0A84FF);
+// Brand navy
+const brandNavyColor = Color(0xFF010127);
+const brandNavyCardColor = Color(0xFF12124A);
+const brandNavyBarColor = Color(0xFF0A0A3A);
 
-const primaryVariantLightColor = Color(0x26007AFF); // 15% opacity
-const primaryVariantDarkColor = Color(0x330A84FF); // 20% opacity
+// Brand red (live / selected / primary actions)
+const brandRedColor = Color(0xFFF9151D);
+const brandRedDeepColor = Color(0xFFB30A12);
 
-// Secondary — iOS system indigo (for secondary actions)
-const secondaryColor = Color(0xFF5856D6);
+/// Success only (sold, fours/sixes, done); the logo itself has no green.
+const positiveGreenColor = Color(0xFF22C55E);
 
-// Containers — iOS system gray hierarchy (light)
-// systemGray6 → systemGray5 → systemGray4
-const containerHighLightColor = Color(0x33636366);  // systemGray ~20%
-const containerNormalLightColor = Color(0x1F636366); // systemGray ~12%
-const containerLowLightColor = Color(0x0F636366);   // systemGray ~6%
+/// Live-match hero card.
+const liveCardGradient = LinearGradient(
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+  colors: [brandRedColor, brandRedDeepColor],
+);
 
-// Containers — dark mode equivalents
-const containerHighDarkColor = Color(0x3DEBEBF5);
-const containerNormalDarkColor = Color(0x29EBEBF5);
-const containerLowDarkColor = Color(0x14EBEBF5);
+// Primary accent
+const primaryLightColor = brandRedColor;
+const primaryDarkColor = brandRedColor;
 
-// Text — iOS label hierarchy (light)
-const textPrimaryLightColor = Color(0xFF000000);      // label
-const textSecondaryLightColor = Color(0x993C3C43);    // secondaryLabel
-const textDisabledLightColor = Color(0x4D3C3C43);     // tertiaryLabel
+const primaryVariantLightColor = Color(0x26F9151D);
+const primaryVariantDarkColor = Color(0x33F9151D);
 
-// Text — iOS label hierarchy (dark)
-const textPrimaryDarkColor = Color(0xFFFFFFFF);       // label dark
-const textSecondaryDarkColor = Color(0x99EBEBF5);     // secondaryLabel dark
-const textDisabledDarkColor = Color(0x4DEBEBF5);      // tertiaryLabel dark
+const secondaryColor = brandRedColor;
 
-// Separators — iOS style
-const outlineLightColor = Color(0x293C3C43);          // separator light
-const outlineDarkColor = Color(0x29545458);           // separator dark
+// Containers — navy tints (light)
+const containerHighLightColor = Color(0x2E010127);
+const containerNormalLightColor = Color(0x1C010127);
+const containerLowLightColor = Color(0x0F010127);
 
-// Surfaces — iOS system backgrounds
-const surfaceLightColor = Color(0xFFFFFFFF);           // systemBackground
-const surfaceDarkColor = Color(0xFF000000);            // systemBackground dark
+// Containers — white tints over navy (dark)
+const containerHighDarkColor = Color(0x3DFFFFFF);
+const containerNormalDarkColor = Color(0x26FFFFFF);
+const containerLowDarkColor = Color(0x14FFFFFF);
 
-// Grouped background — used for list screens
-const groupedBackgroundLightColor = Color(0xFFF2F2F7); // systemGroupedBackground
-const groupedBackgroundDarkColor = Color(0xFF1C1C1E);  // systemGroupedBackground dark
+// Text (light)
+const textPrimaryLightColor = brandNavyColor;
+const textSecondaryLightColor = Color(0x99010127);
+const textDisabledLightColor = Color(0x52010127);
 
-// Semantic awareness — aligned to iOS HIG
-const awarenessAlertColor = Color(0xFFFF3B30);        // iOS system red
-const awarenessPositiveColor = Color(0xFF34C759);     // iOS system green
-const awarenessWarningColor = Color(0xFFFF9F0A);      // iOS system orange
-const awarenessInfoColor = Color(0xFF007AFF);         // iOS system blue
+// Text (dark)
+const textPrimaryDarkColor = Color(0xFFFFFFFF);
+const textSecondaryDarkColor = Color(0xB3D9D9F0);
+const textDisabledDarkColor = Color(0x66D9D9F0);
+
+// Separators
+const outlineLightColor = Color(0x29010127);
+const outlineDarkColor = Color(0x29FFFFFF);
+
+// Surfaces (cards)
+const surfaceLightColor = Color(0xFFFFFFFF);
+const surfaceDarkColor = brandNavyCardColor;
+
+// Screen backgrounds
+const groupedBackgroundLightColor = Color(0xFFF3F3F8);
+const groupedBackgroundDarkColor = brandNavyColor;
+
+// Semantic awareness
+const awarenessAlertColor = brandRedColor;
+const awarenessPositiveColor = positiveGreenColor;
+const awarenessWarningColor = Color(0xFFFF9F0A);
+const awarenessInfoColor = Color(0xFF2F4FD8);
 
 final ThemeData _materialLightTheme = ThemeData.light(useMaterial3: true);
 final ThemeData _materialDarkTheme = ThemeData.dark(useMaterial3: true);
@@ -88,7 +105,7 @@ final ThemeData materialThemeDataLight = _materialLightTheme.copyWith(
   ),
   scaffoldBackgroundColor: groupedBackgroundLightColor,
   appBarTheme: _materialLightTheme.appBarTheme.copyWith(
-    backgroundColor: surfaceLightColor,
+    backgroundColor: groupedBackgroundLightColor,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
     scrolledUnderElevation: 0,
@@ -129,7 +146,7 @@ final ThemeData materialThemeDataDark = _materialDarkTheme.copyWith(
   ),
   scaffoldBackgroundColor: groupedBackgroundDarkColor,
   appBarTheme: _materialDarkTheme.appBarTheme.copyWith(
-    backgroundColor: surfaceDarkColor,
+    backgroundColor: groupedBackgroundDarkColor,
     surfaceTintColor: Colors.transparent,
     elevation: 0,
     scrolledUnderElevation: 0,
@@ -149,6 +166,7 @@ class AppColorScheme {
   final Color primaryVariant;
   final Color secondary;
   final Color surface;
+
   /// iOS systemGroupedBackground — `#F2F2F7` light / `#1C1C1E` dark.
   final Color groupedBackground;
   final Color outline;
@@ -252,7 +270,7 @@ final appColorSchemeDark = AppColorScheme(
   positive: awarenessPositiveColor,
   alert: awarenessAlertColor,
   warning: awarenessWarningColor,
-  info: awarenessInfoColor,
+  info: const Color(0xFF8FA2FF),
   onPrimary: textPrimaryDarkColor,
   onSecondary: textSecondaryDarkColor,
   onDisabled: textDisabledLightColor,

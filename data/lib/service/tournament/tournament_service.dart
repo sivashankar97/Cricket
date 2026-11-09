@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../api/ball_score/ball_score_model.dart';
 import '../../api/match/match_model.dart';
 import '../../api/team/team_model.dart';
+import '../../api/tournament/tournament_details.dart';
 import '../../api/tournament/tournament_model.dart';
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
@@ -72,6 +73,36 @@ class TournamentService {
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
+  }
+
+  DocumentReference<Map<String, dynamic>> _rawTournamentDoc(String id) =>
+      _firestore.collection(FireStoreConst.tournamentCollection).doc(id);
+
+  Future<void> saveTournamentDetails(
+    String tournamentId,
+    TournamentDetails details,
+  ) async {
+    try {
+      await _rawTournamentDoc(tournamentId).update(details.toJson());
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  Future<TournamentDetails> getTournamentDetails(String tournamentId) async {
+    try {
+      final snapshot = await _rawTournamentDoc(tournamentId).get();
+      return TournamentDetails.fromJson(snapshot.data());
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  Stream<TournamentDetails> streamTournamentDetails(String tournamentId) {
+    return _rawTournamentDoc(tournamentId)
+        .snapshots()
+        .map((snapshot) => TournamentDetails.fromJson(snapshot.data()))
+        .handleError((error, stack) => throw AppError.fromError(error, stack));
   }
 
   Future<TournamentModel> getTournamentById(String id) async {
