@@ -1,9 +1,9 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:data/api/tournament/tournament_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:khelo/components/app_image_provider.dart';
 import 'package:khelo/components/app_page.dart';
+import 'package:khelo/components/grouped_list.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/enum_extensions.dart';
 import 'package:khelo/domain/formatter/date_formatter.dart';
@@ -13,10 +13,10 @@ import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
 import 'package:style/text/app_text_style.dart';
+import 'package:style/theme/colors.dart';
+import 'package:style/theme/shadows.dart';
 
-import '../../../components/empty_screen.dart';
 import '../../../components/error_screen.dart';
-import '../../../gen/assets.gen.dart';
 import 'components/sliver_header_delegate.dart';
 
 class TournamentListScreen extends ConsumerStatefulWidget {
@@ -68,10 +68,12 @@ class _TournamentListScreenState extends ConsumerState<TournamentListScreen>
       );
     }
     if (state.groupTournaments.isEmpty) {
-      return EmptyScreen(
+      return BrandEmptyState(
+        icon: CupertinoIcons.rosette,
         title: context.l10n.tournament_list_empty_list_title,
-        description: context.l10n.tournament_list_empty_list_description,
-        isShowButton: false,
+        description: context.l10n.my_cricket_empty_tournaments_body,
+        buttonTitle: context.l10n.home_screen_create_tournament_btn,
+        onTap: () => AppRoute.addTournament().push(context),
       );
     }
 
@@ -83,7 +85,7 @@ class _TournamentListScreenState extends ConsumerState<TournamentListScreen>
       slivers: [
         ..._tournaments(context, state),
         SliverToBoxAdapter(
-          child: SizedBox(height: 16 + context.mediaQueryPadding.bottom),
+          child: SizedBox(height: 120 + context.mediaQueryPadding.bottom),
         ),
       ],
     );
@@ -99,13 +101,19 @@ class _TournamentListScreenState extends ConsumerState<TournamentListScreen>
           SliverPersistentHeader(
             pinned: true,
             delegate: SliverPersistentDelegate(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  key.format(context, DateFormatType.monthYear),
-                  style: AppTextStyle.header3
-                      .copyWith(color: context.colorScheme.textPrimary),
-                  textScaler: TextScaler.noScaling,
+              size: 44,
+              child: SizedBox.expand(
+                child: ColoredBox(
+                  color: context.colorScheme.groupedBackground,
+                  child: Align(
+                    alignment: Alignment.bottomLeft,
+                    child: MediaQuery.withNoTextScaling(
+                      child: SectionCaption(
+                        key.format(context, DateFormatType.monthYear),
+                        padding: const EdgeInsets.fromLTRB(32, 0, 32, 6),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -123,50 +131,65 @@ class _TournamentListScreenState extends ConsumerState<TournamentListScreen>
   }
 
   Widget _tournamentItem(BuildContext context, TournamentModel tournament) {
+    final cs = context.colorScheme;
     return OnTapScale(
       onTap: () =>
           AppRoute.tournamentDetail(tournamentId: tournament.id).push(context),
       child: Container(
-        padding: const EdgeInsets.all(16),
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: context.colorScheme.surface,
-          borderRadius: BorderRadius.circular(12),
-        ),
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 10),
+        decoration: cs.cardDecoration(radius: 18),
         child: Row(
           children: [
-            _profileImage(context, tournament.profile_img_url),
-            const SizedBox(width: 16),
+            _profileImage(tournament.profile_img_url),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     tournament.name,
-                    style: AppTextStyle.header4.copyWith(
-                      color: context.colorScheme.textPrimary,
+                    style: AppTextStyle.subtitle1.copyWith(
+                      color: cs.textPrimary,
+                      fontWeight: FontWeight.w700,
                     ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 2,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    context.l10n.tournament_list_match_title(
-                        tournament.match_ids.length),
-                    style: AppTextStyle.subtitle2.copyWith(
-                      color: context.colorScheme.textSecondary,
-                    ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      InfoChip(
+                        DateFormatter.formatDateRange(
+                          context,
+                          startDate: tournament.start_date,
+                          endDate: tournament.end_date,
+                          formatType: DateFormatType.dayMonth,
+                        ),
+                        icon: CupertinoIcons.calendar,
+                      ),
+                      InfoChip(
+                        context.l10n.tournament_list_match_title(
+                            tournament.match_ids.length),
+                        icon: CupertinoIcons.sportscourt,
+                      ),
+                      InfoChip(
+                        tournament.type.getString(context),
+                        color: brandRedColor,
+                        background: brandRedColor.withValues(alpha: 0.1),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  _scheduleAndTypeView(context, tournament),
                 ],
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: 8),
             Icon(
               CupertinoIcons.chevron_forward,
-              size: 16,
-              color: context.colorScheme.textDisabled,
+              size: 15,
+              color: cs.textDisabled,
             ),
           ],
         ),
@@ -174,59 +197,20 @@ class _TournamentListScreenState extends ConsumerState<TournamentListScreen>
     );
   }
 
-  Widget _profileImage(BuildContext context, String? imageUrl) {
+  Widget _profileImage(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return const BrandIconThumb(CupertinoIcons.rosette);
+    }
     return Container(
-      height: 82,
-      width: 82,
+      height: 64,
+      width: 64,
       decoration: BoxDecoration(
-          color: context.colorScheme.surface,
-          borderRadius: BorderRadius.circular(6),
-          image: (imageUrl != null)
-              ? DecorationImage(
-                  image: CachedNetworkImageProvider(imageUrl),
-                  fit: BoxFit.cover,
-                )
-              : null),
-      child: imageUrl == null
-          ? Center(
-              child: SvgPicture.asset(Assets.images.icTournaments,
-                  height: 32,
-                  width: 32,
-                  colorFilter: ColorFilter.mode(
-                    context.colorScheme.textSecondary,
-                    BlendMode.srcATop,
-                  )),
-            )
-          : null,
-    );
-  }
-
-  Widget _scheduleAndTypeView(
-    BuildContext context,
-    TournamentModel tournament,
-  ) {
-    return Text.rich(TextSpan(
-        text: DateFormatter.formatDateRange(
-          context,
-          startDate: tournament.start_date,
-          endDate: tournament.end_date,
-          formatType: DateFormatType.dayMonth,
+        borderRadius: BorderRadius.circular(14),
+        image: DecorationImage(
+          image: appImageProvider(imageUrl),
+          fit: BoxFit.cover,
         ),
-        style: AppTextStyle.caption
-            .copyWith(color: context.colorScheme.textDisabled),
-        children: [
-          WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Container(
-                height: 5,
-                width: 5,
-                margin: const EdgeInsets.symmetric(horizontal: 8),
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: context.colorScheme.textSecondary,
-                ),
-              )),
-          TextSpan(text: tournament.type.getString(context))
-        ]));
+      ),
+    );
   }
 }

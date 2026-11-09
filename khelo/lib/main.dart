@@ -4,6 +4,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/ui/app.dart';
@@ -18,6 +19,11 @@ const appBaseUrl = 'https://khelo.canopas.com';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  LicenseRegistry.addLicense(() async* {
+    final license =
+        await rootBundle.loadString('assets/fonts/NotoSansTamil-OFL.txt');
+    yield LicenseEntryWithLineBreaks(['NotoSansTamil'], license);
+  });
   runApp(const SplashScreen());
   final (container, _) = await (
     _initContainer(),

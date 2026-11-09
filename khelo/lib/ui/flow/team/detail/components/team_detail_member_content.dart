@@ -9,6 +9,8 @@ import 'package:khelo/ui/flow/team/detail/team_detail_view_model.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
+import 'package:khelo/components/mascot/mascot_on_appear.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 
 class TeamDetailMemberContent extends ConsumerWidget {
   const TeamDetailMemberContent({super.key});
@@ -47,14 +49,17 @@ class TeamDetailMemberContent extends ConsumerWidget {
         ],
       );
     } else {
-      return EmptyScreen(
-        title: context.l10n.team_detail_empty_member_title,
-        description: state.team!.created_by == state.currentUserId
-            ? context.l10n.team_detail_empty_member_description_text
-            : context.l10n.team_detail_visitor_empty_member_description_text,
-        isShowButton: isAdminOrOwner,
-        buttonTitle: context.l10n.team_list_add_members_title,
-        onTap: () => AppRoute.addTeamMember(team: state.team!).push(context),
+      return MascotOnAppear(
+        reaction: MascotReaction.noPlayers,
+        child: EmptyScreen(
+          title: context.l10n.team_detail_empty_member_title,
+          description: state.team!.created_by == state.currentUserId
+              ? context.l10n.team_detail_empty_member_description_text
+              : context.l10n.team_detail_visitor_empty_member_description_text,
+          isShowButton: isAdminOrOwner,
+          buttonTitle: context.l10n.team_list_add_members_title,
+          onTap: () => AppRoute.addTeamMember(team: state.team!).push(context),
+        ),
       );
     }
   }

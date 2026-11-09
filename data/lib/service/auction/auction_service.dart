@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -373,6 +374,7 @@ class AuctionService {
         throw const AuctionActionException(AuctionError.notLive);
       }
       final poolName = await _availablePoolName(Auction.fromJson(beforeData));
+      final logos = await _teamLogoUrls(Auction.fromJson(beforeData));
 
       return await _firestore.runTransaction((tx) async {
         final auctionRef = _auctions.doc(auctionId);
@@ -409,7 +411,7 @@ class AuctionService {
           throw const AuctionActionException(AuctionError.tooManyPlayers);
         }
 
-        _writeTournament(tx, completed, ids, poolName, now);
+        _writeTournament(tx, completed, ids, poolName, now, logos);
         tx.set(
           auctionRef,
           completed.withTournament(ids.tournament).toJson(),
@@ -450,12 +452,26 @@ class AuctionService {
     return candidates.last;
   }
 
+  /// Team logos as inline JPEG data URLs, keyed by auction team id.
+  Future<Map<String, String>> _teamLogoUrls(Auction auction) async {
+    final logos = <String, String>{};
+    for (final team in auction.teams.where((t) => t.hasLogo)) {
+      final doc = await _photos.doc(auction.teamLogoId(team)).get();
+      final bytes = (doc.data()?['data'] as Blob?)?.bytes;
+      if (bytes != null) {
+        logos[team.id] = 'data:image/jpeg;base64,${base64Encode(bytes)}';
+      }
+    }
+    return logos;
+  }
+
   void _writeTournament(
     Transaction tx,
     Auction auction,
     _GeneratedIds ids,
     String poolName,
     DateTime now,
+    Map<String, String> logos,
   ) {
     final owner = auction.createdBy;
     final teamsRef = _firestore.collection(FireStoreConst.teamsCollection);
@@ -500,7 +516,7 @@ class AuctionService {
         FireStoreConst.name: team.name,
         FireStoreConst.nameLowercase: team.name.caseAndSpaceInsensitive,
         FireStoreConst.nameInitial: team.initials.toUpperCase(),
-        FireStoreConst.profileImageUrl: null,
+        FireStoreConst.profileImageUrl: logos[team.id],
         FireStoreConst.createdBy: owner,
         FireStoreConst.createdAt: now.toIso8601String(),
         FireStoreConst.createdTime: Timestamp.fromDate(now),

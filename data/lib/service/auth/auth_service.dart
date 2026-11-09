@@ -1,10 +1,7 @@
-import 'dart:convert';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
@@ -195,7 +192,12 @@ class AuthService {
       case 'user-not-found':
       case 'wrong-password':
       case 'invalid-credential':
+      case 'invalid-login-credentials':
         return 'Email or password is incorrect. Create an account if you are new.';
+      case 'too-many-requests':
+        return 'Too many attempts. Wait a few minutes, or reset your password.';
+      case 'user-disabled':
+        return 'This account has been turned off. Contact support for help.';
       case 'operation-not-allowed':
         return 'Email sign-in is not available yet.';
       case 'unauthorized-domain':
@@ -242,37 +244,6 @@ class AuthService {
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
-  }
-
-  /// Exchanges the one-time code from the WhatsApp login link (sent by the
-  /// service in `khelo/whatsapp_login`) for a Firebase custom token.
-  Future<void> signInWithWhatsAppCode(
-    String code, {
-    required String apiBaseUrl,
-  }) async {
-    final http.Response response;
-    try {
-      response = await http.post(
-        Uri.parse('$apiBaseUrl/exchange'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'code': code.trim()}),
-      );
-    } catch (error, stack) {
-      throw AppError.fromError(error, stack);
-    }
-    if (response.statusCode == 400) {
-      throw const AppError(
-        message:
-            'This login link has expired or was already used. Send "Hi login" on WhatsApp again.',
-      );
-    }
-    if (response.statusCode != 200) {
-      throw AppError(
-        message: 'WhatsApp login is unavailable (${response.statusCode}).',
-      );
-    }
-    final token = (jsonDecode(response.body) as Map<String, dynamic>)['token'];
-    await signInWithCustomToken(token as String);
   }
 
   Future<void> _onVerificationSuccess(

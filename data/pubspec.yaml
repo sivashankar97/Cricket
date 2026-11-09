@@ -16,6 +16,7 @@ dependencies:
 
   # storage
   cloud_firestore: ^5.4.3
+  crypto: ^3.0.3
   firebase_messaging: ^15.0.2
 
   # auth

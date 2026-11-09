@@ -1,6 +1,8 @@
 import 'package:data/errors/app_error.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:khelo/components/mascot/mascot_on_appear.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/components/place_holder_screen.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 
@@ -15,7 +17,10 @@ class ErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (error is NoConnectionError) {
-      return _noInternetConnectionScreen(context);
+      return MascotOnAppear(
+        reaction: MascotReaction.internet,
+        child: _noInternetConnectionScreen(context),
+      );
     } else {
       return _errorScreen(context);
     }

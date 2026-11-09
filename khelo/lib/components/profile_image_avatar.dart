@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:khelo/components/app_image_provider.dart';
+import 'package:khelo/domain/image/profile_photo.dart';
 import 'package:khelo/domain/platform/local_file_image.dart';
 import 'package:khelo/gen/assets.gen.dart';
 import 'package:style/animations/on_tap_scale.dart';
@@ -45,6 +47,8 @@ class ProfileImageAvatar extends StatelessWidget {
     );
   }
 
+  bool get _inline => ProfilePhoto.isInline(imageUrl) && !isLoading;
+
   Widget _roundedImageView(BuildContext context) {
     return Container(
       height: size,
@@ -58,8 +62,13 @@ class ProfileImageAvatar extends StatelessWidget {
                   image: localFileImage(filePath!),
                   fit: BoxFit.cover,
                 )
-              : null),
-      child: (filePath != null)
+              : _inline
+                  ? DecorationImage(
+                      image: appImageProvider(imageUrl!),
+                      fit: BoxFit.cover,
+                    )
+                  : null),
+      child: (filePath != null || _inline)
           ? null
           : (imageUrl != null && !isLoading)
               ? CachedNetworkImage(

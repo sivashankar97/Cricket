@@ -146,6 +146,121 @@ void main() {
     });
   });
 
+  group('MatchFormat', () {
+    test('1, 2 and 5 overs with 2, 3 and 5 wickets', () {
+      expect(MatchFormat.options.map((f) => (f.balls, f.wickets)),
+          [(6, 2), (12, 3), (30, 5)]);
+    });
+
+    test('unknown over counts fall back to two overs', () {
+      expect(MatchFormat.fromOvers(5), MatchFormat.fiveOvers);
+      expect(MatchFormat.fromOvers(7), MatchFormat.twoOvers);
+    });
+
+    test('an innings bowls the format\'s balls and ends on its wickets', () {
+      var innings = Innings.start(seed: 3, format: MatchFormat.fiveOvers);
+      expect(innings.deliveries, hasLength(30));
+      for (var i = 0; i < 4; i++) {
+        innings = innings.record(ShotResult.out);
+      }
+      expect(innings.isOver, isFalse);
+      expect(innings.record(ShotResult.out).isOver, isTrue);
+
+      var short = Innings.start(seed: 3, format: MatchFormat.oneOver);
+      for (var i = 0; i < 6; i++) {
+        short = short.record(ShotResult.dot);
+      }
+      expect(short.isOver, isTrue);
+    });
+
+    test('the first balls are the same whatever the format', () {
+      expect(
+        Innings.start(seed: 9, format: MatchFormat.oneOver).deliveries,
+        Innings.start(seed: 9).deliveries.take(6),
+      );
+    });
+
+    test('overs text', () {
+      expect(oversText(0), '0.0');
+      expect(oversText(10), '1.4');
+      expect(oversText(12), '2.0');
+    });
+  });
+
+  group('replay', () {
+    test('rebuilds an innings with its tap offsets', () {
+      final played = Innings.start(seed: 4)
+          .record(ShotResult.six, offsetMs: 10)
+          .record(ShotResult.dot);
+      final replayed = Innings.replay(
+        seed: 4,
+        format: MatchFormat.twoOvers,
+        balls: [(ShotResult.six, 10), (ShotResult.dot, null)],
+      );
+      expect(replayed.results, played.results);
+      expect(replayed.offsets, [10, null]);
+      expect(replayed.runs, 6);
+    });
+  });
+
+  group('matchOutcome', () {
+    const format = MatchFormat.twoOvers;
+
+    test('the chaser passing the score wins by wickets left', () {
+      final outcome = matchOutcome(
+          firstRuns: 20, secondRuns: 21, secondWickets: 1, format: format);
+      expect(outcome.winner, MatchWinner.secondBatter);
+      expect(outcome.margin, 2);
+      expect(outcome.byWickets, isTrue);
+    });
+
+    test('the first batter defending wins by runs', () {
+      final outcome = matchOutcome(
+          firstRuns: 30, secondRuns: 22, secondWickets: 3, format: format);
+      expect(outcome.winner, MatchWinner.firstBatter);
+      expect(outcome.margin, 8);
+    });
+
+    test('equal scores are a tie', () {
+      expect(
+        matchOutcome(
+                firstRuns: 15, secondRuns: 15, secondWickets: 0, format: format)
+            .winner,
+        MatchWinner.tie,
+      );
+    });
+  });
+
+  group('toss and commentary', () {
+    test('both players see the same toss and commentary line', () {
+      expect(tossLandsHeads(10), isTrue);
+      expect(tossLandsHeads(11), isFalse);
+      expect(commentaryVariant(77, 3), commentaryVariant(77, 3));
+      for (var ball = 0; ball < 30; ball++) {
+        expect(commentaryVariant(123456, ball), inInclusiveRange(0, 2));
+      }
+    });
+  });
+
+  group('progress', () {
+    test('XP rewards runs, boundaries and wins', () {
+      expect(
+          xpForGame(runs: 20, fours: 1, sixes: 2, won: true), 20 + 2 + 8 + 25);
+      expect(xpForGame(runs: 0, fours: 0, sixes: 0), 5);
+    });
+
+    test('levels need 100, then 150, then 200 XP', () {
+      expect(levelForXp(0).level, 1);
+      expect(levelForXp(99).level, 1);
+      expect(levelForXp(100).level, 2);
+      expect(levelForXp(249).level, 2);
+      final third = levelForXp(260);
+      expect(third.level, 3);
+      expect(third.xpInLevel, 10);
+      expect(third.xpForNext, 200);
+    });
+  });
+
   group('challengeWinner', () {
     test('the higher score wins', () {
       expect(challengeWinner(creatorRuns: 30, opponentRuns: 31),

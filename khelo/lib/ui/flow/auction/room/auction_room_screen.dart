@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:data/api/auction/auction_models.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +10,8 @@ import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/confirmation_dialog.dart';
 import 'package:khelo/components/error_screen.dart';
 import 'package:khelo/components/error_snackbar.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:style/extensions/context_extensions.dart';
@@ -36,8 +39,33 @@ class AuctionRoomScreen extends ConsumerStatefulWidget {
 
 class _AuctionRoomScreenState extends ConsumerState<AuctionRoomScreen>
     with AuctionActionRunner {
+  Set<String>? _seenLogIds;
+
+  /// Cheers players sold or left unsold while the room is open (admins and
+  /// viewers alike); history that was already there is skipped.
+  void _reactToLog(
+    AsyncValue<List<AuctionLogEntry>>? previous,
+    AsyncValue<List<AuctionLogEntry>> next,
+  ) {
+    final entries = next.valueOrNull;
+    if (entries == null) return;
+    final seen = _seenLogIds ??=
+        (previous?.valueOrNull ?? entries).map((e) => e.id).toSet();
+    final fresh = entries.where((e) => seen.add(e.id)).toList();
+    final last = fresh.lastWhereOrNull((e) =>
+        e.type == AuctionLogType.sold || e.type == AuctionLogType.unsold);
+    if (last == null) return;
+    ref.read(mascotProvider.notifier).react(
+          last.type == AuctionLogType.sold
+              ? MascotReaction.auctionSold
+              : MascotReaction.auctionUnsold,
+          top: true,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
+    ref.listen(auctionLogProvider(widget.auctionId), _reactToLog);
     final state = ref.watch(auctionProvider(widget.auctionId));
     final auction = state.valueOrNull;
     final uid = ref.watch(currentUserPod)?.id;

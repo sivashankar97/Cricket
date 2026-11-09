@@ -4,7 +4,5 @@
 .firebase/
 vault/
 dart_defines.env
-khelo/whatsapp_login/.env
-khelo/whatsapp_login/node_modules/
 khelo/secrets/
 *firebase-adminsdk*.json

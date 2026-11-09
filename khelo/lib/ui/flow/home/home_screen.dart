@@ -11,15 +11,16 @@ import 'package:khelo/components/empty_screen.dart';
 import 'package:khelo/components/error_screen.dart';
 import 'package:khelo/components/image_avatar.dart';
 import 'package:khelo/components/mascot/mascot_controller.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/enum_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
+import 'package:khelo/ui/flow/home/components/live_match_card.dart';
 import 'package:khelo/ui/flow/home/components/match_item.dart';
 import 'package:khelo/ui/flow/home/components/tournament_item.dart';
 import 'package:khelo/ui/flow/home/global_cricket/global_cricket_section.dart';
 import 'package:khelo/ui/flow/home/home_view_model.dart';
 import 'package:style/animations/on_tap_scale.dart';
-import 'package:style/button/action_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
 import 'package:style/text/app_text_style.dart';
@@ -38,6 +39,9 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   /// Home rows show only the latest few; "View all" lists the rest.
   static const _homeRowLimit = 5;
+
+  /// Tablets and desktop get a centred column instead of edge-to-edge rows.
+  static const _maxContentWidth = 960.0;
 
   late HomeViewNotifier notifier;
 
@@ -68,8 +72,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     ref.read(mascotProvider.notifier).show(
           MascotPose.welcome,
           name == null || name.isEmpty
-              ? context.l10n.mascot_welcome_guest
-              : context.l10n.mascot_welcome_named(name),
+              ? mascotText.mascot_welcome_guest
+              : mascotText.mascot_welcome_named(name),
           onceKey: 'home_welcome',
           onlyWhenIdle: true,
           delay: const Duration(milliseconds: 900),
@@ -83,27 +87,87 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final cs = context.colorScheme;
 
     return AppPage(
-      titleWidget: SvgPicture.asset(
-        Assets.images.appLogoWordmark,
-        height: 40,
-        theme: SvgTheme(currentColor: cs.textPrimary),
-      ),
-      actions: state.matches.isNotEmpty
-          ? [
-              actionButton(
-                context,
-                icon: Icon(
+      titleWidget: _greeting(context),
+      actions: [
+        if (state.matches.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(right: 12),
+            child: OnTapScale(
+              onTap: () => AppRoute.searchHome.push(context),
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: cs.card,
+                  shape: BoxShape.circle,
+                  boxShadow: cs.cardShadow,
+                ),
+                child: Icon(
                   CupertinoIcons.search,
                   color: cs.primary,
-                  size: 22,
+                  size: 20,
                 ),
-                onPressed: () => AppRoute.searchHome.push(context),
               ),
-            ]
-          : null,
+            ),
+          ),
+      ],
       body: Builder(builder: (context) {
         return _body(context, notifier, state);
       }),
+    );
+  }
+
+  /// Logo mark, "Good evening!" and the player's first name (or Guest mode).
+  Widget _greeting(BuildContext context) {
+    final cs = context.colorScheme;
+    final hour = DateTime.now().hour;
+    final greeting = hour < 12
+        ? context.l10n.home_greeting_morning
+        : hour < 17
+            ? context.l10n.home_greeting_afternoon
+            : context.l10n.home_greeting_evening;
+    final name = ref.watch(currentUserPod)?.name?.trim();
+    return Row(
+      children: [
+        Container(
+          width: 40,
+          height: 40,
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: cs.card,
+            shape: BoxShape.circle,
+            boxShadow: cs.cardShadow,
+          ),
+          child: SvgPicture.asset(Assets.images.appLogoMark),
+        ),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                greeting,
+                maxLines: 1,
+                style: AppTextStyle.caption.copyWith(
+                  color: cs.textSecondary,
+                ),
+              ),
+              Text(
+                name == null || name.isEmpty
+                    ? context.l10n.home_greeting_guest
+                    : name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.header4.copyWith(
+                  color: cs.textPrimary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -122,13 +186,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    return ListView(
+    List<MatchModel> group(MatchStatusLabel label) =>
+        _homeOrder(label, state.groupMatches[label] ?? const []);
+    final live = group(MatchStatusLabel.live);
+    final upcoming = group(MatchStatusLabel.upcoming);
+    final finished = group(MatchStatusLabel.finished);
+
+    final list = ListView(
       padding:
-          context.mediaQueryPadding + const EdgeInsets.only(top: 8, bottom: 24),
+          context.mediaQueryPadding + const EdgeInsets.only(top: 4, bottom: 24),
       children: [
+        // ── Live matches ─────────────────────────────────────────────────────
+        if (live.isNotEmpty) ...[
+          _sectionHeader(
+            context,
+            title: context.l10n.home_section_live(live.length),
+            live: true,
+            showViewAll: true,
+            onViewAll: () =>
+                AppRoute.viewAll(status: MatchStatusLabel.live).push(context),
+          ),
+          LiveMatchCarousel(matches: live.take(_homeRowLimit).toList()),
+        ],
+
         // ── Quick Actions ────────────────────────────────────────────────────
-        _quickActionsRow(context),
         const SizedBox(height: 4),
+        _quickActionsRow(context),
+
+        // ── Upcoming matches ─────────────────────────────────────────────────
+        if (upcoming.isNotEmpty)
+          _matchRow(
+            context,
+            title: context.l10n.home_section_upcoming,
+            label: MatchStatusLabel.upcoming,
+            matches: upcoming,
+          ),
 
         // ── Tournaments ──────────────────────────────────────────────────────
         if (state.tournaments.isNotEmpty) ...[
@@ -145,25 +237,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         ),
 
+        // ── Recent results ───────────────────────────────────────────────────
+        if (finished.isNotEmpty)
+          _matchRow(
+            context,
+            title: context.l10n.home_section_finished,
+            label: MatchStatusLabel.finished,
+            matches: finished,
+          ),
+
         // ── Leaderboard ──────────────────────────────────────────────────────
         if (state.leaderboard.isNotEmpty) ...[
           _leaderboardSection(context, state.leaderboard),
         ],
 
-        // ── Matches ──────────────────────────────────────────────────────────
-        state.matches.isNotEmpty
-            ? _matchesSection(context, state)
-            : SizedBox(
-                height: context.mediaQuerySize.height /
-                    (state.tournaments.isEmpty ? 1.3 : 2),
-                child: EmptyScreen(
-                  title: context.l10n.home_screen_no_matches_title,
-                  description:
-                      context.l10n.home_screen_no_matches_description_text,
-                  isShowButton: false,
-                ),
-              ),
+        if (state.matches.isEmpty)
+          SizedBox(
+            height: context.mediaQuerySize.height /
+                (state.tournaments.isEmpty ? 1.3 : 2),
+            child: EmptyScreen(
+              title: context.l10n.home_screen_no_matches_title,
+              description: context.l10n.home_screen_no_matches_description_text,
+              isShowButton: false,
+            ),
+          ),
       ],
+    );
+
+    return Align(
+      alignment: Alignment.topCenter,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: _maxContentWidth),
+        child: list,
+      ),
     );
   }
 
@@ -258,10 +364,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     } else {
       ref.read(mascotProvider.notifier).show(
             MascotPose.help,
-            context.l10n.mascot_sign_in_to_create,
-            lift: MascotController.signInOptionsLift,
+            mascotText.mascot_sign_in_to_create,
+            allowFun: false,
           );
-      AppRoute.phoneLogin.push(context);
+      AppRoute.signIn.push(context);
     }
   }
 
@@ -272,6 +378,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _sectionHeader(
     BuildContext context, {
     required String title,
+    bool live = false,
     bool showViewAll = false,
     VoidCallback? onViewAll,
   }) {
@@ -280,6 +387,24 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
       child: Row(
         children: [
+          if (live) ...[
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: brandRedColor,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: brandRedColor.withValues(alpha: 0.5),
+                    blurRadius: 8,
+                    spreadRadius: 1,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
           Expanded(
             child: Text(
               title,
@@ -473,41 +598,36 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ── Matches section ──────────────────────────────────────────────────────────
+  // ── Upcoming / finished rows ─────────────────────────────────────────────
 
-  Widget _matchesSection(BuildContext context, HomeViewState state) {
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: state.groupMatches.length,
-      itemBuilder: (context, index) {
-        final entry = state.groupMatches.entries.elementAt(index);
-        if (entry.value.isEmpty) return const SizedBox();
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _sectionHeader(
-              context,
-              title: entry.key.getString(context),
-              showViewAll: true,
-              onViewAll: () =>
-                  AppRoute.viewAll(status: entry.key).push(context),
-            ),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              clipBehavior: Clip.none,
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Row(
-                children: _homeOrder(entry.key, entry.value)
-                    .take(_homeRowLimit)
-                    .map((match) => MatchItem(match: match))
-                    .toList(),
-              ),
-            ),
-          ],
-        );
-      },
+  Widget _matchRow(
+    BuildContext context, {
+    required String title,
+    required MatchStatusLabel label,
+    required List<MatchModel> matches,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _sectionHeader(
+          context,
+          title: title,
+          showViewAll: true,
+          onViewAll: () => AppRoute.viewAll(status: label).push(context),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          clipBehavior: Clip.none,
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: matches
+                .take(_homeRowLimit)
+                .map((match) => MatchItem(match: match))
+                .toList(),
+          ),
+        ),
+      ],
     );
   }
 }

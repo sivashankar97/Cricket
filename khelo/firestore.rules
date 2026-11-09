@@ -10,9 +10,47 @@ service cloud.firestore {
       return request.auth != null && !isGuest();
     }
 
-    // Everything except auctions and their photos: any signed-in user.
+    // Everything except auctions, their photos and private contact details:
+    // any signed-in user.
     match /{collection}/{document=**} {
-      allow read, write: if signedIn() && !(collection in ['auctions', 'photos']);
+      allow read, write: if signedIn()
+        && !(collection in ['auctions', 'photos', 'user_private',
+                            'phone_index', 'player_claims']);
+    }
+
+    // A player's mobile number: only they can read or change it.
+    match /user_private/{userId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+
+    // Hashed mobile number -> player id. Exact lookups only (no listing).
+    // Only the player or the organizer who added them can change an entry.
+    match /phone_index/{key} {
+      allow get: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.created_by == request.auth.uid;
+      allow update, delete: if signedIn()
+        && (resource.data.user_id == request.auth.uid
+            || resource.data.created_by == request.auth.uid);
+    }
+
+    // "That added player is me" requests; the organizer approves or declines.
+    match /player_claims/{claimId} {
+      allow get: if signedIn()
+        && (claimId.matches('.*_' + request.auth.uid)
+            || resource.data.organizer_id == request.auth.uid);
+      allow list: if signedIn()
+        && (resource.data.claimant_id == request.auth.uid
+            || resource.data.organizer_id == request.auth.uid);
+      allow create: if signedIn()
+        && claimId == request.resource.data.player_id + '_' + request.auth.uid
+        && request.resource.data.claimant_id == request.auth.uid
+        && request.resource.data.status in ['pending', 'dismissed'];
+      allow update: if signedIn()
+        && resource.data.organizer_id == request.auth.uid
+        && request.resource.data.claimant_id == resource.data.claimant_id
+        && request.resource.data.player_id == resource.data.player_id
+        && request.resource.data.status in ['approved', 'declined'];
     }
 
     match /matches/{document=**} {

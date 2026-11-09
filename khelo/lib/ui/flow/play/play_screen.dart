@@ -1,7 +1,13 @@
+import 'dart:math';
+
+import 'package:data/api/play/play_match.dart';
 import 'package:data/api/play/play_models.dart';
+import 'package:data/service/play/play_service.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/components/app_page.dart';
+import 'package:khelo/components/error_snackbar.dart';
 import 'package:khelo/components/image_avatar.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/formatter/date_formatter.dart';
@@ -13,9 +19,11 @@ import 'package:style/theme/colors.dart';
 import 'package:style/theme/shadows.dart';
 
 import '../../../domain/play/cricket_game.dart';
+import '../../../domain/play/play_progress.dart';
 import 'game/play_game_screen.dart';
+import 'match/play_match_screen.dart';
+import 'play_opponent_sheet.dart';
 import 'play_providers.dart';
-import 'select_opponent_sheet.dart';
 
 /// Play tab dashboard: daily challenge, quick play / challenge actions,
 /// challenges, leaderboard and recent games.
@@ -39,6 +47,21 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
     final challenges = ref.watch(playChallengesProvider).valueOrNull ?? [];
     final recent = ref.watch(playRecentGamesProvider).valueOrNull ?? [];
     final weekly = ref.watch(playWeeklyGamesProvider).valueOrNull ?? [];
+    final allGames = ref.watch(playAllGamesProvider).valueOrNull;
+    final progress = allGames == null ? null : PlayProgress.fromGames(allGames);
+    final now = DateTime.now();
+    final liveMatches = (ref.watch(playMatchesProvider).valueOrNull ?? [])
+        .where((match) => match.status.isOpen && !match.isExpired(now))
+        .toList();
+    ref.listen(playAllGamesProvider, (previous, next) {
+      final before = previous?.valueOrNull;
+      final after = next.valueOrNull;
+      if (before == null || after == null) return;
+      final had = PlayProgress.fromGames(before).badges;
+      for (final badge in PlayProgress.fromGames(after).badges) {
+        if (!had.contains(badge)) _announceBadge(badge);
+      }
+    });
 
     final myDailyBest = rankBestScores(
       dailyGames.where((game) => game.userId == userId).toList(),
@@ -46,14 +69,20 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
     ).firstOrNull;
     final dailyPlayers = dailyGames.map((game) => game.userId).toSet().length;
 
+    // Centered column on tablets and desktop.
+    final side = max(16.0, (MediaQuery.sizeOf(context).width - 720) / 2);
     return AppPage(
       title: context.l10n.play_screen_title,
       body: ListView(
         padding: context.mediaQueryPadding +
-            const EdgeInsets.fromLTRB(16, 12, 16, 120),
+            EdgeInsets.fromLTRB(side, 12, side, 120),
         children: [
           if (isGuest) ...[
             _guestBanner(context),
+            const SizedBox(height: 14),
+          ],
+          if (progress != null) ...[
+            _progressCard(context, progress),
             const SizedBox(height: 14),
           ],
           _dailyCard(context, daily, myDailyBest, dailyPlayers),
@@ -65,6 +94,10 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
             style: AppTextStyle.caption
                 .copyWith(color: context.colorScheme.textSecondary),
           ),
+          if (liveMatches.isNotEmpty) ...[
+            _sectionTitle(context, context.l10n.play_match_section),
+            ...liveMatches.map((match) => _matchTile(context, match, userId)),
+          ],
           if (challenges.isNotEmpty) ...[
             _sectionTitle(context, context.l10n.play_challenges_title),
             ...challenges
@@ -124,7 +157,7 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
           const SizedBox(width: 8),
           _smallButton(
             context.l10n.sign_in_options_title,
-            () => AppRoute.phoneLogin.push(context),
+            () => AppRoute.signIn.push(context),
           ),
         ],
       ),
@@ -251,7 +284,7 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
                 ? context.l10n.play_guest_challenge_hint
                 : context.l10n.play_challenge_friend_hint,
             onTap: () => isGuest
-                ? AppRoute.phoneLogin.push(context)
+                ? AppRoute.signIn.push(context)
                 : _challengeFriend(context),
           ),
         ),
@@ -260,9 +293,16 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
   }
 
   Future<void> _challengeFriend(BuildContext context) async {
-    final opponent = await showSelectOpponentSheet(context);
+    final opponent = await showPlayOpponentSheet(context);
     if (opponent == null || !context.mounted) return;
-    AppRoute.playGame(PlayGameArgs.newChallenge(opponent)).push(context);
+    final format = await showMatchFormatSheet(context, opponent);
+    if (format == null || !context.mounted) return;
+    try {
+      final match = await createPlayMatch(ref, opponent, format);
+      if (context.mounted) AppRoute.playMatch(match.id).push(context);
+    } catch (error) {
+      if (context.mounted) showErrorSnackBar(context: context, error: error);
+    }
   }
 
   Widget _actionCard(
@@ -299,6 +339,270 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // ── Progress ─────────────────────────────────────────────────────────────
+
+  void _announceBadge(PlayBadge badge) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Row(
+        children: [
+          Icon(_badgeIcon(badge), color: awarenessWarningColor),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+                context.l10n.play_badge_unlocked(_badgeName(context, badge))),
+          ),
+        ],
+      ),
+    ));
+  }
+
+  IconData _badgeIcon(PlayBadge badge) => switch (badge) {
+        PlayBadge.firstSix => Icons.looks_6_rounded,
+        PlayBadge.sixHitter => Icons.local_fire_department_rounded,
+        PlayBadge.thirty => Icons.sports_cricket_rounded,
+        PlayBadge.matchWinner => Icons.emoji_events_rounded,
+        PlayBadge.dailyStreak => Icons.calendar_month_rounded,
+        PlayBadge.century => Icons.military_tech_rounded,
+        PlayBadge.veteran => Icons.workspace_premium_rounded,
+      };
+
+  String _badgeName(BuildContext context, PlayBadge badge) => switch (badge) {
+        PlayBadge.firstSix => context.l10n.play_badge_first_six,
+        PlayBadge.sixHitter => context.l10n.play_badge_six_hitter,
+        PlayBadge.thirty => context.l10n.play_badge_thirty,
+        PlayBadge.matchWinner => context.l10n.play_badge_match_winner,
+        PlayBadge.dailyStreak => context.l10n.play_badge_daily_streak,
+        PlayBadge.century => context.l10n.play_badge_century,
+        PlayBadge.veteran => context.l10n.play_badge_veteran,
+      };
+
+  Widget _progressCard(BuildContext context, PlayProgress progress) {
+    final fraction =
+        progress.xpForNext == 0 ? 0.0 : progress.xpInLevel / progress.xpForNext;
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [brandNavyCardColor, Color(0xFF1C1C6B)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                height: 48,
+                width: 48,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFD166), awarenessWarningColor],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: awarenessWarningColor.withValues(alpha: 0.45),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+                child: Text(
+                  '${progress.level}',
+                  style: AppTextStyle.header3.copyWith(
+                    color: brandNavyColor,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          context.l10n.play_level(progress.level),
+                          style: AppTextStyle.subtitle1.copyWith(
+                            color: textPrimaryDarkColor,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          context.l10n.play_xp_progress(
+                              progress.xpInLevel, progress.xpForNext),
+                          style: AppTextStyle.caption
+                              .copyWith(color: textSecondaryDarkColor),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: TweenAnimationBuilder<double>(
+                        tween: Tween(begin: 0, end: fraction),
+                        duration: const Duration(milliseconds: 900),
+                        curve: Curves.easeOutCubic,
+                        builder: (context, value, _) => LinearProgressIndicator(
+                          value: value,
+                          minHeight: 8,
+                          backgroundColor:
+                              textPrimaryDarkColor.withValues(alpha: 0.12),
+                          color: awarenessWarningColor,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              _stat(Icons.local_fire_department_rounded,
+                  context.l10n.play_stat_streak(progress.streak)),
+              _stat(Icons.emoji_events_rounded,
+                  context.l10n.play_stat_wins(progress.wins)),
+              _stat(Icons.sports_cricket_rounded,
+                  context.l10n.play_stat_best(progress.best)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            context.l10n.play_badges_title.toUpperCase(),
+            style: AppTextStyle.caption.copyWith(
+              color: textSecondaryDarkColor,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(height: 8),
+          LayoutBuilder(builder: (context, constraints) {
+            const count = 7;
+            final size = min(40.0, (constraints.maxWidth - 6 * 6) / count);
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                for (final badge in PlayBadge.values)
+                  _badge(context, badge,
+                      size: size, unlocked: progress.badges.contains(badge)),
+              ],
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _stat(IconData icon, String text) => Expanded(
+        child: Row(
+          children: [
+            Icon(icon, size: 16, color: awarenessWarningColor),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                text,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.caption.copyWith(
+                  color: textPrimaryDarkColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+
+  Widget _badge(BuildContext context, PlayBadge badge,
+      {required double size, required bool unlocked}) {
+    return Tooltip(
+      message: _badgeName(context, badge),
+      triggerMode: TooltipTriggerMode.tap,
+      child: Container(
+        height: size,
+        width: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: unlocked
+              ? awarenessWarningColor.withValues(alpha: 0.18)
+              : textPrimaryDarkColor.withValues(alpha: 0.06),
+          border: Border.all(
+            color: unlocked
+                ? awarenessWarningColor
+                : textPrimaryDarkColor.withValues(alpha: 0.12),
+          ),
+        ),
+        child: Icon(
+          _badgeIcon(badge),
+          size: size * 0.5,
+          color: unlocked
+              ? awarenessWarningColor
+              : textPrimaryDarkColor.withValues(alpha: 0.25),
+        ),
+      ),
+    );
+  }
+
+  // ── Live matches ─────────────────────────────────────────────────────────
+
+  Widget _matchTile(BuildContext context, PlayMatch match, String? userId) {
+    final cs = context.colorScheme;
+    final me = userId ?? '';
+    final other = match.otherThan(me);
+    final format = formatLabel(context, match.format);
+    void open() => AppRoute.playMatch(match.id).push(context);
+
+    final String text;
+    Widget? trailing;
+    if (match.status == PlayMatchStatus.requested) {
+      if (match.isHost(me)) {
+        text = context.l10n.play_match_request_to(other.name, format);
+      } else {
+        text = context.l10n.play_match_request_from(other.name, format);
+        trailing = _smallButton(context.l10n.play_match_accept, () async {
+          try {
+            await ref.read(playServiceProvider).acceptMatch(match.id);
+            if (context.mounted) open();
+          } catch (error) {
+            if (context.mounted) {
+              showErrorSnackBar(context: context, error: error);
+            }
+          }
+        });
+      }
+    } else {
+      text = context.l10n.play_match_in_progress(other.name, format);
+      trailing = _smallButton(context.l10n.play_match_join, open);
+    }
+
+    return OnTapScale(
+      onTap: open,
+      child: _rowCard(
+        context,
+        leading: ImageAvatar(
+          initial: other.name.isEmpty ? '?' : other.name[0].toUpperCase(),
+          imageUrl: other.image,
+          size: 36,
+        ),
+        title: Text(
+          text,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: AppTextStyle.subtitle3.copyWith(color: cs.textPrimary),
+        ),
+        trailing: trailing,
       ),
     );
   }
@@ -531,6 +835,10 @@ class _PlayScreenState extends ConsumerState<PlayScreen> {
       PlayMode.solo => (
           CupertinoIcons.sportscourt_fill,
           context.l10n.play_mode_solo
+        ),
+      PlayMode.match => (
+          CupertinoIcons.bolt_fill,
+          context.l10n.play_mode_match
         ),
     };
     return _rowCard(

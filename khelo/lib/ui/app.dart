@@ -12,6 +12,10 @@ import 'package:style/theme/theme.dart';
 
 import 'app_route.dart';
 
+/// `app_ta.arb` only holds the mascot's lines (see `mascotText`), so the app
+/// itself stays English.
+const _appLocales = [Locale('en')];
+
 class App extends ConsumerStatefulWidget {
   const App({super.key});
 
@@ -59,7 +63,7 @@ class _AppState extends ConsumerState<App> {
               routerConfig: _router,
               builder: (context, child) => MascotOverlay(child: child!),
               localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
+              supportedLocales: _appLocales,
               theme: CupertinoThemeData(
                 brightness: context.brightness,
                 primaryColor: colorScheme.primary,
@@ -98,7 +102,7 @@ class _AppState extends ConsumerState<App> {
               routerConfig: _router,
               builder: (context, child) => MascotOverlay(child: child!),
               localizationsDelegates: AppLocalizations.localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
+              supportedLocales: _appLocales,
               theme: materialThemeDataLight,
               darkTheme: materialThemeDataDark,
               themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,

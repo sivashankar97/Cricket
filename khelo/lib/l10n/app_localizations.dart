@@ -6,6 +6,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'app_localizations_en.dart';
+import 'app_localizations_ta.dart';
 
 // ignore_for_file: type=lint
 
@@ -92,7 +93,10 @@ abstract class AppLocalizations {
   ];
 
   /// A list of this localizations delegate's supported locales.
-  static const List<Locale> supportedLocales = <Locale>[Locale('en')];
+  static const List<Locale> supportedLocales = <Locale>[
+    Locale('en'),
+    Locale('ta')
+  ];
 
   /// No description provided for @app_title.
   ///
@@ -641,24 +645,6 @@ abstract class AppLocalizations {
   /// **'Sign in'**
   String get sign_in_options_title;
 
-  /// No description provided for @sign_in_options_description.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose how you want to sign in.'**
-  String get sign_in_options_description;
-
-  /// No description provided for @sign_in_email_option.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with email'**
-  String get sign_in_email_option;
-
-  /// No description provided for @sign_in_whatsapp_option.
-  ///
-  /// In en, this message translates to:
-  /// **'Continue with WhatsApp'**
-  String get sign_in_whatsapp_option;
-
   /// No description provided for @sign_in_guest_option.
   ///
   /// In en, this message translates to:
@@ -671,58 +657,16 @@ abstract class AppLocalizations {
   /// **'Play cricket without an account. Your scores show as \"Guest\".'**
   String get sign_in_guest_hint;
 
-  /// No description provided for @sign_in_whatsapp_subtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Send \'Hi login\' on WhatsApp to get your instant login link.'**
-  String get sign_in_whatsapp_subtitle;
-
-  /// No description provided for @sign_in_whatsapp_opened_title.
-  ///
-  /// In en, this message translates to:
-  /// **'WhatsApp Chat Opened'**
-  String get sign_in_whatsapp_opened_title;
-
-  /// No description provided for @sign_in_whatsapp_opened_desc.
-  ///
-  /// In en, this message translates to:
-  /// **'Send the prefilled message \'Hi login\' in WhatsApp. You will receive a login link to continue.'**
-  String get sign_in_whatsapp_opened_desc;
-
-  /// No description provided for @sign_in_whatsapp_open_again_btn.
-  ///
-  /// In en, this message translates to:
-  /// **'Open WhatsApp Again'**
-  String get sign_in_whatsapp_open_again_btn;
-
-  /// No description provided for @sign_in_whatsapp_have_link_btn.
-  ///
-  /// In en, this message translates to:
-  /// **'I have a login link or token'**
-  String get sign_in_whatsapp_have_link_btn;
-
-  /// No description provided for @sign_in_whatsapp_enter_link_placeholder.
-  ///
-  /// In en, this message translates to:
-  /// **'Paste login link or token here'**
-  String get sign_in_whatsapp_enter_link_placeholder;
-
-  /// No description provided for @sign_in_whatsapp_submit_token_btn.
-  ///
-  /// In en, this message translates to:
-  /// **'Verify & Sign In'**
-  String get sign_in_whatsapp_submit_token_btn;
-
   /// No description provided for @sign_in_email_title.
   ///
   /// In en, this message translates to:
-  /// **'Sign in with email'**
+  /// **'Welcome back'**
   String get sign_in_email_title;
 
   /// No description provided for @sign_in_email_description.
   ///
   /// In en, this message translates to:
-  /// **'Sign in with your email and password.'**
+  /// **'Sign in to score matches, follow tournaments and see your stats.'**
   String get sign_in_email_description;
 
   /// No description provided for @sign_in_email_create_title.
@@ -734,13 +678,13 @@ abstract class AppLocalizations {
   /// No description provided for @sign_in_email_create_description.
   ///
   /// In en, this message translates to:
-  /// **'Use your email and choose a password with at least 6 characters.'**
+  /// **'Set up teams, matches and tournaments, and keep all your cricket in one place.'**
   String get sign_in_email_create_description;
 
   /// No description provided for @sign_in_password_placeholder.
   ///
   /// In en, this message translates to:
-  /// **'Password'**
+  /// **'Enter your password'**
   String get sign_in_password_placeholder;
 
   /// No description provided for @sign_in_email_sign_in_btn.
@@ -755,17 +699,53 @@ abstract class AppLocalizations {
   /// **'Create account'**
   String get sign_in_email_create_btn;
 
-  /// No description provided for @sign_in_email_switch_to_create.
+  /// No description provided for @sign_in_email_label.
   ///
   /// In en, this message translates to:
-  /// **'New here? Create an account'**
-  String get sign_in_email_switch_to_create;
+  /// **'Email'**
+  String get sign_in_email_label;
 
-  /// No description provided for @sign_in_email_switch_to_sign_in.
+  /// No description provided for @sign_in_password_label.
   ///
   /// In en, this message translates to:
-  /// **'Already have an account? Sign in'**
-  String get sign_in_email_switch_to_sign_in;
+  /// **'Password'**
+  String get sign_in_password_label;
+
+  /// No description provided for @sign_in_password_create_placeholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a password'**
+  String get sign_in_password_create_placeholder;
+
+  /// No description provided for @sign_in_password_rule.
+  ///
+  /// In en, this message translates to:
+  /// **'At least 6 characters'**
+  String get sign_in_password_rule;
+
+  /// No description provided for @sign_in_mode_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in or create an account'**
+  String get sign_in_mode_label;
+
+  /// No description provided for @sign_in_or.
+  ///
+  /// In en, this message translates to:
+  /// **'or'**
+  String get sign_in_or;
+
+  /// No description provided for @sign_in_show_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Show password'**
+  String get sign_in_show_password;
+
+  /// No description provided for @sign_in_hide_password.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide password'**
+  String get sign_in_hide_password;
 
   /// No description provided for @sign_in_forgot_password.
   ///
@@ -788,7 +768,7 @@ abstract class AppLocalizations {
   /// No description provided for @sign_in_email_placeholder.
   ///
   /// In en, this message translates to:
-  /// **'Email'**
+  /// **'name@example.com'**
   String get sign_in_email_placeholder;
 
   /// No description provided for @sign_in_required_title.
@@ -1061,6 +1041,114 @@ abstract class AppLocalizations {
   /// **'Enjoy the freedom of creating your own cricket matches or teams.'**
   String get home_screen_no_matches_description_text;
 
+  /// No description provided for @home_greeting_morning.
+  ///
+  /// In en, this message translates to:
+  /// **'Good morning!'**
+  String get home_greeting_morning;
+
+  /// No description provided for @home_greeting_afternoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Good afternoon!'**
+  String get home_greeting_afternoon;
+
+  /// No description provided for @home_greeting_evening.
+  ///
+  /// In en, this message translates to:
+  /// **'Good evening!'**
+  String get home_greeting_evening;
+
+  /// No description provided for @home_greeting_guest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest mode'**
+  String get home_greeting_guest;
+
+  /// No description provided for @home_section_live.
+  ///
+  /// In en, this message translates to:
+  /// **'Live matches ({count})'**
+  String home_section_live(int count);
+
+  /// No description provided for @home_section_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming matches'**
+  String get home_section_upcoming;
+
+  /// No description provided for @home_section_finished.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent results'**
+  String get home_section_finished;
+
+  /// No description provided for @home_match_overs.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 over match} other{{count} overs match}}'**
+  String home_match_overs(int count);
+
+  /// No description provided for @home_live_need.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} need {runs, plural, =1{1 run} other{{runs} runs}} in {balls, plural, =1{1 ball} other{{balls} balls}}'**
+  String home_live_need(String team, int runs, int balls);
+
+  /// No description provided for @home_live_batting.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} batting'**
+  String home_live_batting(String team);
+
+  /// No description provided for @home_live_toss.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} won the toss'**
+  String home_live_toss(String team);
+
+  /// No description provided for @home_live_starting.
+  ///
+  /// In en, this message translates to:
+  /// **'Match about to start'**
+  String get home_live_starting;
+
+  /// No description provided for @home_live_target.
+  ///
+  /// In en, this message translates to:
+  /// **'Target {target}'**
+  String home_live_target(int target);
+
+  /// No description provided for @home_crr.
+  ///
+  /// In en, this message translates to:
+  /// **'CRR {rate}'**
+  String home_crr(String rate);
+
+  /// No description provided for @home_rrr.
+  ///
+  /// In en, this message translates to:
+  /// **'RRR {rate}'**
+  String home_rrr(String rate);
+
+  /// No description provided for @home_today.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get home_today;
+
+  /// No description provided for @home_tomorrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Tomorrow'**
+  String get home_tomorrow;
+
+  /// No description provided for @home_result_won_by.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} won by {margin}'**
+  String home_result_won_by(String team, String margin);
+
   /// No description provided for @home_search_hint_title.
   ///
   /// In en, this message translates to:
@@ -1144,6 +1232,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'My Cricket'**
   String get my_cricket_screen_title;
+
+  /// No description provided for @my_cricket_header_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your matches, teams and tournaments'**
+  String get my_cricket_header_subtitle;
+
+  /// No description provided for @my_cricket_empty_matches_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a match, pick both teams and score it ball by ball.'**
+  String get my_cricket_empty_matches_body;
+
+  /// No description provided for @my_cricket_empty_teams_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Build your squad and invite players to join your team.'**
+  String get my_cricket_empty_teams_body;
+
+  /// No description provided for @my_cricket_empty_tournaments_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up a league or knockout, then add teams and matches.'**
+  String get my_cricket_empty_tournaments_body;
 
   /// No description provided for @add_tournament_screen_title.
   ///
@@ -2078,7 +2190,7 @@ abstract class AppLocalizations {
   /// No description provided for @add_team_member_search_placeholder_text.
   ///
   /// In en, this message translates to:
-  /// **'Search member name'**
+  /// **'Search by name or mobile number'**
   String get add_team_member_search_placeholder_text;
 
   /// No description provided for @add_team_member_empty_title.
@@ -2114,7 +2226,7 @@ abstract class AppLocalizations {
   /// No description provided for @add_team_member_create_player_description.
   ///
   /// In en, this message translates to:
-  /// **'Add a player who doesn\'t use Sports Tamil. Only the name is required.'**
+  /// **'Add a player who isn\'t on Sports Tamil yet. Only the name is required. The mobile number stays private and lets them link their account when they sign up.'**
   String get add_team_member_create_player_description;
 
   /// No description provided for @add_team_member_create_player_name.
@@ -2126,8 +2238,38 @@ abstract class AppLocalizations {
   /// No description provided for @add_team_member_create_player_phone.
   ///
   /// In en, this message translates to:
-  /// **'Phone number (optional)'**
+  /// **'Mobile number (optional)'**
   String get add_team_member_create_player_phone;
+
+  /// No description provided for @add_team_member_phone_not_found_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No player with this number'**
+  String get add_team_member_phone_not_found_title;
+
+  /// No description provided for @add_team_member_phone_not_found_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Create the player with this number. When they sign up with it, they can link their account.'**
+  String get add_team_member_phone_not_found_body;
+
+  /// No description provided for @add_team_member_create_with_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Create player with this number'**
+  String get add_team_member_create_with_number;
+
+  /// No description provided for @add_team_member_phone_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid mobile number. Add the country code if it isn\'t {dial}.'**
+  String add_team_member_phone_invalid(String dial);
+
+  /// No description provided for @add_team_member_player_exists.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} already has this number, so they were added instead.'**
+  String add_team_member_player_exists(String name);
 
   /// No description provided for @add_team_member_create_player_button.
   ///
@@ -4172,6 +4314,234 @@ abstract class AppLocalizations {
   /// **'This can not undone. if you delete your account, your data will be gone forever.'**
   String get edit_profile_delete_account_description_text;
 
+  /// No description provided for @profile_form_create_heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your player profile'**
+  String get profile_form_create_heading;
+
+  /// No description provided for @profile_form_create_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Takes less than a minute. Name and mobile number are required.'**
+  String get profile_form_create_subtitle;
+
+  /// No description provided for @profile_form_edit_heading.
+  ///
+  /// In en, this message translates to:
+  /// **'Your player profile'**
+  String get profile_form_edit_heading;
+
+  /// No description provided for @profile_form_edit_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your details up to date so teams can find you.'**
+  String get profile_form_edit_subtitle;
+
+  /// No description provided for @profile_form_photo_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add photo'**
+  String get profile_form_photo_add;
+
+  /// No description provided for @profile_form_photo_change.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get profile_form_photo_change;
+
+  /// No description provided for @profile_form_photo_remove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get profile_form_photo_remove;
+
+  /// No description provided for @profile_form_photo_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get profile_form_photo_optional;
+
+  /// No description provided for @profile_form_section_basic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic details'**
+  String get profile_form_section_basic;
+
+  /// No description provided for @profile_form_section_personal.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal'**
+  String get profile_form_section_personal;
+
+  /// No description provided for @profile_form_section_cricket.
+  ///
+  /// In en, this message translates to:
+  /// **'Cricket profile'**
+  String get profile_form_section_cricket;
+
+  /// No description provided for @profile_form_name_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Full name'**
+  String get profile_form_name_label;
+
+  /// No description provided for @profile_form_name_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Arun Kumar'**
+  String get profile_form_name_hint;
+
+  /// No description provided for @profile_form_phone_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number'**
+  String get profile_form_phone_label;
+
+  /// No description provided for @profile_form_phone_private.
+  ///
+  /// In en, this message translates to:
+  /// **'Only you can see your number'**
+  String get profile_form_phone_private;
+
+  /// No description provided for @profile_form_email_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get profile_form_email_label;
+
+  /// No description provided for @profile_form_email_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'you@example.com'**
+  String get profile_form_email_hint;
+
+  /// No description provided for @profile_form_location_label.
+  ///
+  /// In en, this message translates to:
+  /// **'City'**
+  String get profile_form_location_label;
+
+  /// No description provided for @profile_form_location_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Chennai'**
+  String get profile_form_location_hint;
+
+  /// No description provided for @profile_form_optional.
+  ///
+  /// In en, this message translates to:
+  /// **'Optional'**
+  String get profile_form_optional;
+
+  /// No description provided for @profile_form_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Required'**
+  String get profile_form_required;
+
+  /// No description provided for @profile_form_dob_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Date of birth'**
+  String get profile_form_dob_label;
+
+  /// No description provided for @profile_form_dob_add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add date'**
+  String get profile_form_dob_add;
+
+  /// No description provided for @profile_form_gender_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Gender'**
+  String get profile_form_gender_label;
+
+  /// No description provided for @profile_form_role_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Playing role'**
+  String get profile_form_role_label;
+
+  /// No description provided for @profile_form_batting_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Batting'**
+  String get profile_form_batting_label;
+
+  /// No description provided for @profile_form_bowling_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Bowling'**
+  String get profile_form_bowling_label;
+
+  /// No description provided for @profile_form_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose'**
+  String get profile_form_choose;
+
+  /// No description provided for @profile_form_error_name.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your name (at least 2 letters)'**
+  String get profile_form_error_name;
+
+  /// No description provided for @profile_form_error_phone_empty.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your mobile number'**
+  String get profile_form_error_phone_empty;
+
+  /// No description provided for @profile_form_error_phone_invalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid {country} mobile number'**
+  String profile_form_error_phone_invalid(String country);
+
+  /// No description provided for @profile_form_error_email.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email or leave it empty'**
+  String get profile_form_error_email;
+
+  /// No description provided for @profile_form_error_photo.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t use that photo. Try another one.'**
+  String get profile_form_error_photo;
+
+  /// No description provided for @profile_form_create_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Create profile'**
+  String get profile_form_create_btn;
+
+  /// No description provided for @profile_form_save_btn.
+  ///
+  /// In en, this message translates to:
+  /// **'Save changes'**
+  String get profile_form_save_btn;
+
+  /// No description provided for @profile_form_sign_out.
+  ///
+  /// In en, this message translates to:
+  /// **'Not you? Sign out'**
+  String get profile_form_sign_out;
+
+  /// No description provided for @profile_form_country_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Country code'**
+  String get profile_form_country_title;
+
+  /// No description provided for @profile_form_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'{done} of {total} done'**
+  String profile_form_progress(int done, int total);
+
   /// No description provided for @transfer_teams_title.
   ///
   /// In en, this message translates to:
@@ -4315,6 +4685,162 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enhance your profile with more details to make it better!'**
   String get profile_complete_description_title;
+
+  /// No description provided for @profile_section_activity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get profile_section_activity;
+
+  /// No description provided for @profile_section_preferences.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get profile_section_preferences;
+
+  /// No description provided for @profile_section_support.
+  ///
+  /// In en, this message translates to:
+  /// **'Help & support'**
+  String get profile_section_support;
+
+  /// No description provided for @profile_section_about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get profile_section_about;
+
+  /// No description provided for @profile_edit_button.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get profile_edit_button;
+
+  /// No description provided for @profile_complete_percent.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile {percent}% complete'**
+  String profile_complete_percent(int percent);
+
+  /// No description provided for @profile_complete_finish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get profile_complete_finish;
+
+  /// No description provided for @profile_qr_title.
+  ///
+  /// In en, this message translates to:
+  /// **'My player QR'**
+  String get profile_qr_title;
+
+  /// No description provided for @profile_qr_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Teammates scan it to add you'**
+  String get profile_qr_subtitle;
+
+  /// No description provided for @profile_stats_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs, wickets and match history'**
+  String get profile_stats_subtitle;
+
+  /// No description provided for @profile_notifications_off_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications are off'**
+  String get profile_notifications_off_title;
+
+  /// No description provided for @profile_notifications_off_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn them on to hear about your teams and matches.'**
+  String get profile_notifications_off_body;
+
+  /// No description provided for @profile_mascot_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips and cheers from the tiger'**
+  String get profile_mascot_subtitle;
+
+  /// No description provided for @profile_section_player_links.
+  ///
+  /// In en, this message translates to:
+  /// **'Player links'**
+  String get profile_section_player_links;
+
+  /// No description provided for @player_claim_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Is this you?'**
+  String get player_claim_title;
+
+  /// No description provided for @player_claim_body.
+  ///
+  /// In en, this message translates to:
+  /// **'An organizer added {name} with your mobile number, in {teams} teams and {matches} matches. Link this player to your account to get those matches and stats.'**
+  String player_claim_body(String name, int teams, int matches);
+
+  /// No description provided for @player_claim_yes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes, that\'s me'**
+  String get player_claim_yes;
+
+  /// No description provided for @player_claim_no.
+  ///
+  /// In en, this message translates to:
+  /// **'Not me'**
+  String get player_claim_no;
+
+  /// No description provided for @player_claim_sent.
+  ///
+  /// In en, this message translates to:
+  /// **'Request sent. The organizer will confirm it.'**
+  String get player_claim_sent;
+
+  /// No description provided for @player_claim_request_row.
+  ///
+  /// In en, this message translates to:
+  /// **'{claimant} says they are {player}'**
+  String player_claim_request_row(String claimant, String player);
+
+  /// No description provided for @player_claim_request_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Approving moves this player\'s teams, matches and stats to their account.'**
+  String get player_claim_request_hint;
+
+  /// No description provided for @player_claim_approve.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve'**
+  String get player_claim_approve;
+
+  /// No description provided for @player_claim_decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get player_claim_decline;
+
+  /// No description provided for @player_claim_approved_toast.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked. {player}\'s matches and stats now belong to {claimant}.'**
+  String player_claim_approved_toast(String player, String claimant);
+
+  /// No description provided for @player_claim_waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the organizer to confirm {player}'**
+  String player_claim_waiting(String player);
+
+  /// No description provided for @player_claim_declined.
+  ///
+  /// In en, this message translates to:
+  /// **'The organizer didn\'t confirm {player}'**
+  String player_claim_declined(String player);
 
   /// No description provided for @profile_complete_add_profile_picture.
   ///
@@ -5312,6 +5838,685 @@ abstract class AppLocalizations {
   /// **'Retry'**
   String get play_retry_save;
 
+  /// No description provided for @play_comm_six_0.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} launches it over long-on. That\'s huge!'**
+  String play_comm_six_0(String name);
+
+  /// No description provided for @play_comm_six_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Into the crowd! A monster hit from {name}.'**
+  String play_comm_six_1(String name);
+
+  /// No description provided for @play_comm_six_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean strike from {name}, and that\'s out of the ground!'**
+  String play_comm_six_2(String name);
+
+  /// No description provided for @play_comm_four_0.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} finds the gap and it races away to the rope.'**
+  String play_comm_four_0(String name);
+
+  /// No description provided for @play_comm_four_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Beautifully timed by {name}. Four runs.'**
+  String play_comm_four_1(String name);
+
+  /// No description provided for @play_comm_four_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Through the covers by {name}. Nobody\'s stopping that.'**
+  String play_comm_four_2(String name);
+
+  /// No description provided for @play_comm_two_0.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} pushes it into the gap and comes back for two.'**
+  String play_comm_two_0(String name);
+
+  /// No description provided for @play_comm_two_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Good running from {name}. Two more.'**
+  String play_comm_two_1(String name);
+
+  /// No description provided for @play_comm_two_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Worked away by {name} for a couple.'**
+  String play_comm_two_2(String name);
+
+  /// No description provided for @play_comm_single_0.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} nudges it for a quick single.'**
+  String play_comm_single_0(String name);
+
+  /// No description provided for @play_comm_single_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Just a single. {name} keeps the board moving.'**
+  String play_comm_single_1(String name);
+
+  /// No description provided for @play_comm_single_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft hands from {name}. One run.'**
+  String play_comm_single_2(String name);
+
+  /// No description provided for @play_comm_dot_0.
+  ///
+  /// In en, this message translates to:
+  /// **'Dot ball. Tight from the bowler.'**
+  String get play_comm_dot_0;
+
+  /// No description provided for @play_comm_dot_1.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} can\'t get that one away.'**
+  String play_comm_dot_1(String name);
+
+  /// No description provided for @play_comm_dot_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Beaten! That one went past the edge.'**
+  String get play_comm_dot_2;
+
+  /// No description provided for @play_comm_out_0.
+  ///
+  /// In en, this message translates to:
+  /// **'Bowled! The stumps are everywhere.'**
+  String get play_comm_out_0;
+
+  /// No description provided for @play_comm_out_1.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean bowled! {name} has to walk back.'**
+  String play_comm_out_1(String name);
+
+  /// No description provided for @play_comm_out_2.
+  ///
+  /// In en, this message translates to:
+  /// **'Timber! What a ball to get rid of {name}.'**
+  String play_comm_out_2(String name);
+
+  /// No description provided for @play_you.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get play_you;
+
+  /// No description provided for @play_sound_on.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound on'**
+  String get play_sound_on;
+
+  /// No description provided for @play_sound_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Sound off'**
+  String get play_sound_off;
+
+  /// No description provided for @play_this_over.
+  ///
+  /// In en, this message translates to:
+  /// **'This over'**
+  String get play_this_over;
+
+  /// No description provided for @play_hud_overs.
+  ///
+  /// In en, this message translates to:
+  /// **'Overs {overs}/{total}'**
+  String play_hud_overs(String overs, int total);
+
+  /// No description provided for @play_hud_target.
+  ///
+  /// In en, this message translates to:
+  /// **'Target {target}'**
+  String play_hud_target(int target);
+
+  /// No description provided for @play_mode_match.
+  ///
+  /// In en, this message translates to:
+  /// **'Live match'**
+  String get play_mode_match;
+
+  /// No description provided for @play_format_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick the format'**
+  String get play_format_title;
+
+  /// No description provided for @play_format_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Both of you face the same balls. Highest score wins.'**
+  String get play_format_subtitle;
+
+  /// No description provided for @play_format_quick.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick'**
+  String get play_format_quick;
+
+  /// No description provided for @play_format_classic.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get play_format_classic;
+
+  /// No description provided for @play_format_long.
+  ///
+  /// In en, this message translates to:
+  /// **'Long'**
+  String get play_format_long;
+
+  /// No description provided for @play_format_detail.
+  ///
+  /// In en, this message translates to:
+  /// **'{overs, plural, =1{1 over} other{{overs} overs}} · {wickets} wickets'**
+  String play_format_detail(int overs, int wickets);
+
+  /// No description provided for @play_send_request.
+  ///
+  /// In en, this message translates to:
+  /// **'Send match request'**
+  String get play_send_request;
+
+  /// No description provided for @play_online_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Online now'**
+  String get play_online_now;
+
+  /// No description provided for @play_recent_opponents.
+  ///
+  /// In en, this message translates to:
+  /// **'Played before'**
+  String get play_recent_opponents;
+
+  /// No description provided for @play_online_label.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get play_online_label;
+
+  /// No description provided for @play_select_opponent_more.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a name to find more players'**
+  String get play_select_opponent_more;
+
+  /// No description provided for @play_select_opponent_none_online.
+  ///
+  /// In en, this message translates to:
+  /// **'No one else is on Play right now. Search for a friend and send a request.'**
+  String get play_select_opponent_none_online;
+
+  /// No description provided for @play_match_waiting_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name}'**
+  String play_match_waiting_title(String name);
+
+  /// No description provided for @play_match_waiting_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Your match request is on its way. It expires in 10 minutes.'**
+  String get play_match_waiting_body;
+
+  /// No description provided for @play_match_cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel request'**
+  String get play_match_cancel;
+
+  /// No description provided for @play_match_declined.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} can\'t play right now.'**
+  String play_match_declined(String name);
+
+  /// No description provided for @play_match_cancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'This match request was cancelled.'**
+  String get play_match_cancelled;
+
+  /// No description provided for @play_match_expired.
+  ///
+  /// In en, this message translates to:
+  /// **'This match request expired.'**
+  String get play_match_expired;
+
+  /// No description provided for @play_match_back.
+  ///
+  /// In en, this message translates to:
+  /// **'Back to Play'**
+  String get play_match_back;
+
+  /// No description provided for @play_match_incoming_title.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} challenges you!'**
+  String play_match_incoming_title(String name);
+
+  /// No description provided for @play_match_incoming_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Live match · {format}. Ready to play?'**
+  String play_match_incoming_body(String format);
+
+  /// No description provided for @play_match_accept.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get play_match_accept;
+
+  /// No description provided for @play_match_decline.
+  ///
+  /// In en, this message translates to:
+  /// **'Decline'**
+  String get play_match_decline;
+
+  /// No description provided for @play_match_section.
+  ///
+  /// In en, this message translates to:
+  /// **'Live matches'**
+  String get play_match_section;
+
+  /// No description provided for @play_match_request_from.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} wants to play · {format}'**
+  String play_match_request_from(String name, String format);
+
+  /// No description provided for @play_match_request_to.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for {name} · {format}'**
+  String play_match_request_to(String name, String format);
+
+  /// No description provided for @play_match_in_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'Live vs {name} · {format}'**
+  String play_match_in_progress(String name, String format);
+
+  /// No description provided for @play_match_join.
+  ///
+  /// In en, this message translates to:
+  /// **'Join'**
+  String get play_match_join;
+
+  /// No description provided for @play_match_unavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'This match is no longer available.'**
+  String get play_match_unavailable;
+
+  /// No description provided for @play_challenge_live_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Live 1v1 match'**
+  String get play_challenge_live_hint;
+
+  /// No description provided for @play_vs.
+  ///
+  /// In en, this message translates to:
+  /// **'VS'**
+  String get play_vs;
+
+  /// No description provided for @play_toss_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Toss time'**
+  String get play_toss_title;
+
+  /// No description provided for @play_toss_call_prompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Call it!'**
+  String get play_toss_call_prompt;
+
+  /// No description provided for @play_toss_heads.
+  ///
+  /// In en, this message translates to:
+  /// **'Heads'**
+  String get play_toss_heads;
+
+  /// No description provided for @play_toss_tails.
+  ///
+  /// In en, this message translates to:
+  /// **'Tails'**
+  String get play_toss_tails;
+
+  /// No description provided for @play_toss_waiting_call.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is calling the toss…'**
+  String play_toss_waiting_call(String name);
+
+  /// No description provided for @play_toss_called.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} called {call}'**
+  String play_toss_called(String name, String call);
+
+  /// No description provided for @play_toss_won.
+  ///
+  /// In en, this message translates to:
+  /// **'You won the toss!'**
+  String get play_toss_won;
+
+  /// No description provided for @play_toss_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} won the toss'**
+  String play_toss_lost(String name);
+
+  /// No description provided for @play_toss_choose.
+  ///
+  /// In en, this message translates to:
+  /// **'Bat or bowl first?'**
+  String get play_toss_choose;
+
+  /// No description provided for @play_toss_bat.
+  ///
+  /// In en, this message translates to:
+  /// **'Bat first'**
+  String get play_toss_bat;
+
+  /// No description provided for @play_toss_bowl.
+  ///
+  /// In en, this message translates to:
+  /// **'Bowl first'**
+  String get play_toss_bowl;
+
+  /// No description provided for @play_toss_waiting_choice.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is choosing…'**
+  String play_toss_waiting_choice(String name);
+
+  /// No description provided for @play_bats_first.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} bats first'**
+  String play_bats_first(String name);
+
+  /// No description provided for @play_live_your_innings.
+  ///
+  /// In en, this message translates to:
+  /// **'Your innings'**
+  String get play_live_your_innings;
+
+  /// No description provided for @play_live_batting.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is batting'**
+  String play_live_batting(String name);
+
+  /// No description provided for @play_live_watch_first.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch live. You chase this score next.'**
+  String get play_live_watch_first;
+
+  /// No description provided for @play_live_watch_second.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch live. {name} needs {target} to win.'**
+  String play_live_watch_second(String name, int target);
+
+  /// No description provided for @play_live_waiting_ball.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for the next ball…'**
+  String get play_live_waiting_ball;
+
+  /// No description provided for @play_innings_break.
+  ///
+  /// In en, this message translates to:
+  /// **'Innings break'**
+  String get play_innings_break;
+
+  /// No description provided for @play_innings_break_body.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} scored {score}. {chaser} needs {target} to win.'**
+  String play_innings_break_body(
+      String name, String score, String chaser, int target);
+
+  /// No description provided for @play_countdown_go.
+  ///
+  /// In en, this message translates to:
+  /// **'GO!'**
+  String get play_countdown_go;
+
+  /// No description provided for @play_get_ready.
+  ///
+  /// In en, this message translates to:
+  /// **'Get ready'**
+  String get play_get_ready;
+
+  /// No description provided for @play_opponent_offline.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} disconnected. Waiting for them to come back…'**
+  String play_opponent_offline(String name);
+
+  /// No description provided for @play_claim_win.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim win'**
+  String get play_claim_win;
+
+  /// No description provided for @play_leave_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave the match?'**
+  String get play_leave_title;
+
+  /// No description provided for @play_leave_body.
+  ///
+  /// In en, this message translates to:
+  /// **'You will forfeit and {name} wins.'**
+  String play_leave_body(String name);
+
+  /// No description provided for @play_leave_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Forfeit'**
+  String get play_leave_confirm;
+
+  /// No description provided for @play_leave_stay.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay'**
+  String get play_leave_stay;
+
+  /// No description provided for @play_result_by_runs.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} won by {runs, plural, =1{1 run} other{{runs} runs}}'**
+  String play_result_by_runs(String name, int runs);
+
+  /// No description provided for @play_result_by_wickets.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} won by {wickets, plural, =1{1 wicket} other{{wickets} wickets}}'**
+  String play_result_by_wickets(String name, int wickets);
+
+  /// No description provided for @play_result_tied.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a tie!'**
+  String get play_result_tied;
+
+  /// No description provided for @play_result_forfeit.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} won. The other player left.'**
+  String play_result_forfeit(String name);
+
+  /// No description provided for @play_result_you_win.
+  ///
+  /// In en, this message translates to:
+  /// **'YOU WIN!'**
+  String get play_result_you_win;
+
+  /// No description provided for @play_result_you_lose.
+  ///
+  /// In en, this message translates to:
+  /// **'YOU LOSE'**
+  String get play_result_you_lose;
+
+  /// No description provided for @play_result_tie_banner.
+  ///
+  /// In en, this message translates to:
+  /// **'TIE!'**
+  String get play_result_tie_banner;
+
+  /// No description provided for @play_scorecard.
+  ///
+  /// In en, this message translates to:
+  /// **'Scorecard'**
+  String get play_scorecard;
+
+  /// No description provided for @play_sc_runs.
+  ///
+  /// In en, this message translates to:
+  /// **'R'**
+  String get play_sc_runs;
+
+  /// No description provided for @play_sc_balls.
+  ///
+  /// In en, this message translates to:
+  /// **'B'**
+  String get play_sc_balls;
+
+  /// No description provided for @play_sc_fours.
+  ///
+  /// In en, this message translates to:
+  /// **'4s'**
+  String get play_sc_fours;
+
+  /// No description provided for @play_sc_sixes.
+  ///
+  /// In en, this message translates to:
+  /// **'6s'**
+  String get play_sc_sixes;
+
+  /// No description provided for @play_sc_strike_rate.
+  ///
+  /// In en, this message translates to:
+  /// **'SR'**
+  String get play_sc_strike_rate;
+
+  /// No description provided for @play_rematch.
+  ///
+  /// In en, this message translates to:
+  /// **'Rematch'**
+  String get play_rematch;
+
+  /// No description provided for @play_xp_earned.
+  ///
+  /// In en, this message translates to:
+  /// **'+{xp} XP'**
+  String play_xp_earned(int xp);
+
+  /// No description provided for @play_level.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String play_level(int level);
+
+  /// No description provided for @play_xp_progress.
+  ///
+  /// In en, this message translates to:
+  /// **'{xp}/{next} XP'**
+  String play_xp_progress(int xp, int next);
+
+  /// No description provided for @play_stat_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =0{No streak} =1{1-day streak} other{{days}-day streak}}'**
+  String play_stat_streak(int days);
+
+  /// No description provided for @play_stat_wins.
+  ///
+  /// In en, this message translates to:
+  /// **'{wins, plural, =1{1 win} other{{wins} wins}}'**
+  String play_stat_wins(int wins);
+
+  /// No description provided for @play_stat_best.
+  ///
+  /// In en, this message translates to:
+  /// **'Best {runs}'**
+  String play_stat_best(int runs);
+
+  /// No description provided for @play_badges_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Badges'**
+  String get play_badges_title;
+
+  /// No description provided for @play_badge_first_six.
+  ///
+  /// In en, this message translates to:
+  /// **'First six'**
+  String get play_badge_first_six;
+
+  /// No description provided for @play_badge_six_hitter.
+  ///
+  /// In en, this message translates to:
+  /// **'3 sixes in a game'**
+  String get play_badge_six_hitter;
+
+  /// No description provided for @play_badge_thirty.
+  ///
+  /// In en, this message translates to:
+  /// **'30 in a game'**
+  String get play_badge_thirty;
+
+  /// No description provided for @play_badge_match_winner.
+  ///
+  /// In en, this message translates to:
+  /// **'Won a live match'**
+  String get play_badge_match_winner;
+
+  /// No description provided for @play_badge_daily_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'3-day streak'**
+  String get play_badge_daily_streak;
+
+  /// No description provided for @play_badge_century.
+  ///
+  /// In en, this message translates to:
+  /// **'100 career runs'**
+  String get play_badge_century;
+
+  /// No description provided for @play_badge_veteran.
+  ///
+  /// In en, this message translates to:
+  /// **'25 games played'**
+  String get play_badge_veteran;
+
+  /// No description provided for @play_badge_unlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge unlocked: {badge}'**
+  String play_badge_unlocked(String badge);
+
   /// No description provided for @profile_my_stats.
   ///
   /// In en, this message translates to:
@@ -5383,6 +6588,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No auctions yet.'**
   String get auction_empty;
+
+  /// No description provided for @auction_empty_body.
+  ///
+  /// In en, this message translates to:
+  /// **'Create one to register players and run live bidding.'**
+  String get auction_empty_body;
+
+  /// No description provided for @auction_hero_stat_live.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} live'**
+  String auction_hero_stat_live(int count);
+
+  /// No description provided for @auction_hero_stat_upcoming.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} upcoming'**
+  String auction_hero_stat_upcoming(int count);
+
+  /// No description provided for @auction_hero_stat_completed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} completed'**
+  String auction_hero_stat_completed(int count);
 
   /// No description provided for @auction_not_found.
   ///
@@ -6497,7 +7726,7 @@ abstract class AppLocalizations {
   /// No description provided for @mascot_sign_in_options.
   ///
   /// In en, this message translates to:
-  /// **'Pick a way to sign in, or jump in as a guest to play.'**
+  /// **'Sign in with your email, or jump in as a guest to play.'**
   String get mascot_sign_in_options;
 
   /// No description provided for @mascot_sign_in_required.
@@ -6607,6 +7836,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Profile saved!'**
   String get mascot_profile_saved;
+
+  /// No description provided for @mascot_profile_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish your profile first: just your name and mobile number.'**
+  String get mascot_profile_required;
+
+  /// No description provided for @mascot_profile_need_name.
+  ///
+  /// In en, this message translates to:
+  /// **'First tell me your name!'**
+  String get mascot_profile_need_name;
+
+  /// No description provided for @mascot_profile_need_phone.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your mobile number. Only you can see it.'**
+  String get mascot_profile_need_phone;
+
+  /// No description provided for @mascot_profile_bad_phone.
+  ///
+  /// In en, this message translates to:
+  /// **'That number doesn\'t look right. Check it once more.'**
+  String get mascot_profile_bad_phone;
+
+  /// No description provided for @mascot_profile_need_both.
+  ///
+  /// In en, this message translates to:
+  /// **'I need your name and mobile number to create your profile.'**
+  String get mascot_profile_need_both;
+
+  /// No description provided for @mascot_profile_bad_email.
+  ///
+  /// In en, this message translates to:
+  /// **'That email doesn\'t look right. Fix it or leave it empty.'**
+  String get mascot_profile_bad_email;
+
+  /// No description provided for @mascot_profile_photo_added.
+  ///
+  /// In en, this message translates to:
+  /// **'Great photo! Looking like a hero.'**
+  String get mascot_profile_photo_added;
+
+  /// No description provided for @mascot_profile_photo_failed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t use that photo. Pick another one.'**
+  String get mascot_profile_photo_failed;
+
+  /// No description provided for @mascot_fun_six.
+  ///
+  /// In en, this message translates to:
+  /// **'SIX! That ball has left the stadium and gone home!'**
+  String get mascot_fun_six;
+
+  /// No description provided for @mascot_fun_four.
+  ///
+  /// In en, this message translates to:
+  /// **'FOUR! Straight to the boundary, what a shot!'**
+  String get mascot_fun_four;
+
+  /// No description provided for @mascot_fun_wicket.
+  ///
+  /// In en, this message translates to:
+  /// **'WICKET! The pavilion is waiting, off you go!'**
+  String get mascot_fun_wicket;
+
+  /// No description provided for @mascot_fun_dot_ball.
+  ///
+  /// In en, this message translates to:
+  /// **'Dot ball! A little smile for the bowler.'**
+  String get mascot_fun_dot_ball;
+
+  /// No description provided for @mascot_fun_perfect_timing.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfect timing! Even with eyes closed you couldn\'t hit it sweeter!'**
+  String get mascot_fun_perfect_timing;
+
+  /// No description provided for @mascot_fun_early_shot.
+  ///
+  /// In en, this message translates to:
+  /// **'A bit too early! Let the ball come, then hit.'**
+  String get mascot_fun_early_shot;
+
+  /// No description provided for @mascot_fun_late_shot.
+  ///
+  /// In en, this message translates to:
+  /// **'A bit late! The ball is already in the keeper\'s gloves.'**
+  String get mascot_fun_late_shot;
+
+  /// No description provided for @mascot_fun_match_won.
+  ///
+  /// In en, this message translates to:
+  /// **'Victory! You\'re the hero today!'**
+  String get mascot_fun_match_won;
+
+  /// No description provided for @mascot_fun_match_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'Lost this one, but the next match is ours!'**
+  String get mascot_fun_match_lost;
+
+  /// No description provided for @mascot_fun_last_over.
+  ///
+  /// In en, this message translates to:
+  /// **'Last over! Everyone to the edge of your seats!'**
+  String get mascot_fun_last_over;
+
+  /// No description provided for @mascot_fun_comeback.
+  ///
+  /// In en, this message translates to:
+  /// **'No worries! A comeback is the real mass. One more time!'**
+  String get mascot_fun_comeback;
+
+  /// No description provided for @mascot_fun_team_created.
+  ///
+  /// In en, this message translates to:
+  /// **'New team ready! See you on the field.'**
+  String get mascot_fun_team_created;
+
+  /// No description provided for @mascot_fun_tournament_created.
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament ready! Let the fight for the trophy begin.'**
+  String get mascot_fun_tournament_created;
+
+  /// No description provided for @mascot_fun_challenge_won.
+  ///
+  /// In en, this message translates to:
+  /// **'Challenge won! Your opponent is speechless now.'**
+  String get mascot_fun_challenge_won;
+
+  /// No description provided for @mascot_fun_challenge_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'This challenge slipped away. When\'s the revenge match?'**
+  String get mascot_fun_challenge_lost;
+
+  /// No description provided for @mascot_fun_empty_matches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches yet. Start the first one yourself!'**
+  String get mascot_fun_empty_matches;
+
+  /// No description provided for @mascot_fun_no_players.
+  ///
+  /// In en, this message translates to:
+  /// **'No players here yet. Add some people to the team!'**
+  String get mascot_fun_no_players;
+
+  /// No description provided for @mascot_fun_internet.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet! Please check your connection.'**
+  String get mascot_fun_internet;
+
+  /// No description provided for @mascot_fun_auction_sold.
+  ///
+  /// In en, this message translates to:
+  /// **'SOLD! A new star for the team!'**
+  String get mascot_fun_auction_sold;
+
+  /// No description provided for @mascot_fun_auction_unsold.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsold… no worries, the chance will come in the next round!'**
+  String get mascot_fun_auction_unsold;
+
+  /// No description provided for @mascot_movie_baasha_style.
+  ///
+  /// In en, this message translates to:
+  /// **'If I hit one six, it\'s like hitting a hundred!'**
+  String get mascot_movie_baasha_style;
+
+  /// No description provided for @mascot_movie_padayappa_style.
+  ///
+  /// In en, this message translates to:
+  /// **'My shot, my own style!'**
+  String get mascot_movie_padayappa_style;
+
+  /// No description provided for @mascot_movie_mass_entry.
+  ///
+  /// In en, this message translates to:
+  /// **'The Tiger has entered the ground! The game goes to another level now!'**
+  String get mascot_movie_mass_entry;
+
+  /// No description provided for @mascot_movie_comedy_scene.
+  ///
+  /// In en, this message translates to:
+  /// **'The fielder is running faster than the ball, it\'s a comedy scene!'**
+  String get mascot_movie_comedy_scene;
+
+  /// No description provided for @mascot_movie_climax_scene.
+  ///
+  /// In en, this message translates to:
+  /// **'This is the climax! Don\'t leave your seat till the last ball!'**
+  String get mascot_movie_climax_scene;
+
+  /// No description provided for @mascot_movie_hero_intro.
+  ///
+  /// In en, this message translates to:
+  /// **'Hero entry! Raise the bat in slow motion!'**
+  String get mascot_movie_hero_intro;
+
+  /// No description provided for @mascot_movie_interval.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval! Have a tea and come back for the second half.'**
+  String get mascot_movie_interval;
+
+  /// No description provided for @mascot_movie_dialogue_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'What\'s your dialogue? Let your bat do the talking!'**
+  String get mascot_movie_dialogue_hint;
+
+  /// No description provided for @mascot_movie_cool_attitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s play it cool... the scoreboard will do the talking!'**
+  String get mascot_movie_cool_attitude;
+
+  /// No description provided for @mascot_movie_youth_energy.
+  ///
+  /// In en, this message translates to:
+  /// **'Whistles ready? Let the next shot shake the whole ground!'**
+  String get mascot_movie_youth_energy;
+
+  /// No description provided for @mascot_movie_mass_punch.
+  ///
+  /// In en, this message translates to:
+  /// **'Our game needs no noise... the scoreboard is enough!'**
+  String get mascot_movie_mass_punch;
+
+  /// No description provided for @mascot_fun_match_tied.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s a tie! Both teams fought right to the last ball!'**
+  String get mascot_fun_match_tied;
 }
 
 class _AppLocalizationsDelegate
@@ -6620,7 +8089,7 @@ class _AppLocalizationsDelegate
 
   @override
   bool isSupported(Locale locale) =>
-      <String>['en'].contains(locale.languageCode);
+      <String>['en', 'ta'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
@@ -6631,6 +8100,8 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
   switch (locale.languageCode) {
     case 'en':
       return AppLocalizationsEn();
+    case 'ta':
+      return AppLocalizationsTa();
   }
 
   throw FlutterError(

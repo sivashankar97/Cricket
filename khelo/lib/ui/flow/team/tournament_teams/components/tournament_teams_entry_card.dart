@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:khelo/components/grouped_list.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:style/animations/on_tap_scale.dart';
@@ -17,29 +18,21 @@ class TournamentTeamsEntryCard extends StatelessWidget {
       onTap: () => AppRoute.tournamentTeams.push(context),
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: cs.cardDecoration(radius: 12).copyWith(
-              border: Border.all(color: cs.outline, width: 0.5),
-            ),
+        decoration: cs.cardDecoration(radius: 18),
         child: Row(
           children: [
-            Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: cs.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(CupertinoIcons.person_3_fill, color: cs.primary),
-            ),
-            const SizedBox(width: 12),
+            const BrandIconThumb(CupertinoIcons.person_3_fill, size: 44),
+            const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     context.l10n.tournament_teams_title,
-                    style:
-                        AppTextStyle.subtitle1.copyWith(color: cs.textPrimary),
+                    style: AppTextStyle.subtitle1.copyWith(
+                      color: cs.textPrimary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -50,7 +43,8 @@ class TournamentTeamsEntryCard extends StatelessWidget {
                 ],
               ),
             ),
-            Icon(CupertinoIcons.chevron_right, color: cs.textDisabled),
+            Icon(CupertinoIcons.chevron_forward,
+                size: 15, color: cs.textDisabled),
           ],
         ),
       ),

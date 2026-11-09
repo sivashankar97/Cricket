@@ -8,6 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:khelo/components/image_avatar.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/components/profile_image_avatar.dart';
 import 'package:khelo/domain/extensions/string_extensions.dart';
 import 'package:khelo/ui/flow/matches/add_match/components/section_title.dart';
@@ -70,6 +72,9 @@ class _AddTournamentScreenState extends ConsumerState<AddTournamentScreen> {
     ref.listen(addTournamentStateProvider.select((value) => value.pop),
         (previous, next) {
       if (next) {
+        ref
+            .read(mascotProvider.notifier)
+            .react(MascotReaction.tournamentCreated);
         context.pop();
       }
     });

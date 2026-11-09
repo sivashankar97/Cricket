@@ -11,15 +11,3 @@ services:
     mem_limit: 64m
     cpus: 0.5
 
-  # WhatsApp login (khelo/whatsapp_login). Not published on a host port; only
-  # reachable through `web` at /wa/.
-  wa-login:
-    build: ./whatsapp_login
-    restart: unless-stopped
-    env_file: ./whatsapp_login/.env
-    environment:
-      FIREBASE_SERVICE_ACCOUNT_FILE: /run/secrets/firebase-admin.json
-    volumes:
-      - ./secrets/firebase-admin.json:/run/secrets/firebase-admin.json:ro
-    mem_limit: 128m
-    cpus: 0.5

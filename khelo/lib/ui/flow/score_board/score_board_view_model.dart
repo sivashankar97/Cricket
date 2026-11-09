@@ -18,10 +18,13 @@ import 'package:data/service/tournament/tournament_service.dart';
 import 'package:data/service/match_event/match_event_service.dart';
 import 'package:data/service/partnership/partnership_service.dart';
 import 'package:data/service/user/user_service.dart';
+import 'package:data/storage/app_preferences.dart';
 import 'package:data/utils/combine_latest.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/flow/score_board/components/select_player_sheet.dart';
 
@@ -38,6 +41,8 @@ final scoreBoardStateProvider = StateNotifierProvider.autoDispose<
     ref.read(tournamentServiceProvider),
     ref.read(matchEventServiceProvider),
     ref.read(partnershipServiceProvider),
+    mascot: ref.read(mascotProvider.notifier),
+    currentUserId: () => ref.read(currentUserPod)?.id,
   );
 });
 
@@ -69,8 +74,16 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
     this._ballScoreService,
     this._tournamentService,
     this._matchEventService,
-    this._partnershipService,
-  ) : super(const ScoreBoardViewState());
+    this._partnershipService, {
+    MascotController? mascot,
+    String? Function()? currentUserId,
+  })  : _mascot = mascot,
+        _currentUserId = currentUserId ?? (() => null),
+        super(const ScoreBoardViewState());
+
+  final MascotController? _mascot;
+  final String? Function() _currentUserId;
+  final Set<String> _lastOverAnnounced = {};
 
   MatchRules get rules => state.match?.rules ?? const MatchRules();
 
@@ -135,6 +148,11 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
         final isMatchChanged = state.match != match;
         final isInningChanged = state.allInnings.isEmpty && innings.isNotEmpty;
         state = state.copyWith(match: match, error: null);
+        if (previousMatch != null &&
+            previousMatch.match_status != MatchStatus.finish &&
+            match.match_status == MatchStatus.finish) {
+          _reactToResult(match);
+        }
         if (innings.isEmpty) {
           await _createInnings(
               isForTestMatch: match.match_type == MatchType.testMatch);
@@ -736,6 +754,7 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
         ballsPerOver: _ballsPerOver,
       );
       state = state.copyWith(isActionInProgress: false);
+      _reactToBall(ball);
     } catch (e) {
       debugPrint("ScoreBoardViewNotifier: error while adding ball -> $e");
       state = state.copyWith(
@@ -1558,6 +1577,52 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
         showSelectBowlerSheet:
             showSelectBatsManAndBowlerSheet ? null : DateTime.now(),
         isActionInProgress: false);
+    _announceLastOver();
+  }
+
+  // ── Tiger mascot reactions ────────────────────────────────────────────────
+
+  void _reactToBall(BallScoreModel ball) {
+    if (ball.extras_type == ExtrasType.penaltyRun) return;
+    final reaction = reactionForBall(ball);
+    if (reaction != null) {
+      _mascot?.react(reaction, top: true, allowFun: false);
+    }
+  }
+
+  /// Once per innings, when the final over of a limited-overs match starts.
+  void _announceLastOver() {
+    final match = state.match;
+    final inningId = state.currentInning?.id;
+    if (match == null ||
+        inningId == null ||
+        match.match_type != MatchType.limitedOvers) {
+      return;
+    }
+    final overs = (match.revised_target?.overs ?? match.number_of_over).ceil();
+    if (state.overCount != overs || !_lastOverAnnounced.add(inningId)) return;
+    _mascot?.react(MascotReaction.lastOver, top: true, allowFun: false);
+  }
+
+  /// Only for a user on exactly one of the two teams (by squad, else by
+  /// ownership); neutral scorers get no reaction.
+  void _reactToResult(MatchModel match) {
+    final userId = _currentUserId();
+    final result = match.matchResult;
+    if (userId == null || result == null) return;
+    var mine = match.teams
+        .where((team) => team.squad.any((p) => p.player.id == userId))
+        .toList();
+    if (mine.isEmpty) {
+      mine =
+          match.teams.where((team) => team.team.created_by == userId).toList();
+    }
+    if (mine.length != 1) return;
+    _mascot?.react(result.winType == WinnerByType.tie
+        ? MascotReaction.matchTied
+        : mine.single.team.id == result.teamId
+            ? MascotReaction.matchWon
+            : MascotReaction.matchLost);
   }
 
   Future<void> startNextInning() async {

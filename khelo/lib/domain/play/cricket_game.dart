@@ -1,7 +1,40 @@
 import 'dart:math';
 
+/// Overs and wickets for one innings.
+class MatchFormat {
+  final int overs;
+  final int wickets;
+
+  const MatchFormat(this.overs, this.wickets);
+
+  static const oneOver = MatchFormat(1, 2);
+  static const twoOvers = MatchFormat(2, 3);
+  static const fiveOvers = MatchFormat(5, 5);
+  static const options = [oneOver, twoOvers, fiveOvers];
+
+  /// Formats saved with an unknown over count fall back to two overs.
+  static MatchFormat fromOvers(int overs) => options.firstWhere(
+        (format) => format.overs == overs,
+        orElse: () => twoOvers,
+      );
+
+  int get balls => overs * 6;
+
+  @override
+  bool operator ==(Object other) =>
+      other is MatchFormat && other.overs == overs && other.wickets == wickets;
+
+  @override
+  int get hashCode => Object.hash(overs, wickets);
+}
+
+/// "1.4" for 10 balls.
+String oversText(int balls) => '${balls ~/ 6}.${balls % 6}';
+
 /// Rules of the Play tab's mini timing-cricket game.
 class GameRules {
+  /// Quick Play and the Daily Challenge always use two overs, three wickets.
+  static const format = MatchFormat.twoOvers;
   static const balls = 12;
   static const wickets = 3;
   static const minTravelMs = 900;
@@ -9,6 +42,9 @@ class GameRules {
 
   /// How long after the ball reaches the batter a late swing still counts.
   static const lateWindowMs = 230;
+
+  /// A swing this close to the ball's arrival is perfect timing (a six).
+  static const perfectWindowMs = 45;
 }
 
 enum ShotResult {
@@ -73,7 +109,7 @@ ShotResult judgeShot(Delivery delivery, {required int? tapOffsetMs}) {
   final miss = delivery.onStumps ? ShotResult.out : ShotResult.dot;
   if (tapOffsetMs == null) return miss;
   final offset = tapOffsetMs.abs();
-  if (offset <= 45) return ShotResult.six;
+  if (offset <= GameRules.perfectWindowMs) return ShotResult.six;
   if (offset <= 100) return ShotResult.four;
   if (offset <= 160) return ShotResult.two;
   if (offset <= GameRules.lateWindowMs) return ShotResult.single;
@@ -83,22 +119,49 @@ ShotResult judgeShot(Delivery delivery, {required int? tapOffsetMs}) {
 class Innings {
   final int seed;
   final int? target;
+  final MatchFormat format;
   final List<Delivery> deliveries;
   final List<ShotResult> results;
+
+  /// Tap offset per ball (null = not swung), so others can replay it.
+  final List<int?> offsets;
 
   const Innings._({
     required this.seed,
     required this.target,
+    required this.format,
     required this.deliveries,
     required this.results,
+    required this.offsets,
   });
 
-  factory Innings.start({required int seed, int? target}) => Innings._(
+  factory Innings.start({
+    required int seed,
+    int? target,
+    MatchFormat format = MatchFormat.twoOvers,
+  }) =>
+      Innings._(
         seed: seed,
         target: target,
-        deliveries: deliveriesForSeed(seed),
+        format: format,
+        deliveries: deliveriesForSeed(seed, count: format.balls),
         results: const [],
+        offsets: const [],
       );
+
+  /// Rebuilds an innings from saved balls (e.g. a live opponent's).
+  factory Innings.replay({
+    required int seed,
+    int? target,
+    required MatchFormat format,
+    required List<(ShotResult, int?)> balls,
+  }) {
+    var innings = Innings.start(seed: seed, target: target, format: format);
+    for (final (result, offset) in balls) {
+      innings = innings.record(result, offsetMs: offset);
+    }
+    return innings;
+  }
 
   int get runs => results.fold(0, (sum, result) => sum + result.runs);
 
@@ -117,19 +180,83 @@ class Innings {
   bool get won => target != null && runs >= target!;
 
   bool get isOver =>
-      balls >= deliveries.length || wickets >= GameRules.wickets || won;
+      balls >= deliveries.length || wickets >= format.wickets || won;
 
   Delivery? get nextDelivery => isOver ? null : deliveries[balls];
 
-  Innings record(ShotResult result) {
+  double get strikeRate => balls == 0 ? 0 : runs * 100 / balls;
+
+  Innings record(ShotResult result, {int? offsetMs}) {
     if (isOver) return this;
     return Innings._(
       seed: seed,
       target: target,
+      format: format,
       deliveries: deliveries,
       results: [...results, result],
+      offsets: [...offsets, offsetMs],
     );
   }
+}
+
+/// Which of the few commentary lines to use for a ball; the same for every
+/// viewer of the same match.
+int commentaryVariant(int seed, int ball, {int variants = 3}) =>
+    (seed + ball * 31).abs() % variants;
+
+/// The coin lands heads for even seeds, so both players see the same toss.
+bool tossLandsHeads(int seed) => seed.isEven;
+
+enum MatchWinner { firstBatter, secondBatter, tie }
+
+class MatchOutcome {
+  final MatchWinner winner;
+
+  /// Runs (first batter won) or wickets left (chaser won); 0 for a tie.
+  final int margin;
+
+  const MatchOutcome(this.winner, this.margin);
+
+  bool get byWickets => winner == MatchWinner.secondBatter;
+}
+
+/// First batter sets the score; the chaser needs one run more.
+MatchOutcome matchOutcome({
+  required int firstRuns,
+  required int secondRuns,
+  required int secondWickets,
+  required MatchFormat format,
+}) {
+  if (secondRuns > firstRuns) {
+    return MatchOutcome(
+        MatchWinner.secondBatter, format.wickets - secondWickets);
+  }
+  if (secondRuns < firstRuns) {
+    return MatchOutcome(MatchWinner.firstBatter, firstRuns - secondRuns);
+  }
+  return const MatchOutcome(MatchWinner.tie, 0);
+}
+
+/// XP for one finished game: runs, boundaries and a bonus for winning.
+int xpForGame({
+  required int runs,
+  required int fours,
+  required int sixes,
+  bool? won,
+}) =>
+    runs + fours * 2 + sixes * 4 + (won == true ? 25 : 5);
+
+/// Levels get 50 XP longer each time: 100, 150, 200…
+({int level, int xpInLevel, int xpForNext}) levelForXp(int xp) {
+  var level = 1;
+  var need = 100;
+  var left = xp;
+  while (left >= need) {
+    left -= need;
+    level++;
+    need += 50;
+  }
+  return (level: level, xpInLevel: left, xpForNext: need);
 }
 
 /// One shared chase per calendar day for every player.

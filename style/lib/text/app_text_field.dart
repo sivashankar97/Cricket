@@ -45,6 +45,7 @@ class AppTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextCapitalization textCapitalization;
   final Function(PointerDownEvent)? onTapOutside;
+  final Iterable<String>? autofillHints;
 
   const AppTextField({
     super.key,
@@ -84,6 +85,7 @@ class AppTextField extends StatelessWidget {
     this.prefixIconConstraints,
     this.textAlign = TextAlign.start,
     this.onTapOutside,
+    this.autofillHints,
   });
 
   @override
@@ -136,6 +138,7 @@ class AppTextField extends StatelessWidget {
         focusNode: focusNode,
         onSubmitted: onSubmitted,
         textAlign: textAlign,
+        autofillHints: autofillHints,
         style: style ??
             AppTextStyle.subtitle2.copyWith(
               color: cs.textPrimary,

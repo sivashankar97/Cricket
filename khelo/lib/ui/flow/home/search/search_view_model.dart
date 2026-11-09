@@ -38,7 +38,7 @@ class SearchHomeViewNotifier extends StateNotifier<SearchHomeViewState> {
   bool _maxTournamentLoaded = false;
   bool _maxMatchLoaded = false;
   String? _lastTeamId;
-  String? _lastUserId;
+  UserModel? _lastUser;
   String? _lastTournamentId;
   String? _lastMatchId;
 
@@ -57,7 +57,7 @@ class SearchHomeViewNotifier extends StateNotifier<SearchHomeViewState> {
       _maxTournamentLoaded = false;
       _maxMatchLoaded = false;
       _lastTeamId = null;
-      _lastUserId = null;
+      _lastUser = null;
       _lastTournamentId = null;
       _lastMatchId = null;
 
@@ -102,12 +102,12 @@ class SearchHomeViewNotifier extends StateNotifier<SearchHomeViewState> {
       final users = await _userService.searchUser(
         _searchKey,
         limit: _limit,
-        lastUserId: _lastUserId,
+        after: _lastUser,
       );
 
       state = state.copyWith(users: {...state.users, ...users}.toList());
 
-      _lastUserId = users.lastOrNull?.id;
+      _lastUser = users.lastOrNull;
       _maxUserLoaded = users.length < _limit;
     } catch (e) {
       state = state.copyWith(error: e, loading: false);

@@ -1,0 +1,86 @@
+{
+  "@@locale": "ta",
+  "mascot_setting_title": "Tiger Guide 🐯",
+  "mascot_welcome_named": "வந்துட்டீங்களா {name}! வாங்க... இன்னைக்கு மைதானத்துல நம்ம ஆட்டம் ஆரம்பிக்கட்டுமா? 🔥",
+  "@mascot_welcome_named": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mascot_welcome_guest": "வாங்க பாஸ்! Guest-ஆ வந்தாலும் ஆட்டம் மட்டும் Mass-ஆ இருக்கணும். ஆரம்பிக்கலாமா? 🏏",
+  "mascot_sign_in_options": "Login பண்ணி உங்க பெயர்ல விளையாடுங்க... இல்ல Guest-ஆ நேரா களமிறங்குங்க!",
+  "mascot_sign_in_required": "இந்த வசதிக்குள் வர Login தேவை பாஸ். ஒரு சின்ன Entry தான்!",
+  "mascot_sign_in_to_create": "முதல்ல Login பண்ணுங்க... அப்புறம் Team, Match, Tournament எல்லாம் நம்ம கையில!",
+  "mascot_email_new_account": "புதுசா வந்திருக்கீங்களா? வாங்க, உங்களுக்கான Account-ஐ உருவாக்கி ஆட்டத்துக்குள் Entry கொடுப்போம்!",
+  "mascot_email_looks_good": "Email சரியா இருக்கு பாஸ்! அடுத்த Step-க்கு போகலாம்.",
+  "mascot_password_hidden": "உங்க Password-ஐ நான் பார்க்கல... ரகசியம் ரகசியம்தான்! 🤫",
+  "mascot_password_shown": "Password திரையில் தெரியுது பாஸ்! பக்கத்தில யாரும் பார்க்கலன்னு ஒருமுறை Check பண்ணுங்க.",
+  "mascot_wrong_password": "அடடா! Login விவரம் பொருந்தலையே. Password மறந்துட்டீங்களா? 'Forgot password' அழுத்துங்க; Reset Link அனுப்புறேன்.",
+  "mascot_email_in_use": "இந்த Email-க்கு ஏற்கனவே Account இருக்கு பாஸ். புதுசா உருவாக்க வேண்டாம்; Sign In பண்ணிப் பாருங்க!",
+  "mascot_enter_email_first": "முதல்ல உங்க Email-ஐ உள்ளிடுங்க. அப்புறம் 'Forgot password' அழுத்துங்க!",
+  "mascot_reset_sent": "Reset Link அனுப்பியாச்சு! Inbox-உம் Spam Folder-உம் Check பண்ணுங்க.",
+  "mascot_something_wrong": "அடடா, ஒரு சின்ன தடங்கல்! மீண்டும் முயற்சி பண்ணுங்க; ஆட்டம் தொடரட்டும்.",
+  "mascot_login_success": "Entry கிடைச்சாச்சு பாஸ்! இனிமே ஆட்டம் நம்ம கையில! 🔥",
+  "mascot_registered": "Account ரெடி! Sports Tamil Team-க்கு Welcome பாஸ்! உங்க ஆட்டம் இப்போதான் ஆரம்பம்!",
+  "mascot_guest_joined": "Guest-ஆ களமிறங்கிட்டீங்க பாஸ்! உங்க Score 'Guest'ன்னு காட்டும். வாங்க, ஆட்டத்தை ஆரம்பிப்போம்!",
+  "mascot_profile_intro": "உங்க பெயரைச் சொல்லுங்க பாஸ்... அப்போதான் Friends உங்களை கண்டுபிடிக்க முடியும்!",
+  "mascot_profile_name": "{name}, பெயரே Mass-ஆ இருக்கு! Sports Tamil-க்கு வரவேற்கிறோம்!",
+  "@mascot_profile_name": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mascot_profile_created": "வாங்க {name}! Sports Tamil குடும்பத்துல உங்க Entry ஆகிடுச்சு! இனிமே கலக்கலாம்! 🏏",
+  "@mascot_profile_created": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "mascot_profile_saved": "Profile Save ஆயிடுச்சு பாஸ்! அடுத்த ஆட்டத்துக்கு Ready!",
+  "mascot_profile_required": "ஆட்டத்துக்கு முன்னாடி Profile-ஐ முடிச்சிடுங்க பாஸ்! பெயரும் Mobile Number-ம் போதும் 🙂",
+  "mascot_profile_need_name": "முதல்ல உங்க பெயரைச் சொல்லுங்க பாஸ்! பெயர் இல்லாம Team-ல சேர்க்க முடியாது 🙂",
+  "mascot_profile_need_phone": "உங்க Mobile Number-ஐக் கொடுங்க பாஸ்... அது உங்களுக்கு மட்டும்தான் தெரியும், பயப்படாதீங்க! 🔒",
+  "mascot_profile_bad_phone": "இந்த Number சரியா இல்லையே பாஸ்... ஒருக்கா திரும்பப் பாருங்க!",
+  "mascot_profile_need_both": "பெயரும் Mobile Number-ம் கட்டாயம் வேணும் பாஸ்! ரெண்டையும் நிரப்புங்க, அப்புறம் ஆட்டம் ஆரம்பம்! 🏏",
+  "mascot_profile_bad_email": "Email சரியா இல்லை பாஸ்... திருத்துங்க, இல்லாட்டி காலியா விடுங்க.",
+  "mascot_profile_photo_added": "சூப்பர் Photo பாஸ்! Hero மாதிரி இருக்கீங்க 😎",
+  "mascot_profile_photo_failed": "இந்த Photo-வை ஏத்த முடியல பாஸ்... வேற ஒரு Photo-வைத் தெரிவு செய்யுங்க!",
+  "mascot_fun_six": "சிக்ஸர்! பந்து எல்லை தாண்டிச்சு... ரசிகர்கள் கொண்டாட்டம் ஆரம்பம்! 🔥",
+  "mascot_fun_four": "பவுண்டரி! என்ன ஒரு ஷாட் பாஸ்... கைதட்டல் கேட்குதே! 👏",
+  "mascot_fun_wicket": "விக்கெட்! ஒரே பந்துல ஆட்டத்தோட கதை திரும்பிடுச்சே! 😎",
+  "mascot_fun_dot_ball": "Dot Ball தான்... ஆனா Tension மட்டும் Full-ஆ ஏறுதே! 😂",
+  "mascot_fun_perfect_timing": "டைமிங் வேற லெவல்! பேட்டும் பந்தும் சரியான நேரத்துல சந்திச்சாச்சு! 🔥",
+  "mascot_fun_early_shot": "கொஞ்சம் பொறுமை பாஸ்... பந்து வர்றதுக்குள்ள ஷாட் ஆடிட்டீங்களே! 😅",
+  "mascot_fun_late_shot": "அடடா! ஷாட் கொஞ்சம் Late ஆயிடுச்சு. அடுத்த Ball-ல Comeback கொடுங்க!",
+  "mascot_fun_match_won": "கிளைமாக்ஸ் நம்ம பக்கம்! Match ஜெயிச்சாச்சு பாஸ்... கொண்டாடுங்க! 🏆",
+  "mascot_fun_match_lost": "இது முடிவு இல்ல பாஸ்... அடுத்த வெற்றிக்கான ஆரம்பம்! அடுத்த Match-ல Comeback கொடுப்போம்!",
+  "mascot_fun_last_over": "கடைசி ஓவர் வந்தாச்சு! இப்போதான் ஆட்டத்துக்கு உண்மையான கிளைமாக்ஸ்!",
+  "mascot_fun_team_created": "Team ரெடி! இனிமேல் மைதானத்துல நம்ம ஆட்டம்தான்! 😎",
+  "mascot_fun_tournament_created": "Tournament ஆரம்பிச்சாச்சு! கோப்பையைத் தூக்கப்போறது யாருன்னு பார்ப்போம்!",
+  "mascot_fun_challenge_won": "Challenge ஜெயிச்சாச்சு! Scoreboard-ஏ உங்க பேரைச் சொல்லுது! 🔥",
+  "mascot_fun_challenge_lost": "இந்த Round அவங்களுக்குப் போச்சு. அடுத்த Round-ஐ நம்ம பக்கம் திருப்பலாம்!",
+  "mascot_fun_auction_sold": "Sold! Bid முடிஞ்சாச்சு... இந்த வீரர் இனிமேல் அந்த அணியோட பலம்!",
+  "mascot_fun_auction_unsold": "இந்த முறை வாய்ப்பு அமையல. ஆனா ஆட்டம் இன்னும் முடியல; அடுத்த வாய்ப்பு வரட்டும்!",
+  "mascot_fun_comeback": "Comeback கொடுக்க இன்னும் நேரம் இருக்கு பாஸ்! அடுத்த பந்திலிருந்து ஆட்டத்தை மாற்றுங்க! 💪",
+  "mascot_fun_empty_matches": "மைதானம் காலியா இருக்கு பாஸ்! ஒரு Match உருவாக்கி நண்பர்களைக் கூப்பிடுங்க!",
+  "mascot_fun_no_players": "Team-க்கு இன்னும் வீரர்கள் தேவை! நண்பர்களைச் சேர்த்து Dream Team உருவாக்குங்க!",
+  "mascot_fun_internet": "Network Connection துண்டிக்கப்பட்டிருக்கு பாஸ். இணையத்தைச் சரிபார்த்து மீண்டும் முயற்சி செய்யுங்க.",
+  "mascot_fun_match_tied": "ஆட்டம் சமன்ல முடிஞ்சிருக்கு! இரு அணிகளும் கடைசி வரை போராடிட்டாங்க!",
+  "mascot_movie_baasha_style": "சொல்ல வேண்டியதைச் சொல்லிட்டேன் பாஸ்... இனிமே Scoreboard பேசட்டும்!",
+  "mascot_movie_padayappa_style": "என் ஆட்டம் என் ஸ்டைல்... வெற்றி வந்தா அது நம்ம Style!",
+  "mascot_movie_mass_entry": "வந்துட்டேன்னு மட்டும் நினைக்காதீங்க... Scoreboard-ல தடம் பதிக்க வந்திருக்கேன்! 💥",
+  "mascot_movie_comedy_scene": "பந்தைப் பார்த்ததும் பேட் ஏன் அமைதியா நிக்குது பாஸ்? 😂",
+  "mascot_movie_climax_scene": "கடைசி பந்து விழும் வரை கதை முடியாது... இது நம்ம கிரிக்கெட் கிளைமாக்ஸ்!",
+  "mascot_movie_hero_intro": "ஹீரோ Entry கொடுத்தாச்சு! இனிமே ஒவ்வொரு Ball-உம் முக்கியம்! 😎",
+  "mascot_movie_interval": "இது Interval தான் பாஸ்... இரண்டாவது Innings-ல சந்திப்போம்!",
+  "mascot_movie_dialogue_hint": "ஒரு Mass Dialogue வேணுமா? Tiger ரெடியா இருக்கு!",
+  "mascot_movie_cool_attitude": "அமைதியா ஆடுவோம்... பதிலை Scoreboard சொல்லட்டும்!",
+  "mascot_movie_youth_energy": "விசில் ரெடியா? அடுத்த Shot-ல மைதானமே அதிரட்டும்!",
+  "mascot_movie_mass_punch": "நம்ம ஆட்டத்துக்கு சத்தம் தேவையில்லை... Scoreboard போதும்!"
+}

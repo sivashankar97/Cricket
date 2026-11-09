@@ -19,6 +19,8 @@ import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/shadows.dart';
+import 'package:khelo/components/mascot/mascot_on_appear.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 
 import '../../../auction/components/auction_widgets.dart';
 import '../components/player_form_sheet.dart';
@@ -107,11 +109,14 @@ class TournamentTeamPlayersScreen extends ConsumerWidget {
         if (state.players.isEmpty && !state.loading)
           SizedBox(
             height: 260,
-            child: EmptyScreen(
-              title: context.l10n.tournament_team_players_empty_title,
-              description:
-                  context.l10n.tournament_team_players_empty_description,
-              isShowButton: false,
+            child: MascotOnAppear(
+              reaction: MascotReaction.noPlayers,
+              child: EmptyScreen(
+                title: context.l10n.tournament_team_players_empty_title,
+                description:
+                    context.l10n.tournament_team_players_empty_description,
+                isShowButton: false,
+              ),
             ),
           )
         else

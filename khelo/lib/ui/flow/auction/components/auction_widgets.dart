@@ -28,7 +28,8 @@ Color auctionTeamColor(Auction auction, AuctionTeam team) {
   return _teamColors[key % _teamColors.length];
 }
 
-class AuctionTeamBadge extends StatelessWidget {
+/// The team's logo, or its initials on the team color.
+class AuctionTeamBadge extends ConsumerWidget {
   final Auction auction;
   final AuctionTeam team;
   final double size;
@@ -41,7 +42,22 @@ class AuctionTeamBadge extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final logo = team.hasLogo
+        ? ref.watch(auctionPhotoProvider(auction.teamLogoId(team))).valueOrNull
+        : null;
+    if (logo != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.3),
+        child: Image.memory(
+          logo,
+          height: size,
+          width: size,
+          fit: BoxFit.cover,
+          gaplessPlayback: true,
+        ),
+      );
+    }
     return Container(
       height: size,
       width: size,

@@ -10,8 +10,12 @@ import 'package:khelo/components/sign_in_required_view.dart';
 import 'package:khelo/gen/assets.gen.dart';
 import 'package:khelo/ui/flow/app_links/app_links_handler.dart';
 import 'package:khelo/ui/flow/my_game/my_game_tab_screen.dart';
+import 'package:khelo/ui/flow/play/match/play_invite_listener.dart';
 import 'package:khelo/ui/flow/play/play_screen.dart';
+import 'package:khelo/ui/flow/profile/player_claims.dart';
+import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/profile/profile_screen.dart';
+import 'package:khelo/ui/flow/settings/edit_profile/profile_completion.dart';
 import 'package:khelo/ui/flow/auction/auction_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:style/animations/fade_indexed_stack.dart';
@@ -49,7 +53,13 @@ class _MainScreenState extends ConsumerState<MainScreen>
     runPostFrame(() {
       notificationHandler.init(context);
       _appLinksHandler.init(context);
+      _openCreateProfileIfNeeded(ref.read(profileIncompleteProvider));
     });
+  }
+
+  void _openCreateProfileIfNeeded(bool? incomplete) {
+    if (incomplete != true || !mounted) return;
+    AppRoute.editProfile(isToCreateAccount: true).go(context);
   }
 
   @override
@@ -70,6 +80,8 @@ class _MainScreenState extends ConsumerState<MainScreen>
   @override
   Widget build(BuildContext context) {
     _observerShowNotificationPermissionPrompt(context);
+    ref.listen(profileIncompleteProvider,
+        (_, next) => _openCreateProfileIfNeeded(next));
     final hasSession = ref.watch(hasUserSession);
     final isGuest = ref.watch(guestUserIdProvider).valueOrNull != null;
     ref.listen(guestUserIdProvider, (previous, next) {
@@ -92,10 +104,13 @@ class _MainScreenState extends ConsumerState<MainScreen>
           : SignInRequiredView(title: context.l10n.tab_profile_title),
     ];
 
-    if (isIOS) {
-      return _cupertinoTabs(context, widgets);
-    }
-    return _materialTabs(context, widgets);
+    return PlayInviteListener(
+      child: PlayerClaimListener(
+        child: isIOS
+            ? _cupertinoTabs(context, widgets)
+            : _materialTabs(context, widgets),
+      ),
+    );
   }
 
   void _observerShowNotificationPermissionPrompt(BuildContext context) {

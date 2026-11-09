@@ -1,22 +1,24 @@
+import 'dart:async';
+
 import 'package:data/api/user/user_models.dart';
 import 'package:data/errors/app_error.dart';
 import 'package:data/service/auth/auth_service.dart';
 import 'package:data/service/file_upload/file_upload_service.dart';
+import 'package:data/service/file_upload/local_file_upload.dart';
 import 'package:data/service/match/match_service.dart';
 import 'package:data/service/team/team_service.dart';
 import 'package:data/service/tournament/tournament_service.dart';
+import 'package:data/service/user/player_link_service.dart';
 import 'package:data/service/user/user_service.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:data/storage/provider/preferences_provider.dart';
-import 'package:data/utils/constant/firebase_storage_constant.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:khelo/domain/extensions/file_extension.dart';
 import 'package:khelo/domain/extensions/string_extensions.dart';
-
-part 'edit_profile_view_model.freezed.dart';
+import 'package:khelo/domain/image/profile_photo.dart';
+import 'package:khelo/domain/phone/phone_number.dart';
+import 'package:khelo/ui/flow/settings/edit_profile/profile_completion.dart';
 
 final editProfileStateProvider = StateNotifierProvider.autoDispose<
     EditProfileViewNotifier, EditProfileState>((ref) {
@@ -29,10 +31,14 @@ final editProfileStateProvider = StateNotifierProvider.autoDispose<
     ref.read(tournamentServiceProvider),
     ref.read(currentUserPod),
     ref.read(currentUserJsonPod.notifier),
+    playerLink: ref.read(playerLinkServiceProvider),
   );
   ref.listen(currentUserPod, (_, next) => notifier._updateUser(next));
   return notifier;
 });
+
+/// Fields Create Profile checks before saving.
+enum ProfileField { name, phone, email }
 
 class EditProfileViewNotifier extends StateNotifier<EditProfileState> {
   final FileUploadService _fileUploadService;
@@ -42,6 +48,10 @@ class EditProfileViewNotifier extends StateNotifier<EditProfileState> {
   final MatchService _matchService;
   final TournamentService _tournamentService;
   final PreferenceNotifier<String?> _userJsonController;
+  final PlayerLinkService? _playerLink;
+
+  /// Number saved before this edit, to free its lookup entry when changed.
+  String? _savedPhone;
 
   EditProfileViewNotifier(
     this._fileUploadService,
@@ -51,18 +61,46 @@ class EditProfileViewNotifier extends StateNotifier<EditProfileState> {
     this._matchService,
     this._tournamentService,
     UserModel? user,
-    this._userJsonController,
-  ) : super(EditProfileState(
-            dob: user?.dob ?? DateTime.now(),
-            imageUrl: user?.profile_img_url,
-            battingStyle: user?.batting_style,
-            bowlingStyle: user?.bowling_style,
-            gender: user?.gender,
-            playerRole: user?.player_role,
-            nameController: TextEditingController(text: user?.name),
-            emailController: TextEditingController(text: user?.email),
-            currentUser: user,
-            locationController: TextEditingController(text: user?.location)));
+    this._userJsonController, {
+    PlayerLinkService? playerLink,
+  })  : _playerLink = playerLink,
+        super(EditProfileState(
+          dob: user?.dob,
+          imageUrl: user?.profile_img_url,
+          battingStyle: user?.batting_style,
+          bowlingStyle: user?.bowling_style,
+          gender: user?.gender,
+          playerRole: user?.player_role,
+          phoneCountry:
+              PhoneNumber.parse(user?.phone)?.country ?? PhoneCountry.india,
+          nameController: TextEditingController(text: user?.name),
+          emailController: TextEditingController(text: user?.email),
+          phoneController: TextEditingController(
+              text: PhoneNumber.parse(user?.phone)?.digits),
+          currentUser: user,
+          locationController: TextEditingController(text: user?.location),
+        )) {
+    _loadPrivatePhone();
+  }
+
+  Future<void> _loadPrivatePhone() async {
+    final userId = state.currentUser?.id;
+    if (userId == null) return;
+    try {
+      final stored = await userService.streamPrivatePhone(userId).first;
+      _savedPhone = stored;
+      final phone = PhoneNumber.parse(stored);
+      if (!mounted || phone == null) return;
+      if (state.phoneController.text.trim().isEmpty ||
+          state.phoneController.text.trim() == phone.digits) {
+        state.phoneController.text = phone.digits;
+        state = state.copyWith(phoneCountry: phone.country);
+        _revalidate();
+      }
+    } catch (e) {
+      debugPrint("EditProfileViewNotifier: error while loading phone -> $e");
+    }
+  }
 
   void _updateUser(UserModel? user) {
     state = state.copyWith(currentUser: user);
@@ -70,97 +108,151 @@ class EditProfileViewNotifier extends StateNotifier<EditProfileState> {
 
   void onDateSelect({required DateTime selectedDate}) {
     state = state.copyWith(dob: selectedDate);
-    onValueChange();
   }
 
   void onGenderSelect({required UserGender gender}) {
     state = state.copyWith(gender: gender);
-    onValueChange();
   }
 
   void onBattingStyleChange(BattingStyle style) {
     state = state.copyWith(battingStyle: style);
-    onValueChange();
   }
 
   void onBowlingStyleChange(BowlingStyle style) {
     state = state.copyWith(bowlingStyle: style);
-    onValueChange();
   }
 
   void onPlayerRoleChange(PlayerRole role) {
     state = state.copyWith(playerRole: role);
-    onValueChange();
   }
 
-  void onValueChange() {
-    final bool isEnable = state.nameController.text.trim().length >= 3 &&
-        state.emailController.text.trim().isValidEmail() &&
-        state.locationController.text.trim().length >= 3;
-
-    state = state.copyWith(isButtonEnable: isEnable);
+  void onPhoneCountryChange(PhoneCountry country) {
+    state = state.copyWith(phoneCountry: country);
+    _revalidate();
   }
 
-  Future<void> onImageChange(String imagePath) async {
+  /// Re-checks fields after the first submit so errors clear as you type.
+  void onValueChange() => _revalidate();
+
+  void _revalidate() {
+    if (!state.submitted) return;
+    state = state.copyWith(errors: validate());
+  }
+
+  /// Missing or wrong fields, in screen order.
+  List<ProfileField> validate() {
+    final name = state.nameController.text.trim();
+    final email = state.emailController.text.trim();
+    return [
+      if (name.length < ProfileRules.minNameLength) ProfileField.name,
+      if (PhoneNumber.validate(
+              state.phoneCountry, state.phoneController.text) !=
+          null)
+        ProfileField.phone,
+      if (email.isNotEmpty && !email.isValidEmail()) ProfileField.email,
+    ];
+  }
+
+  PhoneError? get phoneError =>
+      PhoneNumber.validate(state.phoneCountry, state.phoneController.text);
+
+  /// Shrinks the picked photo to a small square JPEG kept with the profile.
+  /// Returns false when the file isn't a usable image.
+  Future<bool> onImageChange(String imagePath) async {
+    state = state.copyWith(isImageUploading: true, actionError: null);
     try {
-      state = state.copyWith(isImageUploading: true, actionError: null);
-      if (await isFileUnderMaxSize(imagePath)) {
-        state = state.copyWith(filePath: imagePath, isImageUploading: false);
-      } else {
-        state = state.copyWith(
-            isImageUploading: false,
-            actionError: const LargeAttachmentUploadError());
-      }
-      onValueChange();
+      final bytes = await readLocalFileBytes(imagePath);
+      final photo = await ProfilePhoto.encode(bytes);
+      if (!mounted) return false;
+      state = state.copyWith(
+        isImageUploading: false,
+        newImage: photo ?? state.newImage,
+        imageRemoved: photo == null && state.imageRemoved,
+      );
+      return photo != null;
     } catch (e) {
-      state = state.copyWith(isImageUploading: false, actionError: e);
-      debugPrint("EditProfileViewNotifier: error while image upload -> $e");
+      debugPrint("EditProfileViewNotifier: error while reading photo -> $e");
+      if (mounted) state = state.copyWith(isImageUploading: false);
+      return false;
     }
   }
 
-  Future<void> onSubmitTap() async {
-    if (state.currentUser == null) {
-      return;
-    }
-    state = state.copyWith(actionError: null);
-    try {
-      state = state.copyWith(isSaveInProgress: true);
-      if (state.filePath != null) {
-        final imageUrl = await _fileUploadService.uploadProfileImage(
-            filePath: state.filePath!,
-            uploadPath: StorageConst.userProfileUploadPath(
-                userId: state.currentUser!.id));
-        state = state.copyWith(imageUrl: imageUrl);
-      }
+  void onRemoveImage() {
+    state = state.copyWith(newImage: null, imageRemoved: true);
+  }
 
+  /// Lets organizers find this player by number. A failure here must not
+  /// block saving the profile.
+  Future<void> _registerPhone(String userId, String e164) async {
+    try {
+      await _playerLink?.registerOwnPhone(
+        userId: userId,
+        e164: e164,
+        previousE164: _savedPhone ?? state.currentUser?.phone,
+      );
+      _savedPhone = e164;
+    } catch (e) {
+      debugPrint("EditProfileViewNotifier: error while linking phone -> $e");
+    }
+  }
+
+  /// Saves the profile, or returns the fields that still need fixing.
+  Future<List<ProfileField>> onSubmitTap() async {
+    final user = state.currentUser;
+    if (user == null || state.isSaveInProgress) return const [];
+    final errors = validate();
+    state = state.copyWith(submitted: true, errors: errors, actionError: null);
+    if (errors.isNotEmpty) return errors;
+
+    state = state.copyWith(isSaveInProgress: true);
+    try {
       final name = state.nameController.text.trim();
       final email = state.emailController.text.trim();
       final location = state.locationController.text.trim();
+      final phone = PhoneNumber(
+        state.phoneCountry,
+        PhoneNumber.clean(state.phoneCountry, state.phoneController.text),
+      );
+      final oldImage = user.profile_img_url;
+      final image = state.photoUrl;
 
-      UserModel user = UserModel(
-        id: state.currentUser!.id,
+      final updated = user.copyWith(
         name: name,
         name_lowercase: name.toLowerCase(),
-        email: email,
-        location: location.toLowerCase(),
+        email: email.isEmpty ? user.email : email,
+        location: location.isEmpty ? null : location.toLowerCase(),
         batting_style: state.battingStyle,
         bowling_style: state.bowlingStyle,
         player_role: state.playerRole,
         gender: state.gender,
-        phone: state.currentUser?.phone,
-        profile_img_url: state.imageUrl,
+        profile_img_url: image,
         dob: state.dob,
-        created_at: state.currentUser?.created_at ?? DateTime.now(),
+        phone: null,
+        created_at: user.created_at ?? DateTime.now(),
         updated_at: DateTime.now(),
       );
 
-      await userService.updateUser(user);
-      _userJsonController.state = user.toJsonString();
+      await userService.savePrivatePhone(user.id, phone.e164);
+      await userService.updateUser(updated);
+      await _registerPhone(user.id, phone.e164);
+      _userJsonController.state = updated.toJsonString();
+      if (oldImage != null && oldImage != image) {
+        unawaited(_deleteUnusedImage(oldImage));
+      }
       state = state.copyWith(isSaveInProgress: false, isSaved: true);
     } catch (e) {
       state = state.copyWith(isSaveInProgress: false, actionError: e);
       debugPrint(
           "EditProfileViewNotifier: error while edit profile details -> $e");
+    }
+    return const [];
+  }
+
+  Future<void> signOut() async {
+    try {
+      await _authService.signOut();
+    } catch (e) {
+      state = state.copyWith(actionError: e);
     }
   }
 
@@ -228,7 +320,9 @@ class EditProfileViewNotifier extends StateNotifier<EditProfileState> {
     }
   }
 
+  /// Old uploaded files only; inline photos go away with the profile.
   Future<void> _deleteUnusedImage(String imgUrl) async {
+    if (ProfilePhoto.isInline(imgUrl)) return;
     try {
       await _fileUploadService.deleteUploadedImage(imgUrl);
     } catch (e) {
@@ -241,31 +335,118 @@ class EditProfileViewNotifier extends StateNotifier<EditProfileState> {
   void dispose() {
     state.nameController.dispose();
     state.emailController.dispose();
+    state.phoneController.dispose();
     state.locationController.dispose();
     super.dispose();
   }
 }
 
-@freezed
-class EditProfileState with _$EditProfileState {
-  const factory EditProfileState({
-    required DateTime dob,
-    required TextEditingController nameController,
-    required TextEditingController emailController,
-    required TextEditingController locationController,
-    Object? actionError,
-    UserModel? currentUser,
-    String? filePath,
-    @Default(null) String? imageUrl,
-    @Default(null) UserGender? gender,
-    @Default(null) BattingStyle? battingStyle,
-    @Default(null) BowlingStyle? bowlingStyle,
-    @Default(null) PlayerRole? playerRole,
-    @Default(false) bool isButtonEnable,
-    @Default(false) bool isImageUploading,
-    @Default(false) bool isSaved,
-    @Default(false) bool isSaveInProgress,
-    @Default(false) bool showDeleteConfirmationDialog,
-    @Default(false) bool showTransferTeamsSheet,
-  }) = _EditProfileState;
+/// Sentinel so [EditProfileState.copyWith] can tell "not passed" from null.
+const _keep = Object();
+
+class EditProfileState {
+  final DateTime? dob;
+  final TextEditingController nameController;
+  final TextEditingController emailController;
+  final TextEditingController phoneController;
+  final TextEditingController locationController;
+  final PhoneCountry phoneCountry;
+  final Object? actionError;
+  final UserModel? currentUser;
+
+  /// Freshly picked photo (inline JPEG), not saved yet.
+  final String? newImage;
+  final bool imageRemoved;
+  final String? imageUrl;
+  final UserGender? gender;
+  final BattingStyle? battingStyle;
+  final BowlingStyle? bowlingStyle;
+  final PlayerRole? playerRole;
+  final bool submitted;
+  final List<ProfileField> errors;
+  final bool isImageUploading;
+  final bool isSaved;
+  final bool isSaveInProgress;
+  final bool showDeleteConfirmationDialog;
+  final bool showTransferTeamsSheet;
+
+  const EditProfileState({
+    this.dob,
+    required this.nameController,
+    required this.emailController,
+    required this.phoneController,
+    required this.locationController,
+    required this.phoneCountry,
+    this.actionError,
+    this.currentUser,
+    this.newImage,
+    this.imageRemoved = false,
+    this.imageUrl,
+    this.gender,
+    this.battingStyle,
+    this.bowlingStyle,
+    this.playerRole,
+    this.submitted = false,
+    this.errors = const [],
+    this.isImageUploading = false,
+    this.isSaved = false,
+    this.isSaveInProgress = false,
+    this.showDeleteConfirmationDialog = false,
+    this.showTransferTeamsSheet = false,
+  });
+
+  /// Photo the profile will have after saving.
+  String? get photoUrl => newImage ?? (imageRemoved ? null : imageUrl);
+
+  EditProfileState copyWith({
+    Object? dob = _keep,
+    PhoneCountry? phoneCountry,
+    Object? actionError = _keep,
+    Object? currentUser = _keep,
+    Object? newImage = _keep,
+    bool? imageRemoved,
+    Object? gender = _keep,
+    Object? battingStyle = _keep,
+    Object? bowlingStyle = _keep,
+    Object? playerRole = _keep,
+    bool? submitted,
+    List<ProfileField>? errors,
+    bool? isImageUploading,
+    bool? isSaved,
+    bool? isSaveInProgress,
+    bool? showDeleteConfirmationDialog,
+    bool? showTransferTeamsSheet,
+  }) =>
+      EditProfileState(
+        dob: dob == _keep ? this.dob : dob as DateTime?,
+        nameController: nameController,
+        emailController: emailController,
+        phoneController: phoneController,
+        locationController: locationController,
+        phoneCountry: phoneCountry ?? this.phoneCountry,
+        actionError: actionError == _keep ? this.actionError : actionError,
+        currentUser:
+            currentUser == _keep ? this.currentUser : currentUser as UserModel?,
+        newImage: newImage == _keep ? this.newImage : newImage as String?,
+        imageRemoved: imageRemoved ?? this.imageRemoved,
+        imageUrl: imageUrl,
+        gender: gender == _keep ? this.gender : gender as UserGender?,
+        battingStyle: battingStyle == _keep
+            ? this.battingStyle
+            : battingStyle as BattingStyle?,
+        bowlingStyle: bowlingStyle == _keep
+            ? this.bowlingStyle
+            : bowlingStyle as BowlingStyle?,
+        playerRole:
+            playerRole == _keep ? this.playerRole : playerRole as PlayerRole?,
+        submitted: submitted ?? this.submitted,
+        errors: errors ?? this.errors,
+        isImageUploading: isImageUploading ?? this.isImageUploading,
+        isSaved: isSaved ?? this.isSaved,
+        isSaveInProgress: isSaveInProgress ?? this.isSaveInProgress,
+        showDeleteConfirmationDialog:
+            showDeleteConfirmationDialog ?? this.showDeleteConfirmationDialog,
+        showTransferTeamsSheet:
+            showTransferTeamsSheet ?? this.showTransferTeamsSheet,
+      );
 }

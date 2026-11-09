@@ -171,6 +171,30 @@ class UserService {
     }
   }
 
+  /// Owner-only contact details (`user_private/{uid}`); the `users` doc is
+  /// public, so the mobile number is kept out of it.
+  DocumentReference<Map<String, dynamic>> _privateRef(String userId) =>
+      firestore.collection(FireStoreConst.userPrivateCollection).doc(userId);
+
+  Stream<String?> streamPrivatePhone(String userId) => _privateRef(userId)
+      .snapshots()
+      .map((doc) => doc.data()?[FireStoreConst.phone] as String?)
+      .handleError((error, stack) => throw AppError.fromError(error, stack));
+
+  Future<void> savePrivatePhone(String userId, String phone) async {
+    try {
+      await _privateRef(userId).set(
+        {
+          FireStoreConst.phone: phone,
+          'updated_at': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
   Future<void> updateUserStats(String userId, UserStat stats) async {
     try {
       final userStatsRef = _userStatsRef(userId);
@@ -227,31 +251,31 @@ class UserService {
 
   Future<void> deleteUser() async {
     try {
-      await _userRef.doc(_currentUser?.id).delete();
+      final id = _currentUser?.id;
+      if (id != null) await _privateRef(id).delete();
+      await _userRef.doc(id).delete();
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
   }
 
+  /// Name-prefix search. Ordered by name, then document id, which the
+  /// automatic single-field index serves (no composite index needed).
   Future<List<UserModel>> searchUser(
     String searchKey, {
     int limit = 20,
-    String? lastUserId,
+    UserModel? after,
   }) async {
     try {
+      final key = searchKey.trim().toLowerCase();
       var query = _userRef
-          .where(
-            FireStoreConst.nameLowercase,
-            isGreaterThanOrEqualTo: searchKey.toLowerCase(),
-          )
-          .where(
-            FireStoreConst.nameLowercase,
-            isLessThan: '${searchKey.toLowerCase()}z',
-          )
-          .orderBy(FireStoreConst.id);
+          .where(FireStoreConst.nameLowercase, isGreaterThanOrEqualTo: key)
+          .where(FireStoreConst.nameLowercase, isLessThan: '$key\uf8ff')
+          .orderBy(FireStoreConst.nameLowercase)
+          .orderBy(FieldPath.documentId);
 
-      if (lastUserId != null) {
-        query = query.startAfter([lastUserId]);
+      if (after != null) {
+        query = query.startAfter([after.name_lowercase ?? '', after.id]);
       }
 
       query = query.limit(limit);

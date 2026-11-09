@@ -22,7 +22,7 @@ import 'package:khelo/ui/flow/score_board/add_toss_detail/add_toss_detail_screen
 import 'package:khelo/ui/flow/score_board/score_board_screen.dart';
 import 'package:khelo/ui/flow/settings/edit_profile/edit_profile_screen.dart';
 import 'package:khelo/ui/flow/sign_in/phone_verification/phone_verification_screen.dart';
-import 'package:khelo/ui/flow/sign_in/sign_in_options_screen.dart';
+import 'package:khelo/ui/flow/sign_in/sign_in_screen.dart';
 import 'package:khelo/ui/flow/team/add_team/add_team_screen.dart';
 import 'package:khelo/ui/flow/team/add_team_member/add_team_member_screen.dart';
 import 'package:khelo/ui/flow/team/detail/make_admin/make_team_admin_screen.dart';
@@ -40,10 +40,9 @@ import 'package:khelo/ui/flow/team/tournament_teams/pools/team_pool_list_screen.
 
 import 'flow/home/view_all/home_view_all_screen.dart';
 import 'flow/play/game/play_game_screen.dart';
+import 'flow/play/match/play_match_screen.dart';
 import 'flow/main/main_screen.dart';
 import 'flow/settings/support/contact_support_screen.dart';
-import 'flow/sign_in/sign_in_with_email/sign_in_with_email_screen.dart';
-import 'flow/sign_in/whatsapp_login_redirect_screen.dart';
 import 'flow/team/user_detail/user_detail_screen.dart';
 import 'flow/tournament/detail/tournament_detail_screen.dart';
 import 'flow/tournament/match_selection/match_selection_screen.dart';
@@ -88,6 +87,7 @@ class AppRoute {
   static const pathTournamentTeamPlayers = "/tournament-team-players";
   static const pathTournamentTeamPicker = "/tournament-team-picker";
   static const pathPlayGame = "/play-game";
+  static const pathPlayMatch = "/play-match";
   static const pathAuctionForm = "/auction-form";
   static const pathAuctionPlayers = "/auction-players";
   static const pathAuctionRetained = "/auction-retained";
@@ -174,11 +174,8 @@ class AppRoute {
   static AppRoute get intro =>
       AppRoute("/intro", builder: (_) => const IntroScreen());
 
-  static AppRoute get phoneLogin =>
-      AppRoute("/phone-login", builder: (_) => const SignInOptionsScreen());
-
-  static AppRoute get emailLogin =>
-      AppRoute("/email-login", builder: (_) => const SignInWithEmailScreen());
+  static AppRoute get signIn =>
+      AppRoute("/sign-in", builder: (_) => const SignInScreen());
 
   static AppRoute get contactSupport => AppRoute(
         "/contact-support",
@@ -260,6 +257,11 @@ class AppRoute {
   static AppRoute playGame(PlayGameArgs args) => AppRoute(
         pathPlayGame,
         builder: (_) => PlayGameScreen(args: args),
+      );
+
+  static AppRoute playMatch(String matchId) => AppRoute(
+        pathPlayMatch,
+        builder: (_) => PlayMatchScreen(matchId: matchId),
       );
 
   static AppRoute auctionForm({Auction? auction}) => AppRoute(
@@ -474,33 +476,12 @@ class AppRoute {
     ),
     contactSupport.goRoute(),
     GoRoute(
-      path: phoneLogin.path,
+      path: signIn.path,
       pageBuilder: (context, state) => adaptivePage(
         state: state,
-        child: state.extra == null
-            ? const SignInOptionsScreen()
-            : state.widget(context),
+        child:
+            state.extra == null ? const SignInScreen() : state.widget(context),
       ),
-    ),
-    GoRoute(
-      path: emailLogin.path,
-      pageBuilder: (context, state) => adaptivePage(
-        state: state,
-        child: state.extra == null
-            ? const SignInWithEmailScreen()
-            : state.widget(context),
-      ),
-    ),
-    GoRoute(
-      path: '/whatsapp-login',
-      pageBuilder: (context, state) {
-        return adaptivePage(
-          state: state,
-          child: WhatsAppLoginRedirectScreen(
-            code: state.uri.queryParameters['code'],
-          ),
-        );
-      },
     ),
     searchHome.goRoute(),
     GoRoute(
@@ -555,6 +536,11 @@ class AppRoute {
     ),
     GoRoute(
       path: pathPlayGame,
+      pageBuilder: (context, state) =>
+          adaptivePage(state: state, child: state.widget(context)),
+    ),
+    GoRoute(
+      path: pathPlayMatch,
       pageBuilder: (context, state) =>
           adaptivePage(state: state, child: state.widget(context)),
     ),

@@ -17,6 +17,7 @@ class ImagePickerSheet extends ConsumerWidget {
     BuildContext context, {
     required bool allowCrop,
     bool cropOriginal = false,
+    double? maxDimension,
   }) {
     HapticFeedback.mediumImpact();
     return showModalBottomSheet(
@@ -27,6 +28,7 @@ class ImagePickerSheet extends ConsumerWidget {
         return ImagePickerSheet(
             allowCrop: allowCrop,
             cropOriginal: cropOriginal,
+            maxDimension: maxDimension,
             onPop: (String? imagePath) {
               context.pop(imagePath);
             });
@@ -36,6 +38,9 @@ class ImagePickerSheet extends ConsumerWidget {
 
   final bool allowCrop;
   final bool cropOriginal;
+
+  /// Shrinks big photos while picking (longest side, in pixels).
+  final double? maxDimension;
   final void Function(String? imagePath) onPop;
 
   ImagePickerSheet({
@@ -43,6 +48,7 @@ class ImagePickerSheet extends ConsumerWidget {
     required this.allowCrop,
     required this.onPop,
     this.cropOriginal = false,
+    this.maxDimension,
   });
 
   final ImagePicker _picker = ImagePicker();
@@ -73,6 +79,8 @@ class ImagePickerSheet extends ConsumerWidget {
                   final image = await _picker.pickImage(
                     source: ImageSource.camera,
                     requestFullMetadata: false,
+                    maxWidth: maxDimension,
+                    maxHeight: maxDimension,
                   );
                   if (allowCrop) {
                     if (context.mounted && image != null) {
@@ -94,6 +102,8 @@ class ImagePickerSheet extends ConsumerWidget {
                   final image = await _picker.pickImage(
                     source: ImageSource.gallery,
                     requestFullMetadata: false,
+                    maxWidth: maxDimension,
+                    maxHeight: maxDimension,
                   );
                   if (allowCrop) {
                     if (context.mounted && image != null) {

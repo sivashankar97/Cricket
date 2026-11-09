@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:data/api/play/play_models.dart';
-import 'package:data/api/user/user_models.dart';
 import 'package:data/service/play/play_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/components/error_snackbar.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/text/app_text_style.dart';
@@ -16,20 +17,22 @@ import 'package:style/theme/colors.dart';
 
 import '../../../../domain/play/cricket_game.dart';
 import '../play_providers.dart';
-import 'cricket_field_painter.dart';
+import 'play_arena.dart';
+import 'play_layout.dart';
+import 'play_sounds.dart';
 
+/// A single-innings game: Quick play, the Daily challenge, or replying to an
+/// older turn-based challenge. Live 1v1 matches use `PlayMatchScreen`.
 class PlayGameArgs {
   final PlayMode mode;
   final int seed;
   final int? target;
-  final UserModel? opponent;
   final PlayChallenge? challenge;
 
   const PlayGameArgs._({
     required this.mode,
     required this.seed,
     this.target,
-    this.opponent,
     this.challenge,
   });
 
@@ -44,13 +47,6 @@ class PlayGameArgs {
         target: daily.target,
       );
 
-  /// Creator bats first; the opponent later faces the same [seed].
-  factory PlayGameArgs.newChallenge(UserModel opponent) => PlayGameArgs._(
-        mode: PlayMode.challenge,
-        seed: Random().nextInt(1 << 31),
-        opponent: opponent,
-      );
-
   factory PlayGameArgs.answerChallenge(PlayChallenge challenge) =>
       PlayGameArgs._(
         mode: PlayMode.challenge,
@@ -59,8 +55,6 @@ class PlayGameArgs {
         challenge: challenge,
       );
 }
-
-enum _Phase { ready, bowling, shot, finished }
 
 class PlayGameScreen extends ConsumerStatefulWidget {
   final PlayGameArgs args;
@@ -71,119 +65,74 @@ class PlayGameScreen extends ConsumerStatefulWidget {
   ConsumerState<PlayGameScreen> createState() => _PlayGameScreenState();
 }
 
-class _PlayGameScreenState extends ConsumerState<PlayGameScreen>
-    with TickerProviderStateMixin {
-  late int _seed;
-  late Innings _innings;
-  late final AnimationController _ball;
-  late final AnimationController _swing;
-  late final AnimationController _after;
-  _Phase _phase = _Phase.ready;
-  ShotResult? _lastShot;
-  int? _lastOffset;
-  bool _swung = false;
+class _PlayGameScreenState extends ConsumerState<PlayGameScreen> {
+  late int _seed = widget.args.seed;
+  late Innings _innings =
+      Innings.start(seed: _seed, target: widget.args.target);
+  bool _finished = false;
   bool _saving = false;
   bool _saved = false;
   Object? _saveError;
-  Timer? _nextBallTimer;
+  Timer? _finishTimer;
 
-  Delivery? get _delivery => _innings.nextDelivery;
+  /// Whether the last finished game was a loss, to cheer a retry.
+  bool _lostLastGame = false;
 
-  int get _totalMs => (_delivery?.travelMs ?? 1200) + GameRules.lateWindowMs;
-
-  @override
-  void initState() {
-    super.initState();
-    _seed = widget.args.seed;
-    _innings = Innings.start(seed: _seed, target: widget.args.target);
-    _ball = AnimationController(vsync: this)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed && _phase == _Phase.bowling) {
-          _resolve(null);
-        }
-      });
-    _swing = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 260));
-    _after = AnimationController(
-        vsync: this, duration: const Duration(milliseconds: 700));
-  }
+  MascotController get _mascot => ref.read(mascotProvider.notifier);
 
   @override
   void dispose() {
-    _nextBallTimer?.cancel();
-    _ball.dispose();
-    _swing.dispose();
-    _after.dispose();
+    _finishTimer?.cancel();
     super.dispose();
   }
 
-  void _bowl() {
-    if (_delivery == null) return;
-    setState(() {
-      _phase = _Phase.bowling;
-      _lastShot = null;
-      _lastOffset = null;
-      _swung = false;
-    });
-    _swing.reset();
-    _after.reset();
-    _ball.duration = Duration(milliseconds: _totalMs);
-    _ball.forward(from: 0);
-  }
-
-  void _onTap() {
-    switch (_phase) {
-      case _Phase.ready:
-        _bowl();
-      case _Phase.bowling:
-        if (_swung) return;
-        _swung = true;
-        _swing.forward(from: 0);
-        final elapsed = (_ball.value * _totalMs).round();
-        _resolve(elapsed - _delivery!.travelMs);
-      case _Phase.shot:
-      case _Phase.finished:
-        break;
-    }
-  }
-
-  void _resolve(int? offsetMs) {
-    final delivery = _delivery;
-    if (delivery == null) return;
-    final result = judgeShot(delivery, tapOffsetMs: offsetMs);
-    _ball.stop();
-    if (result != ShotResult.dot || offsetMs != null) {
-      HapticFeedback.mediumImpact();
-    }
-    setState(() {
-      _phase = _Phase.shot;
-      _lastShot = result;
-      _lastOffset = offsetMs;
-      _innings = _innings.record(result);
-    });
-    _after.forward(from: 0);
-    _nextBallTimer = Timer(const Duration(milliseconds: 1300), () {
-      if (!mounted) return;
-      if (_innings.isOver) {
-        setState(() => _phase = _Phase.finished);
+  void _onBall(ShotResult result, int? offsetMs) {
+    setState(() => _innings = _innings.record(result, offsetMs: offsetMs));
+    _mascot.react(
+      reactionForShot(result, offsetMs),
+      top: true,
+      allowFun: false,
+      duration: const Duration(milliseconds: 2200),
+    );
+    if (_innings.isOver) {
+      _finishTimer = Timer(const Duration(milliseconds: 1300), () {
+        if (!mounted) return;
+        setState(() => _finished = true);
         _save();
-      } else {
-        _bowl();
-      }
-    });
+      });
+    }
+  }
+
+  void _reactToOutcome({required bool? won}) {
+    final args = widget.args;
+    final MascotReaction? reaction;
+    if (args.challenge != null) {
+      reaction = switch (won) {
+        true => MascotReaction.challengeWon,
+        false => MascotReaction.challengeLost,
+        null => null,
+      };
+    } else if (args.mode == PlayMode.daily) {
+      reaction =
+          won == true ? MascotReaction.matchWon : MascotReaction.matchLost;
+    } else {
+      reaction = null;
+    }
+    if (won != null) {
+      ref.read(playSoundsProvider).play(won ? PlaySound.win : PlaySound.lose);
+    }
+    _lostLastGame = won == false;
+    if (reaction != null) _mascot.react(reaction, top: true);
   }
 
   void _restart() {
-    _nextBallTimer?.cancel();
-    _ball.reset();
-    _swing.reset();
-    _after.reset();
+    if (_lostLastGame) _mascot.react(MascotReaction.comeback, top: true);
+    _lostLastGame = false;
+    _finishTimer?.cancel();
     setState(() {
       _seed = Random().nextInt(1 << 31);
       _innings = Innings.start(seed: _seed, target: widget.args.target);
-      _phase = _Phase.ready;
-      _lastShot = null;
-      _lastOffset = null;
+      _finished = false;
       _saved = false;
       _saveError = null;
     });
@@ -200,41 +149,28 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen>
     });
     final service = ref.read(playServiceProvider);
     final args = widget.args;
-    final score = PlayScore(
-      runs: _innings.runs,
-      wickets: _innings.wickets,
-      balls: _innings.balls,
-    );
     try {
-      String? challengeId = args.challenge?.id;
       bool? won;
       if (args.mode == PlayMode.daily) won = _innings.won;
 
-      if (args.opponent != null) {
-        final created = await service.createChallenge((id) => PlayChallenge(
-              id: id,
-              seed: args.seed,
-              creatorId: user.id,
-              creatorName: user.name,
-              opponentId: args.opponent!.id,
-              opponentName: args.opponent!.name ?? '',
-              creatorScore: score,
-              createdAt: DateTime.now(),
-            ));
-        challengeId = created.id;
-      } else if (args.challenge != null) {
+      final challenge = args.challenge;
+      if (challenge != null) {
         final winner = challengeWinner(
-          creatorRuns: args.challenge!.creatorScore.runs,
+          creatorRuns: challenge.creatorScore.runs,
           opponentRuns: _innings.runs,
         );
         won = winner == ChallengeWinner.tie
             ? null
             : winner == ChallengeWinner.opponent;
         await service.completeChallenge(
-          challengeId: args.challenge!.id,
-          opponentScore: score,
+          challengeId: challenge.id,
+          opponentScore: PlayScore(
+            runs: _innings.runs,
+            wickets: _innings.wickets,
+            balls: _innings.balls,
+          ),
           winnerId: switch (winner) {
-            ChallengeWinner.creator => args.challenge!.creatorId,
+            ChallengeWinner.creator => challenge.creatorId,
             ChallengeWinner.opponent => user.id,
             ChallengeWinner.tie => null,
           },
@@ -258,10 +194,13 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen>
         dailyDate: args.mode == PlayMode.daily
             ? DailyChallenge.forDate(DateTime.now()).dateKey
             : null,
-        challengeId: challengeId,
+        challengeId: challenge?.id,
         createdAt: DateTime.now(),
       ));
-      if (mounted) setState(() => _saved = true);
+      if (mounted) {
+        setState(() => _saved = true);
+        _reactToOutcome(won: won);
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() => _saveError = error);
@@ -273,8 +212,18 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen>
 
   // ── UI ───────────────────────────────────────────────────────────────────
 
+  String _label(BuildContext context) => switch (widget.args.mode) {
+        PlayMode.daily => context.l10n.play_daily_title,
+        PlayMode.challenge =>
+          context.l10n.play_game_vs(widget.args.challenge?.creatorName ?? ''),
+        PlayMode.match => context.l10n.play_mode_match,
+        PlayMode.solo => context.l10n.play_quick_play,
+      };
+
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(playIdentityProvider);
+    final name = user?.name ?? context.l10n.play_you;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
@@ -282,18 +231,23 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen>
         body: SafeArea(
           child: Stack(
             children: [
-              Column(
-                children: [
-                  _topBar(context),
-                  _scoreHud(context),
-                  const SizedBox(height: 10),
-                  _ballDots(),
-                  const SizedBox(height: 12),
-                  Expanded(child: _field(context)),
-                  _bottomHint(context),
-                ],
+              PlayArenaLayout(
+                topBar: _topBar(context),
+                scoreboard: ArenaScoreboard(
+                  innings: _innings,
+                  batterName: name,
+                  batterImage: user?.imageUrl,
+                  label: _label(context),
+                ),
+                arena: PlayArena(
+                  key: ValueKey(_seed),
+                  innings: _innings,
+                  batterName: name,
+                  paused: _finished,
+                  onBall: _onBall,
+                ),
               ),
-              if (_phase == _Phase.finished) _endOverlay(context),
+              if (_finished) _endOverlay(context),
             ],
           ),
         ),
@@ -302,242 +256,55 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen>
   }
 
   Widget _topBar(BuildContext context) {
-    final args = widget.args;
-    final label = switch (args.mode) {
-      PlayMode.daily => context.l10n.play_daily_title,
-      PlayMode.challenge => context.l10n.play_game_vs(
-          args.opponent?.name ?? args.challenge?.creatorName ?? ''),
-      PlayMode.solo => context.l10n.play_quick_play,
-    };
+    final target = widget.args.target;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(8, 4, 16, 0),
+      padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
       child: Row(
         children: [
           IconButton(
             icon: const Icon(CupertinoIcons.xmark, color: textPrimaryDarkColor),
             onPressed: () => Navigator.of(context).maybePop(),
           ),
-          Expanded(
-            child: Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyle.subtitle1.copyWith(
-                color: textPrimaryDarkColor,
-                fontWeight: FontWeight.w700,
+          const Spacer(),
+          if (target != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(
+                color: awarenessWarningColor.withValues(alpha: 0.18),
+                borderRadius: BorderRadius.circular(20),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _scoreHud(BuildContext context) {
-    final needed = _innings.runsNeeded;
-    final subtitle = needed != null && !_innings.isOver
-        ? context.l10n.play_game_need(needed, _innings.ballsLeft)
-        : context.l10n.play_game_balls_left(_innings.ballsLeft);
-    return Column(
-      children: [
-        Text(
-          '${_innings.runs}/${_innings.wickets}',
-          style: AppTextStyle.header1.copyWith(
-            color: textPrimaryDarkColor,
-            fontSize: 44,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        Text(
-          subtitle,
-          style: AppTextStyle.subtitle3.copyWith(color: textSecondaryDarkColor),
-        ),
-      ],
-    );
-  }
-
-  Widget _ballDots() {
-    return Wrap(
-      alignment: WrapAlignment.center,
-      spacing: 6,
-      runSpacing: 6,
-      children: List.generate(GameRules.balls, (index) {
-        final result =
-            index < _innings.results.length ? _innings.results[index] : null;
-        final color = switch (result) {
-          null => textPrimaryDarkColor.withValues(alpha: 0.12),
-          ShotResult.out => brandRedColor,
-          ShotResult.six || ShotResult.four => positiveGreenColor,
-          _ => textPrimaryDarkColor.withValues(alpha: 0.35),
-        };
-        return Container(
-          height: 22,
-          width: 22,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          child: result == null
-              ? null
-              : Text(
-                  result.isOut ? 'W' : '${result.runs}',
-                  style: AppTextStyle.caption.copyWith(
-                    color: result == ShotResult.six || result == ShotResult.four
-                        ? brandNavyColor
-                        : textPrimaryDarkColor,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-        );
-      }),
-    );
-  }
-
-  Widget _field(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTapDown: (_) => _onTap(),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned.fill(
-            child: AnimatedBuilder(
-              animation: Listenable.merge([_ball, _swing, _after]),
-              builder: (context, _) => CustomPaint(
-                painter: CricketFieldPainter(
-                  delivery: _phase == _Phase.ready ? null : _lastDelivery,
-                  ballProgress: _ballProgress,
-                  swing: _swing.value,
-                  after: _after.value,
-                  shot: _lastShot,
+              child: Text(
+                context.l10n.play_hud_target(target),
+                style: AppTextStyle.caption.copyWith(
+                  color: awarenessWarningColor,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
-          ),
-          if (_lastShot != null && _phase == _Phase.shot) _shotBanner(context),
+          const PlaySoundToggle(),
         ],
-      ),
-    );
-  }
-
-  /// The delivery being bowled, or the one just played while showing a shot.
-  Delivery? get _lastDelivery {
-    if (_phase == _Phase.bowling) return _delivery;
-    final index = _innings.balls - 1;
-    if (index < 0) return _delivery;
-    return _innings.deliveries[index];
-  }
-
-  double get _ballProgress {
-    final delivery = _lastDelivery;
-    if (delivery == null) return 0;
-    return _ball.value * _totalMsFor(delivery) / delivery.travelMs;
-  }
-
-  int _totalMsFor(Delivery delivery) =>
-      delivery.travelMs + GameRules.lateWindowMs;
-
-  Widget _shotBanner(BuildContext context) {
-    final shot = _lastShot!;
-    final (text, color) = switch (shot) {
-      ShotResult.six => (context.l10n.play_shot_six, positiveGreenColor),
-      ShotResult.four => (context.l10n.play_shot_four, positiveGreenColor),
-      ShotResult.two => (context.l10n.play_shot_two, textPrimaryDarkColor),
-      ShotResult.single => (
-          context.l10n.play_shot_single,
-          textPrimaryDarkColor
-        ),
-      ShotResult.dot => (context.l10n.play_shot_dot, textSecondaryDarkColor),
-      ShotResult.out => (context.l10n.play_shot_out, brandRedColor),
-    };
-    final offset = _lastOffset;
-    final timing = offset == null
-        ? context.l10n.play_timing_left
-        : offset.abs() <= 45
-            ? context.l10n.play_timing_perfect
-            : offset < 0
-                ? context.l10n.play_timing_early
-                : context.l10n.play_timing_late;
-    return Positioned(
-      top: 24,
-      child: TweenAnimationBuilder<double>(
-        key: ValueKey(_innings.balls),
-        tween: Tween(begin: 0.6, end: 1),
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.elasticOut,
-        builder: (context, scale, child) =>
-            Transform.scale(scale: scale, child: child),
-        child: Column(
-          children: [
-            Text(
-              text,
-              style: AppTextStyle.header1.copyWith(
-                color: color,
-                fontSize: 40,
-                fontWeight: FontWeight.w900,
-                shadows: [
-                  Shadow(
-                    color: Colors.black.withValues(alpha: 0.35),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              timing,
-              style: AppTextStyle.subtitle3.copyWith(
-                color: textPrimaryDarkColor,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _bottomHint(BuildContext context) {
-    final text = _phase == _Phase.ready
-        ? context.l10n.play_game_tap_to_start
-        : context.l10n.play_how_to;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 10, 24, 16),
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: (_phase == _Phase.ready
-                ? AppTextStyle.subtitle1
-                : AppTextStyle.caption)
-            .copyWith(
-          color: _phase == _Phase.ready
-              ? positiveGreenColor
-              : textSecondaryDarkColor,
-          fontWeight: FontWeight.w600,
-        ),
       ),
     );
   }
 
   Widget _endOverlay(BuildContext context) {
     final args = widget.args;
-    final opponentName =
-        args.opponent?.name ?? args.challenge?.creatorName ?? '';
+    final challenge = args.challenge;
     String? headline;
     Color headlineColor = positiveGreenColor;
-    if (args.opponent != null) {
-      headline = context.l10n.play_end_challenge_sent(opponentName);
-    } else if (args.challenge != null) {
-      final winner = challengeWinner(
-        creatorRuns: args.challenge!.creatorScore.runs,
+    if (challenge != null) {
+      final name = challenge.creatorName;
+      switch (challengeWinner(
+        creatorRuns: challenge.creatorScore.runs,
         opponentRuns: _innings.runs,
-      );
-      switch (winner) {
+      )) {
         case ChallengeWinner.opponent:
-          headline = context.l10n.play_end_challenge_won(opponentName);
+          headline = context.l10n.play_end_challenge_won(name);
         case ChallengeWinner.creator:
-          headline = context.l10n.play_end_challenge_lost(opponentName);
+          headline = context.l10n.play_end_challenge_lost(name);
           headlineColor = brandRedColor;
         case ChallengeWinner.tie:
-          headline = context.l10n.play_end_challenge_tie(opponentName);
+          headline = context.l10n.play_end_challenge_tie(name);
           headlineColor = awarenessWarningColor;
       }
     } else if (args.target != null) {
@@ -546,87 +313,165 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen>
           : context.l10n.play_end_target_lost(args.target!);
       if (!_innings.won) headlineColor = brandRedColor;
     }
+    final xp = xpForGame(
+      runs: _innings.runs,
+      fours: _innings.fours,
+      sixes: _innings.sixes,
+      won: args.target != null && _innings.won,
+    );
 
     return Positioned.fill(
       child: ColoredBox(
         color: brandNavyColor.withValues(alpha: 0.85),
         child: Center(
-          child: Container(
-            margin: const EdgeInsets.all(28),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: brandNavyCardColor,
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  context.l10n.play_end_title,
-                  style: AppTextStyle.subtitle2
-                      .copyWith(color: textSecondaryDarkColor),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  context.l10n.play_end_score(
-                      _innings.runs, _innings.wickets, _innings.balls),
-                  textAlign: TextAlign.center,
-                  style: AppTextStyle.header3
-                      .copyWith(color: textPrimaryDarkColor),
-                ),
-                if (headline != null) ...[
-                  const SizedBox(height: 8),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Container(
+              constraints:
+                  const BoxConstraints(maxWidth: PlayLayout.maxPanelWidth - 60),
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: brandNavyCardColor,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Text(
-                    headline,
-                    textAlign: TextAlign.center,
-                    style: AppTextStyle.subtitle1.copyWith(
-                      color: headlineColor,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 22),
-                if (_saving)
-                  Text(
-                    context.l10n.play_end_saving,
-                    style: AppTextStyle.caption
+                    context.l10n.play_end_title,
+                    style: AppTextStyle.subtitle2
                         .copyWith(color: textSecondaryDarkColor),
-                  )
-                else if (_saveError != null)
-                  _endButton(context.l10n.play_retry_save, _save)
-                else ...[
-                  if (args.mode == PlayMode.solo)
-                    _endButton(context.l10n.play_again, _restart),
-                  const SizedBox(height: 10),
-                  _endButton(
-                    context.l10n.play_done,
-                    () => Navigator.of(context).maybePop(),
-                    secondary: true,
                   ),
+                  const SizedBox(height: 6),
+                  Text(
+                    context.l10n.play_end_score(
+                        _innings.runs, _innings.wickets, _innings.balls),
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.header3
+                        .copyWith(color: textPrimaryDarkColor),
+                  ),
+                  const SizedBox(height: 10),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      for (final result in _innings.results)
+                        BallChip(result: result, size: 18),
+                    ],
+                  ),
+                  if (headline != null) ...[
+                    const SizedBox(height: 12),
+                    Text(
+                      headline,
+                      textAlign: TextAlign.center,
+                      style: AppTextStyle.subtitle1.copyWith(
+                        color: headlineColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                  if (_saved) ...[
+                    const SizedBox(height: 10),
+                    XpPill(xp: xp),
+                  ],
+                  const SizedBox(height: 22),
+                  if (_saving)
+                    Text(
+                      context.l10n.play_end_saving,
+                      style: AppTextStyle.caption
+                          .copyWith(color: textSecondaryDarkColor),
+                    )
+                  else if (_saveError != null)
+                    PlayButton(text: context.l10n.play_retry_save, onTap: _save)
+                  else ...[
+                    if (args.mode == PlayMode.solo)
+                      PlayButton(
+                          text: context.l10n.play_again, onTap: _restart),
+                    const SizedBox(height: 10),
+                    PlayButton(
+                      text: context.l10n.play_done,
+                      onTap: () => Navigator.of(context).maybePop(),
+                      secondary: true,
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _endButton(String text, VoidCallback onTap, {bool secondary = false}) {
+/// "+42 XP" chip shown after a game.
+class XpPill extends StatelessWidget {
+  final int xp;
+
+  const XpPill({super.key, required this.xp});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: awarenessWarningColor.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.bolt_rounded,
+              size: 18, color: awarenessWarningColor),
+          const SizedBox(width: 4),
+          Text(
+            context.l10n.play_xp_earned(xp),
+            style: AppTextStyle.subtitle3.copyWith(
+              color: awarenessWarningColor,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Full-width rounded button used on Play end and match screens.
+class PlayButton extends StatelessWidget {
+  final String text;
+  final VoidCallback? onTap;
+  final bool secondary;
+
+  const PlayButton({
+    super.key,
+    required this.text,
+    required this.onTap,
+    this.secondary = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return OnTapScale(
       onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 13),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          gradient: secondary ? null : liveCardGradient,
-          color: secondary ? textPrimaryDarkColor.withValues(alpha: 0.1) : null,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Text(
-          text,
-          style: AppTextStyle.button.copyWith(color: textPrimaryDarkColor),
+      child: Opacity(
+        opacity: onTap == null ? 0.5 : 1,
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 13),
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            gradient: secondary ? null : liveCardGradient,
+            color:
+                secondary ? textPrimaryDarkColor.withValues(alpha: 0.1) : null,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Text(
+            text,
+            style: AppTextStyle.button.copyWith(color: textPrimaryDarkColor),
+          ),
         ),
       ),
     );

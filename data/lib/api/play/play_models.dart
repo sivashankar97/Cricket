@@ -5,7 +5,8 @@ import '../tournament_team/tournament_team_model.dart' show parseFirestoreDate;
 enum PlayMode {
   solo('solo'),
   daily('daily'),
-  challenge('challenge');
+  challenge('challenge'),
+  match('match');
 
   final String value;
 

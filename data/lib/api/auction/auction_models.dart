@@ -206,12 +206,19 @@ class AuctionTeam {
   final String? shortName;
   final int budget;
 
+  /// Bumped on every logo upload; 0 = no logo. The logo is the `photos`
+  /// document [Auction.teamLogoId].
+  final int logoVersion;
+
   const AuctionTeam({
     required this.id,
     required this.name,
     required this.budget,
     this.shortName,
+    this.logoVersion = 0,
   });
+
+  bool get hasLogo => logoVersion > 0;
 
   String get initials {
     if (shortName?.trim().isNotEmpty ?? false) return shortName!.trim();
@@ -227,6 +234,7 @@ class AuctionTeam {
         name: (json['name'] as String?) ?? '',
         shortName: json['short_name'] as String?,
         budget: (json['budget'] as num?)?.toInt() ?? 0,
+        logoVersion: (json['logo_version'] as num?)?.toInt() ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
@@ -234,14 +242,21 @@ class AuctionTeam {
         'name': name,
         'short_name': shortName,
         'budget': budget,
+        'logo_version': logoVersion,
       };
 
-  AuctionTeam copyWith({String? name, Object? shortName = _unset, int? budget}) =>
+  AuctionTeam copyWith({
+    String? name,
+    Object? shortName = _unset,
+    int? budget,
+    int? logoVersion,
+  }) =>
       AuctionTeam(
         id: id,
         name: name ?? this.name,
         shortName: shortName == _unset ? this.shortName : shortName as String?,
         budget: budget ?? this.budget,
+        logoVersion: logoVersion ?? this.logoVersion,
       );
 }
 
@@ -415,6 +430,9 @@ class Auction {
   static const maxPlayers = 400;
 
   String get bannerPhotoId => 'banner_$id';
+
+  /// `photos` doc holding [team]'s logo.
+  String teamLogoId(AuctionTeam team) => 'team_${id}_${team.id}';
 
   bool get hasBanner => bannerVersion > 0;
 

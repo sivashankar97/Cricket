@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:data/storage/provider/preferences_provider.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -39,11 +40,21 @@ class MascotCue {
   /// e.g. for tall sticky buttons.
   final double lift;
 
+  /// Shows near the top instead, for screens with controls at the bottom
+  /// (score board).
+  final bool top;
+
+  /// False for sign-in, error and warning cues: tapping the tiger must not
+  /// replace them with a movie line.
+  final bool allowFun;
+
   const MascotCue({
     required this.id,
     required this.pose,
     required this.message,
     required this.lift,
+    this.top = false,
+    this.allowFun = true,
   });
 }
 
@@ -58,20 +69,33 @@ final mascotProvider =
 });
 
 class MascotController extends StateNotifier<MascotCue?> {
-  MascotController(this._isEnabled) : super(null);
+  MascotController(this._isEnabled)
+      : _movieTurn = Random().nextInt(100),
+        super(null);
 
   static const defaultLift = 110.0;
-
-  /// Clears the WhatsApp, email and guest buttons on the sign-in options screen.
-  static const signInOptionsLift = 250.0;
 
   final bool Function() _isEnabled;
   final Set<String> _shownKeys = {};
   Timer? _hideTimer;
   Timer? _pendingTimer;
   int _nextId = 0;
+  int _movieTurn;
 
-  /// Shows [message] with [pose] and hides it after [duration].
+  MascotCue? get current => state;
+
+  /// Steps through the movie lines so the same one never shows twice in a row.
+  int takeMovieTurn() => _movieTurn++;
+
+  /// Long enough to read [message]; never shorter than [minimum].
+  static Duration readingTime(String message, [Duration? minimum]) {
+    final ms = (1800 + message.length * 55).clamp(2500, 8000);
+    final readable = Duration(milliseconds: ms);
+    return minimum != null && minimum > readable ? minimum : readable;
+  }
+
+  /// Shows [message] with [pose] and hides it after [duration] (by default,
+  /// long enough to read it).
   ///
   /// [onceKey] shows the cue only once per app session.
   /// [delay] debounces: a newer call before the delay ends replaces this one.
@@ -79,11 +103,13 @@ class MascotController extends StateNotifier<MascotCue?> {
   void show(
     MascotPose pose,
     String message, {
-    Duration duration = const Duration(seconds: 4),
+    Duration? duration,
     Duration delay = Duration.zero,
     String? onceKey,
     bool onlyWhenIdle = false,
     double lift = defaultLift,
+    bool top = false,
+    bool allowFun = true,
   }) {
     _pendingTimer?.cancel();
     if (!_isEnabled()) return;
@@ -98,8 +124,10 @@ class MascotController extends StateNotifier<MascotCue?> {
         pose: pose,
         message: message,
         lift: lift,
+        top: top,
+        allowFun: allowFun,
       );
-      _hideTimer = Timer(duration, hide);
+      _hideTimer = Timer(duration ?? readingTime(message), hide);
     }
 
     if (delay == Duration.zero) {

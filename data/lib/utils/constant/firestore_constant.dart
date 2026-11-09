@@ -8,6 +8,7 @@ class FireStoreConst {
   static const String inningsCollection = "innings";
   static const String ballScoresCollection = "ball_scores";
   static const String usersCollection = "users";
+  static const String userPrivateCollection = "user_private";
   static const String userSessionCollection = "user_sessions";
   static const String userStatCollection = "user_stat";
   static const String supportCollection = "contact_support";

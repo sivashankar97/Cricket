@@ -12,9 +12,11 @@ import 'package:khelo/components/image_avatar.dart';
 import 'package:khelo/components/user_detail_cell.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/widget_extension.dart';
+import 'package:khelo/domain/phone/phone_number.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/matches/add_match/select_squad/components/user_detail_sheet.dart';
 import 'package:khelo/ui/flow/team/add_team_member/add_team_member_view_model.dart';
+import 'package:khelo/ui/flow/settings/edit_profile/profile_completion.dart';
 import 'package:khelo/ui/flow/team/add_team_member/components/create_player_sheet.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/button/action_button.dart';
@@ -44,6 +46,10 @@ class _AddTeamMemberScreenState extends ConsumerState<AddTeamMemberScreen> {
     super.initState();
     notifier = ref.read(addTeamMemberStateProvider.notifier);
     runPostFrame(() => notifier.setData(widget.team));
+    ref.listenManual(currentUserPhoneProvider, (_, next) {
+      final country = PhoneNumber.parse(next.valueOrNull)?.country;
+      if (country != null) notifier.defaultCountry = country;
+    }, fireImmediately: true);
   }
 
   @override
@@ -132,68 +138,80 @@ class _AddTeamMemberScreenState extends ConsumerState<AddTeamMemberScreen> {
     AddTeamMemberState state,
   ) {
     return Expanded(
-      child: (state.searchedUsers.isEmpty)
+      child: (state.searchedUsers.isEmpty &&
+              AddTeamMemberViewNotifier.looksLikePhone(
+                  state.searchController.text))
           ? EmptyScreen(
-              title: (state.searchController.text.isNotEmpty)
-                  ? context.l10n.add_team_member_search_no_result_title
-                  : context.l10n.add_team_member_empty_title,
-              description: (state.searchController.text.isNotEmpty)
-                  ? context.l10n.add_team_member_search_description_text
-                  : context.l10n.add_team_member_empty_description_text,
-              buttonTitle: state.searchController.text.trim().isNotEmpty
-                  ? context.l10n.add_team_member_create_named_player(
-                      state.searchController.text.trim())
-                  : context.l10n.add_team_member_create_player_button,
+              title: context.l10n.add_team_member_phone_not_found_title,
+              description: context.l10n.add_team_member_phone_not_found_body,
+              buttonTitle: context.l10n.add_team_member_create_with_number,
               onTap: () => _createPlayer(context,
-                  initialName: state.searchController.text.trim()),
+                  initialPhone: state.searchController.text.trim()),
             )
-          : ListView.separated(
-              padding: const EdgeInsets.only(top: 8, bottom: 70),
-              itemCount: state.searchedUsers.length,
-              itemBuilder: (context, index) {
-                UserModel user = state.searchedUsers[index];
-                final isAdded = widget.team.players
-                            .any((element) => element.user == user) ==
-                        true ||
-                    state.selectedUsers.any((element) => element.user == user);
+          : (state.searchedUsers.isEmpty)
+              ? EmptyScreen(
+                  title: (state.searchController.text.isNotEmpty)
+                      ? context.l10n.add_team_member_search_no_result_title
+                      : context.l10n.add_team_member_empty_title,
+                  description: (state.searchController.text.isNotEmpty)
+                      ? context.l10n.add_team_member_search_description_text
+                      : context.l10n.add_team_member_empty_description_text,
+                  buttonTitle: state.searchController.text.trim().isNotEmpty
+                      ? context.l10n.add_team_member_create_named_player(
+                          state.searchController.text.trim())
+                      : context.l10n.add_team_member_create_player_button,
+                  onTap: () => _createPlayer(context,
+                      initialName: state.searchController.text.trim()),
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.only(top: 8, bottom: 70),
+                  itemCount: state.searchedUsers.length,
+                  itemBuilder: (context, index) {
+                    UserModel user = state.searchedUsers[index];
+                    final isAdded = widget.team.players
+                                .any((element) => element.user == user) ==
+                            true ||
+                        state.selectedUsers
+                            .any((element) => element.user == user);
 
-                return Column(
-                  children: [
-                    if (index == 0 && state.selectedUsers.isNotEmpty) ...[
-                      Divider(
-                        height: 1,
-                        color: context.colorScheme.outline,
-                      ),
-                      const SizedBox(height: 16),
-                    ],
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: UserDetailCell(
-                        user: user,
-                        onTap: () => UserDetailSheet.show(
-                          context,
-                          user,
-                          actionButtonTitle:
-                              isAdded ? null : context.l10n.common_select_title,
-                          onButtonTap: () => notifier.selectUser(user),
+                    return Column(
+                      children: [
+                        if (index == 0 && state.selectedUsers.isNotEmpty) ...[
+                          Divider(
+                            height: 1,
+                            color: context.colorScheme.outline,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: UserDetailCell(
+                            user: user,
+                            onTap: () => UserDetailSheet.show(
+                              context,
+                              user,
+                              actionButtonTitle: isAdded
+                                  ? null
+                                  : context.l10n.common_select_title,
+                              onButtonTap: () => notifier.selectUser(user),
+                            ),
+                            trailing: SecondaryButton(
+                              isAdded
+                                  ? context.l10n.add_team_member_added_text
+                                  : context.l10n.common_add_title.toUpperCase(),
+                              enabled: !isAdded,
+                              onPressed: () => notifier.selectUser(user),
+                            ),
+                          ),
                         ),
-                        trailing: SecondaryButton(
-                          isAdded
-                              ? context.l10n.add_team_member_added_text
-                              : context.l10n.common_add_title.toUpperCase(),
-                          enabled: !isAdded,
-                          onPressed: () => notifier.selectUser(user),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-              separatorBuilder: (context, index) => Divider(
-                height: 32,
-                color: context.colorScheme.outline,
-              ),
-            ),
+                      ],
+                    );
+                  },
+                  separatorBuilder: (context, index) => Divider(
+                    height: 32,
+                    color: context.colorScheme.outline,
+                  ),
+                ),
     );
   }
 
@@ -284,12 +302,28 @@ class _AddTeamMemberScreenState extends ConsumerState<AddTeamMemberScreen> {
     );
   }
 
-  Future<void> _createPlayer(BuildContext context, {String initialName = ''}) {
+  Future<void> _createPlayer(
+    BuildContext context, {
+    String initialName = '',
+    String initialPhone = '',
+  }) {
     return CreatePlayerSheet.show(
       context,
       initialName: initialName,
+      initialPhone: initialPhone,
+      phoneError: (phone) => notifier.toE164(phone) == null
+          ? context.l10n
+              .add_team_member_phone_invalid(notifier.defaultCountry.dial)
+          : null,
       onCreate: (name, phone) async {
-        await notifier.createPlayer(name: name, phone: phone);
+        final result = await notifier.createPlayer(name: name, phone: phone);
+        if (result.existing && context.mounted) {
+          showSnackBar(
+            context,
+            context.l10n.add_team_member_player_exists(result.user.name ?? ''),
+            length: SnackBarLength.long,
+          );
+        }
       },
     );
   }

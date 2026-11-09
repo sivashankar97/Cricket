@@ -322,15 +322,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sign_in_options_title => 'Sign in';
 
   @override
-  String get sign_in_options_description => 'Choose how you want to sign in.';
-
-  @override
-  String get sign_in_email_option => 'Continue with email';
-
-  @override
-  String get sign_in_whatsapp_option => 'Continue with WhatsApp';
-
-  @override
   String get sign_in_guest_option => 'Continue as guest';
 
   @override
@@ -338,45 +329,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Play cricket without an account. Your scores show as \"Guest\".';
 
   @override
-  String get sign_in_whatsapp_subtitle =>
-      'Send \'Hi login\' on WhatsApp to get your instant login link.';
-
-  @override
-  String get sign_in_whatsapp_opened_title => 'WhatsApp Chat Opened';
-
-  @override
-  String get sign_in_whatsapp_opened_desc =>
-      'Send the prefilled message \'Hi login\' in WhatsApp. You will receive a login link to continue.';
-
-  @override
-  String get sign_in_whatsapp_open_again_btn => 'Open WhatsApp Again';
-
-  @override
-  String get sign_in_whatsapp_have_link_btn => 'I have a login link or token';
-
-  @override
-  String get sign_in_whatsapp_enter_link_placeholder =>
-      'Paste login link or token here';
-
-  @override
-  String get sign_in_whatsapp_submit_token_btn => 'Verify & Sign In';
-
-  @override
-  String get sign_in_email_title => 'Sign in with email';
+  String get sign_in_email_title => 'Welcome back';
 
   @override
   String get sign_in_email_description =>
-      'Sign in with your email and password.';
+      'Sign in to score matches, follow tournaments and see your stats.';
 
   @override
   String get sign_in_email_create_title => 'Create your account';
 
   @override
   String get sign_in_email_create_description =>
-      'Use your email and choose a password with at least 6 characters.';
+      'Set up teams, matches and tournaments, and keep all your cricket in one place.';
 
   @override
-  String get sign_in_password_placeholder => 'Password';
+  String get sign_in_password_placeholder => 'Enter your password';
 
   @override
   String get sign_in_email_sign_in_btn => 'Sign in';
@@ -385,11 +352,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sign_in_email_create_btn => 'Create account';
 
   @override
-  String get sign_in_email_switch_to_create => 'New here? Create an account';
+  String get sign_in_email_label => 'Email';
 
   @override
-  String get sign_in_email_switch_to_sign_in =>
-      'Already have an account? Sign in';
+  String get sign_in_password_label => 'Password';
+
+  @override
+  String get sign_in_password_create_placeholder => 'Choose a password';
+
+  @override
+  String get sign_in_password_rule => 'At least 6 characters';
+
+  @override
+  String get sign_in_mode_label => 'Sign in or create an account';
+
+  @override
+  String get sign_in_or => 'or';
+
+  @override
+  String get sign_in_show_password => 'Show password';
+
+  @override
+  String get sign_in_hide_password => 'Hide password';
 
   @override
   String get sign_in_forgot_password => 'Forgot password?';
@@ -404,7 +388,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter your email first, then tap Forgot password.';
 
   @override
-  String get sign_in_email_placeholder => 'Email';
+  String get sign_in_email_placeholder => 'name@example.com';
 
   @override
   String get sign_in_required_title => 'Sign in to continue';
@@ -559,6 +543,96 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enjoy the freedom of creating your own cricket matches or teams.';
 
   @override
+  String get home_greeting_morning => 'Good morning!';
+
+  @override
+  String get home_greeting_afternoon => 'Good afternoon!';
+
+  @override
+  String get home_greeting_evening => 'Good evening!';
+
+  @override
+  String get home_greeting_guest => 'Guest mode';
+
+  @override
+  String home_section_live(int count) {
+    return 'Live matches ($count)';
+  }
+
+  @override
+  String get home_section_upcoming => 'Upcoming matches';
+
+  @override
+  String get home_section_finished => 'Recent results';
+
+  @override
+  String home_match_overs(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count overs match',
+      one: '1 over match',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String home_live_need(String team, int runs, int balls) {
+    String _temp0 = intl.Intl.pluralLogic(
+      runs,
+      locale: localeName,
+      other: '$runs runs',
+      one: '1 run',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      balls,
+      locale: localeName,
+      other: '$balls balls',
+      one: '1 ball',
+    );
+    return '$team need $_temp0 in $_temp1';
+  }
+
+  @override
+  String home_live_batting(String team) {
+    return '$team batting';
+  }
+
+  @override
+  String home_live_toss(String team) {
+    return '$team won the toss';
+  }
+
+  @override
+  String get home_live_starting => 'Match about to start';
+
+  @override
+  String home_live_target(int target) {
+    return 'Target $target';
+  }
+
+  @override
+  String home_crr(String rate) {
+    return 'CRR $rate';
+  }
+
+  @override
+  String home_rrr(String rate) {
+    return 'RRR $rate';
+  }
+
+  @override
+  String get home_today => 'Today';
+
+  @override
+  String get home_tomorrow => 'Tomorrow';
+
+  @override
+  String home_result_won_by(String team, String margin) {
+    return '$team won by $margin';
+  }
+
+  @override
   String get home_search_hint_title => 'Search matches by team name...';
 
   @override
@@ -612,6 +686,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get my_cricket_screen_title => 'My Cricket';
+
+  @override
+  String get my_cricket_header_subtitle =>
+      'Your matches, teams and tournaments';
+
+  @override
+  String get my_cricket_empty_matches_body =>
+      'Create a match, pick both teams and score it ball by ball.';
+
+  @override
+  String get my_cricket_empty_teams_body =>
+      'Build your squad and invite players to join your team.';
+
+  @override
+  String get my_cricket_empty_tournaments_body =>
+      'Set up a league or knockout, then add teams and matches.';
 
   @override
   String get add_tournament_screen_title => 'Add Tournament';
@@ -1152,7 +1242,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get add_team_member_details_title => 'Details';
 
   @override
-  String get add_team_member_search_placeholder_text => 'Search member name';
+  String get add_team_member_search_placeholder_text =>
+      'Search by name or mobile number';
 
   @override
   String get add_team_member_empty_title => 'Your cricket crew awaits!';
@@ -1173,13 +1264,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get add_team_member_create_player_description =>
-      'Add a player who doesn\'t use Sports Tamil. Only the name is required.';
+      'Add a player who isn\'t on Sports Tamil yet. Only the name is required. The mobile number stays private and lets them link their account when they sign up.';
 
   @override
   String get add_team_member_create_player_name => 'Player name';
 
   @override
-  String get add_team_member_create_player_phone => 'Phone number (optional)';
+  String get add_team_member_create_player_phone => 'Mobile number (optional)';
+
+  @override
+  String get add_team_member_phone_not_found_title =>
+      'No player with this number';
+
+  @override
+  String get add_team_member_phone_not_found_body =>
+      'Create the player with this number. When they sign up with it, they can link their account.';
+
+  @override
+  String get add_team_member_create_with_number =>
+      'Create player with this number';
+
+  @override
+  String add_team_member_phone_invalid(String dial) {
+    return 'Enter a valid mobile number. Add the country code if it isn\'t $dial.';
+  }
+
+  @override
+  String add_team_member_player_exists(String name) {
+    return '$name already has this number, so they were added instead.';
+  }
 
   @override
   String get add_team_member_create_player_button => 'Create player';
@@ -2384,6 +2497,128 @@ class AppLocalizationsEn extends AppLocalizations {
       'This can not undone. if you delete your account, your data will be gone forever.';
 
   @override
+  String get profile_form_create_heading => 'Create your player profile';
+
+  @override
+  String get profile_form_create_subtitle =>
+      'Takes less than a minute. Name and mobile number are required.';
+
+  @override
+  String get profile_form_edit_heading => 'Your player profile';
+
+  @override
+  String get profile_form_edit_subtitle =>
+      'Keep your details up to date so teams can find you.';
+
+  @override
+  String get profile_form_photo_add => 'Add photo';
+
+  @override
+  String get profile_form_photo_change => 'Change photo';
+
+  @override
+  String get profile_form_photo_remove => 'Remove';
+
+  @override
+  String get profile_form_photo_optional => 'Optional';
+
+  @override
+  String get profile_form_section_basic => 'Basic details';
+
+  @override
+  String get profile_form_section_personal => 'Personal';
+
+  @override
+  String get profile_form_section_cricket => 'Cricket profile';
+
+  @override
+  String get profile_form_name_label => 'Full name';
+
+  @override
+  String get profile_form_name_hint => 'e.g. Arun Kumar';
+
+  @override
+  String get profile_form_phone_label => 'Mobile number';
+
+  @override
+  String get profile_form_phone_private => 'Only you can see your number';
+
+  @override
+  String get profile_form_email_label => 'Email';
+
+  @override
+  String get profile_form_email_hint => 'you@example.com';
+
+  @override
+  String get profile_form_location_label => 'City';
+
+  @override
+  String get profile_form_location_hint => 'e.g. Chennai';
+
+  @override
+  String get profile_form_optional => 'Optional';
+
+  @override
+  String get profile_form_required => 'Required';
+
+  @override
+  String get profile_form_dob_label => 'Date of birth';
+
+  @override
+  String get profile_form_dob_add => 'Add date';
+
+  @override
+  String get profile_form_gender_label => 'Gender';
+
+  @override
+  String get profile_form_role_label => 'Playing role';
+
+  @override
+  String get profile_form_batting_label => 'Batting';
+
+  @override
+  String get profile_form_bowling_label => 'Bowling';
+
+  @override
+  String get profile_form_choose => 'Choose';
+
+  @override
+  String get profile_form_error_name => 'Enter your name (at least 2 letters)';
+
+  @override
+  String get profile_form_error_phone_empty => 'Enter your mobile number';
+
+  @override
+  String profile_form_error_phone_invalid(String country) {
+    return 'Enter a valid $country mobile number';
+  }
+
+  @override
+  String get profile_form_error_email =>
+      'Enter a valid email or leave it empty';
+
+  @override
+  String get profile_form_error_photo =>
+      'Couldn\'t use that photo. Try another one.';
+
+  @override
+  String get profile_form_create_btn => 'Create profile';
+
+  @override
+  String get profile_form_save_btn => 'Save changes';
+
+  @override
+  String get profile_form_sign_out => 'Not you? Sign out';
+
+  @override
+  String get profile_form_country_title => 'Country code';
+
+  @override
+  String profile_form_progress(int done, int total) {
+    return '$done of $total done';
+  }
+
+  @override
   String get transfer_teams_title => 'Before You Go...';
 
   @override
@@ -2464,6 +2699,99 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profile_complete_description_title =>
       'Enhance your profile with more details to make it better!';
+
+  @override
+  String get profile_section_activity => 'Activity';
+
+  @override
+  String get profile_section_preferences => 'Preferences';
+
+  @override
+  String get profile_section_support => 'Help & support';
+
+  @override
+  String get profile_section_about => 'About';
+
+  @override
+  String get profile_edit_button => 'Edit profile';
+
+  @override
+  String profile_complete_percent(int percent) {
+    return 'Profile $percent% complete';
+  }
+
+  @override
+  String get profile_complete_finish => 'Finish';
+
+  @override
+  String get profile_qr_title => 'My player QR';
+
+  @override
+  String get profile_qr_subtitle => 'Teammates scan it to add you';
+
+  @override
+  String get profile_stats_subtitle => 'Runs, wickets and match history';
+
+  @override
+  String get profile_notifications_off_title => 'Notifications are off';
+
+  @override
+  String get profile_notifications_off_body =>
+      'Turn them on to hear about your teams and matches.';
+
+  @override
+  String get profile_mascot_subtitle => 'Tips and cheers from the tiger';
+
+  @override
+  String get profile_section_player_links => 'Player links';
+
+  @override
+  String get player_claim_title => 'Is this you?';
+
+  @override
+  String player_claim_body(String name, int teams, int matches) {
+    return 'An organizer added $name with your mobile number, in $teams teams and $matches matches. Link this player to your account to get those matches and stats.';
+  }
+
+  @override
+  String get player_claim_yes => 'Yes, that\'s me';
+
+  @override
+  String get player_claim_no => 'Not me';
+
+  @override
+  String get player_claim_sent =>
+      'Request sent. The organizer will confirm it.';
+
+  @override
+  String player_claim_request_row(String claimant, String player) {
+    return '$claimant says they are $player';
+  }
+
+  @override
+  String get player_claim_request_hint =>
+      'Approving moves this player\'s teams, matches and stats to their account.';
+
+  @override
+  String get player_claim_approve => 'Approve';
+
+  @override
+  String get player_claim_decline => 'Decline';
+
+  @override
+  String player_claim_approved_toast(String player, String claimant) {
+    return 'Linked. $player\'s matches and stats now belong to $claimant.';
+  }
+
+  @override
+  String player_claim_waiting(String player) {
+    return 'Waiting for the organizer to confirm $player';
+  }
+
+  @override
+  String player_claim_declined(String player) {
+    return 'The organizer didn\'t confirm $player';
+  }
 
   @override
   String get profile_complete_add_profile_picture => 'Add profile picture';
@@ -3094,6 +3422,470 @@ class AppLocalizationsEn extends AppLocalizations {
   String get play_retry_save => 'Retry';
 
   @override
+  String play_comm_six_0(String name) {
+    return '$name launches it over long-on. That\'s huge!';
+  }
+
+  @override
+  String play_comm_six_1(String name) {
+    return 'Into the crowd! A monster hit from $name.';
+  }
+
+  @override
+  String play_comm_six_2(String name) {
+    return 'Clean strike from $name, and that\'s out of the ground!';
+  }
+
+  @override
+  String play_comm_four_0(String name) {
+    return '$name finds the gap and it races away to the rope.';
+  }
+
+  @override
+  String play_comm_four_1(String name) {
+    return 'Beautifully timed by $name. Four runs.';
+  }
+
+  @override
+  String play_comm_four_2(String name) {
+    return 'Through the covers by $name. Nobody\'s stopping that.';
+  }
+
+  @override
+  String play_comm_two_0(String name) {
+    return '$name pushes it into the gap and comes back for two.';
+  }
+
+  @override
+  String play_comm_two_1(String name) {
+    return 'Good running from $name. Two more.';
+  }
+
+  @override
+  String play_comm_two_2(String name) {
+    return 'Worked away by $name for a couple.';
+  }
+
+  @override
+  String play_comm_single_0(String name) {
+    return '$name nudges it for a quick single.';
+  }
+
+  @override
+  String play_comm_single_1(String name) {
+    return 'Just a single. $name keeps the board moving.';
+  }
+
+  @override
+  String play_comm_single_2(String name) {
+    return 'Soft hands from $name. One run.';
+  }
+
+  @override
+  String get play_comm_dot_0 => 'Dot ball. Tight from the bowler.';
+
+  @override
+  String play_comm_dot_1(String name) {
+    return '$name can\'t get that one away.';
+  }
+
+  @override
+  String get play_comm_dot_2 => 'Beaten! That one went past the edge.';
+
+  @override
+  String get play_comm_out_0 => 'Bowled! The stumps are everywhere.';
+
+  @override
+  String play_comm_out_1(String name) {
+    return 'Clean bowled! $name has to walk back.';
+  }
+
+  @override
+  String play_comm_out_2(String name) {
+    return 'Timber! What a ball to get rid of $name.';
+  }
+
+  @override
+  String get play_you => 'You';
+
+  @override
+  String get play_sound_on => 'Sound on';
+
+  @override
+  String get play_sound_off => 'Sound off';
+
+  @override
+  String get play_this_over => 'This over';
+
+  @override
+  String play_hud_overs(String overs, int total) {
+    return 'Overs $overs/$total';
+  }
+
+  @override
+  String play_hud_target(int target) {
+    return 'Target $target';
+  }
+
+  @override
+  String get play_mode_match => 'Live match';
+
+  @override
+  String get play_format_title => 'Pick the format';
+
+  @override
+  String get play_format_subtitle =>
+      'Both of you face the same balls. Highest score wins.';
+
+  @override
+  String get play_format_quick => 'Quick';
+
+  @override
+  String get play_format_classic => 'Classic';
+
+  @override
+  String get play_format_long => 'Long';
+
+  @override
+  String play_format_detail(int overs, int wickets) {
+    String _temp0 = intl.Intl.pluralLogic(
+      overs,
+      locale: localeName,
+      other: '$overs overs',
+      one: '1 over',
+    );
+    return '$_temp0 · $wickets wickets';
+  }
+
+  @override
+  String get play_send_request => 'Send match request';
+
+  @override
+  String get play_online_now => 'Online now';
+
+  @override
+  String get play_recent_opponents => 'Played before';
+
+  @override
+  String get play_online_label => 'Online';
+
+  @override
+  String get play_select_opponent_more => 'Type a name to find more players';
+
+  @override
+  String get play_select_opponent_none_online =>
+      'No one else is on Play right now. Search for a friend and send a request.';
+
+  @override
+  String play_match_waiting_title(String name) {
+    return 'Waiting for $name';
+  }
+
+  @override
+  String get play_match_waiting_body =>
+      'Your match request is on its way. It expires in 10 minutes.';
+
+  @override
+  String get play_match_cancel => 'Cancel request';
+
+  @override
+  String play_match_declined(String name) {
+    return '$name can\'t play right now.';
+  }
+
+  @override
+  String get play_match_cancelled => 'This match request was cancelled.';
+
+  @override
+  String get play_match_expired => 'This match request expired.';
+
+  @override
+  String get play_match_back => 'Back to Play';
+
+  @override
+  String play_match_incoming_title(String name) {
+    return '$name challenges you!';
+  }
+
+  @override
+  String play_match_incoming_body(String format) {
+    return 'Live match · $format. Ready to play?';
+  }
+
+  @override
+  String get play_match_accept => 'Accept';
+
+  @override
+  String get play_match_decline => 'Decline';
+
+  @override
+  String get play_match_section => 'Live matches';
+
+  @override
+  String play_match_request_from(String name, String format) {
+    return '$name wants to play · $format';
+  }
+
+  @override
+  String play_match_request_to(String name, String format) {
+    return 'Waiting for $name · $format';
+  }
+
+  @override
+  String play_match_in_progress(String name, String format) {
+    return 'Live vs $name · $format';
+  }
+
+  @override
+  String get play_match_join => 'Join';
+
+  @override
+  String get play_match_unavailable => 'This match is no longer available.';
+
+  @override
+  String get play_challenge_live_hint => 'Live 1v1 match';
+
+  @override
+  String get play_vs => 'VS';
+
+  @override
+  String get play_toss_title => 'Toss time';
+
+  @override
+  String get play_toss_call_prompt => 'Call it!';
+
+  @override
+  String get play_toss_heads => 'Heads';
+
+  @override
+  String get play_toss_tails => 'Tails';
+
+  @override
+  String play_toss_waiting_call(String name) {
+    return '$name is calling the toss…';
+  }
+
+  @override
+  String play_toss_called(String name, String call) {
+    return '$name called $call';
+  }
+
+  @override
+  String get play_toss_won => 'You won the toss!';
+
+  @override
+  String play_toss_lost(String name) {
+    return '$name won the toss';
+  }
+
+  @override
+  String get play_toss_choose => 'Bat or bowl first?';
+
+  @override
+  String get play_toss_bat => 'Bat first';
+
+  @override
+  String get play_toss_bowl => 'Bowl first';
+
+  @override
+  String play_toss_waiting_choice(String name) {
+    return '$name is choosing…';
+  }
+
+  @override
+  String play_bats_first(String name) {
+    return '$name bats first';
+  }
+
+  @override
+  String get play_live_your_innings => 'Your innings';
+
+  @override
+  String play_live_batting(String name) {
+    return '$name is batting';
+  }
+
+  @override
+  String get play_live_watch_first => 'Watch live. You chase this score next.';
+
+  @override
+  String play_live_watch_second(String name, int target) {
+    return 'Watch live. $name needs $target to win.';
+  }
+
+  @override
+  String get play_live_waiting_ball => 'Waiting for the next ball…';
+
+  @override
+  String get play_innings_break => 'Innings break';
+
+  @override
+  String play_innings_break_body(
+      String name, String score, String chaser, int target) {
+    return '$name scored $score. $chaser needs $target to win.';
+  }
+
+  @override
+  String get play_countdown_go => 'GO!';
+
+  @override
+  String get play_get_ready => 'Get ready';
+
+  @override
+  String play_opponent_offline(String name) {
+    return '$name disconnected. Waiting for them to come back…';
+  }
+
+  @override
+  String get play_claim_win => 'Claim win';
+
+  @override
+  String get play_leave_title => 'Leave the match?';
+
+  @override
+  String play_leave_body(String name) {
+    return 'You will forfeit and $name wins.';
+  }
+
+  @override
+  String get play_leave_confirm => 'Forfeit';
+
+  @override
+  String get play_leave_stay => 'Stay';
+
+  @override
+  String play_result_by_runs(String name, int runs) {
+    String _temp0 = intl.Intl.pluralLogic(
+      runs,
+      locale: localeName,
+      other: '$runs runs',
+      one: '1 run',
+    );
+    return '$name won by $_temp0';
+  }
+
+  @override
+  String play_result_by_wickets(String name, int wickets) {
+    String _temp0 = intl.Intl.pluralLogic(
+      wickets,
+      locale: localeName,
+      other: '$wickets wickets',
+      one: '1 wicket',
+    );
+    return '$name won by $_temp0';
+  }
+
+  @override
+  String get play_result_tied => 'It\'s a tie!';
+
+  @override
+  String play_result_forfeit(String name) {
+    return '$name won. The other player left.';
+  }
+
+  @override
+  String get play_result_you_win => 'YOU WIN!';
+
+  @override
+  String get play_result_you_lose => 'YOU LOSE';
+
+  @override
+  String get play_result_tie_banner => 'TIE!';
+
+  @override
+  String get play_scorecard => 'Scorecard';
+
+  @override
+  String get play_sc_runs => 'R';
+
+  @override
+  String get play_sc_balls => 'B';
+
+  @override
+  String get play_sc_fours => '4s';
+
+  @override
+  String get play_sc_sixes => '6s';
+
+  @override
+  String get play_sc_strike_rate => 'SR';
+
+  @override
+  String get play_rematch => 'Rematch';
+
+  @override
+  String play_xp_earned(int xp) {
+    return '+$xp XP';
+  }
+
+  @override
+  String play_level(int level) {
+    return 'Level $level';
+  }
+
+  @override
+  String play_xp_progress(int xp, int next) {
+    return '$xp/$next XP';
+  }
+
+  @override
+  String play_stat_streak(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days-day streak',
+      one: '1-day streak',
+      zero: 'No streak',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String play_stat_wins(int wins) {
+    String _temp0 = intl.Intl.pluralLogic(
+      wins,
+      locale: localeName,
+      other: '$wins wins',
+      one: '1 win',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String play_stat_best(int runs) {
+    return 'Best $runs';
+  }
+
+  @override
+  String get play_badges_title => 'Badges';
+
+  @override
+  String get play_badge_first_six => 'First six';
+
+  @override
+  String get play_badge_six_hitter => '3 sixes in a game';
+
+  @override
+  String get play_badge_thirty => '30 in a game';
+
+  @override
+  String get play_badge_match_winner => 'Won a live match';
+
+  @override
+  String get play_badge_daily_streak => '3-day streak';
+
+  @override
+  String get play_badge_century => '100 career runs';
+
+  @override
+  String get play_badge_veteran => '25 games played';
+
+  @override
+  String play_badge_unlocked(String badge) {
+    return 'Badge unlocked: $badge';
+  }
+
+  @override
   String get profile_my_stats => 'My stats';
 
   @override
@@ -3129,6 +3921,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get auction_empty => 'No auctions yet.';
+
+  @override
+  String get auction_empty_body =>
+      'Create one to register players and run live bidding.';
+
+  @override
+  String auction_hero_stat_live(int count) {
+    return '$count live';
+  }
+
+  @override
+  String auction_hero_stat_upcoming(int count) {
+    return '$count upcoming';
+  }
+
+  @override
+  String auction_hero_stat_completed(int count) {
+    return '$count completed';
+  }
 
   @override
   String get auction_not_found =>
@@ -3786,7 +4597,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mascot_sign_in_options =>
-      'Pick a way to sign in, or jump in as a guest to play.';
+      'Sign in with your email, or jump in as a guest to play.';
 
   @override
   String get mascot_sign_in_required =>
@@ -3855,4 +4666,156 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mascot_profile_saved => 'Profile saved!';
+
+  @override
+  String get mascot_profile_required =>
+      'Finish your profile first: just your name and mobile number.';
+
+  @override
+  String get mascot_profile_need_name => 'First tell me your name!';
+
+  @override
+  String get mascot_profile_need_phone =>
+      'Add your mobile number. Only you can see it.';
+
+  @override
+  String get mascot_profile_bad_phone =>
+      'That number doesn\'t look right. Check it once more.';
+
+  @override
+  String get mascot_profile_need_both =>
+      'I need your name and mobile number to create your profile.';
+
+  @override
+  String get mascot_profile_bad_email =>
+      'That email doesn\'t look right. Fix it or leave it empty.';
+
+  @override
+  String get mascot_profile_photo_added => 'Great photo! Looking like a hero.';
+
+  @override
+  String get mascot_profile_photo_failed =>
+      'Couldn\'t use that photo. Pick another one.';
+
+  @override
+  String get mascot_fun_six =>
+      'SIX! That ball has left the stadium and gone home!';
+
+  @override
+  String get mascot_fun_four => 'FOUR! Straight to the boundary, what a shot!';
+
+  @override
+  String get mascot_fun_wicket =>
+      'WICKET! The pavilion is waiting, off you go!';
+
+  @override
+  String get mascot_fun_dot_ball => 'Dot ball! A little smile for the bowler.';
+
+  @override
+  String get mascot_fun_perfect_timing =>
+      'Perfect timing! Even with eyes closed you couldn\'t hit it sweeter!';
+
+  @override
+  String get mascot_fun_early_shot =>
+      'A bit too early! Let the ball come, then hit.';
+
+  @override
+  String get mascot_fun_late_shot =>
+      'A bit late! The ball is already in the keeper\'s gloves.';
+
+  @override
+  String get mascot_fun_match_won => 'Victory! You\'re the hero today!';
+
+  @override
+  String get mascot_fun_match_lost =>
+      'Lost this one, but the next match is ours!';
+
+  @override
+  String get mascot_fun_last_over =>
+      'Last over! Everyone to the edge of your seats!';
+
+  @override
+  String get mascot_fun_comeback =>
+      'No worries! A comeback is the real mass. One more time!';
+
+  @override
+  String get mascot_fun_team_created => 'New team ready! See you on the field.';
+
+  @override
+  String get mascot_fun_tournament_created =>
+      'Tournament ready! Let the fight for the trophy begin.';
+
+  @override
+  String get mascot_fun_challenge_won =>
+      'Challenge won! Your opponent is speechless now.';
+
+  @override
+  String get mascot_fun_challenge_lost =>
+      'This challenge slipped away. When\'s the revenge match?';
+
+  @override
+  String get mascot_fun_empty_matches =>
+      'No matches yet. Start the first one yourself!';
+
+  @override
+  String get mascot_fun_no_players =>
+      'No players here yet. Add some people to the team!';
+
+  @override
+  String get mascot_fun_internet =>
+      'No internet! Please check your connection.';
+
+  @override
+  String get mascot_fun_auction_sold => 'SOLD! A new star for the team!';
+
+  @override
+  String get mascot_fun_auction_unsold =>
+      'Unsold… no worries, the chance will come in the next round!';
+
+  @override
+  String get mascot_movie_baasha_style =>
+      'If I hit one six, it\'s like hitting a hundred!';
+
+  @override
+  String get mascot_movie_padayappa_style => 'My shot, my own style!';
+
+  @override
+  String get mascot_movie_mass_entry =>
+      'The Tiger has entered the ground! The game goes to another level now!';
+
+  @override
+  String get mascot_movie_comedy_scene =>
+      'The fielder is running faster than the ball, it\'s a comedy scene!';
+
+  @override
+  String get mascot_movie_climax_scene =>
+      'This is the climax! Don\'t leave your seat till the last ball!';
+
+  @override
+  String get mascot_movie_hero_intro =>
+      'Hero entry! Raise the bat in slow motion!';
+
+  @override
+  String get mascot_movie_interval =>
+      'Interval! Have a tea and come back for the second half.';
+
+  @override
+  String get mascot_movie_dialogue_hint =>
+      'What\'s your dialogue? Let your bat do the talking!';
+
+  @override
+  String get mascot_movie_cool_attitude =>
+      'Let\'s play it cool... the scoreboard will do the talking!';
+
+  @override
+  String get mascot_movie_youth_energy =>
+      'Whistles ready? Let the next shot shake the whole ground!';
+
+  @override
+  String get mascot_movie_mass_punch =>
+      'Our game needs no noise... the scoreboard is enough!';
+
+  @override
+  String get mascot_fun_match_tied =>
+      'It\'s a tie! Both teams fought right to the last ball!';
 }

@@ -133,27 +133,23 @@
   "sign_in_get_otp_btn_text": "Get OTP",
   "sign_in_invalid_phone_number_text": "Please enter valid phone number",
   "sign_in_options_title": "Sign in",
-  "sign_in_options_description": "Choose how you want to sign in.",
-  "sign_in_email_option": "Continue with email",
-  "sign_in_whatsapp_option": "Continue with WhatsApp",
   "sign_in_guest_option": "Continue as guest",
   "sign_in_guest_hint": "Play cricket without an account. Your scores show as \"Guest\".",
-  "sign_in_whatsapp_subtitle": "Send 'Hi login' on WhatsApp to get your instant login link.",
-  "sign_in_whatsapp_opened_title": "WhatsApp Chat Opened",
-  "sign_in_whatsapp_opened_desc": "Send the prefilled message 'Hi login' in WhatsApp. You will receive a login link to continue.",
-  "sign_in_whatsapp_open_again_btn": "Open WhatsApp Again",
-  "sign_in_whatsapp_have_link_btn": "I have a login link or token",
-  "sign_in_whatsapp_enter_link_placeholder": "Paste login link or token here",
-  "sign_in_whatsapp_submit_token_btn": "Verify & Sign In",
-  "sign_in_email_title": "Sign in with email",
-  "sign_in_email_description": "Sign in with your email and password.",
+  "sign_in_email_title": "Welcome back",
+  "sign_in_email_description": "Sign in to score matches, follow tournaments and see your stats.",
   "sign_in_email_create_title": "Create your account",
-  "sign_in_email_create_description": "Use your email and choose a password with at least 6 characters.",
-  "sign_in_password_placeholder": "Password",
+  "sign_in_email_create_description": "Set up teams, matches and tournaments, and keep all your cricket in one place.",
+  "sign_in_password_placeholder": "Enter your password",
   "sign_in_email_sign_in_btn": "Sign in",
   "sign_in_email_create_btn": "Create account",
-  "sign_in_email_switch_to_create": "New here? Create an account",
-  "sign_in_email_switch_to_sign_in": "Already have an account? Sign in",
+  "sign_in_email_label": "Email",
+  "sign_in_password_label": "Password",
+  "sign_in_password_create_placeholder": "Choose a password",
+  "sign_in_password_rule": "At least 6 characters",
+  "sign_in_mode_label": "Sign in or create an account",
+  "sign_in_or": "or",
+  "sign_in_show_password": "Show password",
+  "sign_in_hide_password": "Hide password",
   "sign_in_forgot_password": "Forgot password?",
   "sign_in_reset_email_sent": "Password reset link sent to {email}. Check your inbox and spam folder.",
   "@sign_in_reset_email_sent": {
@@ -164,7 +160,7 @@
     }
   },
   "sign_in_reset_enter_email": "Enter your email first, then tap Forgot password.",
-  "sign_in_email_placeholder": "Email",
+  "sign_in_email_placeholder": "name@example.com",
   "sign_in_required_title": "Sign in to continue",
   "sign_in_required_description": "Sign in to see your matches, teams, stats, and profile.",
   "otp_verification_verification_title": "Verification code",
@@ -244,6 +240,96 @@
   "global_cricket_scorecard_loading": "Loading scorecard…",
   "home_screen_no_matches_title": "No Matches in this area!",
   "home_screen_no_matches_description_text": "Enjoy the freedom of creating your own cricket matches or teams.",
+  "home_greeting_morning": "Good morning!",
+  "home_greeting_afternoon": "Good afternoon!",
+  "home_greeting_evening": "Good evening!",
+  "home_greeting_guest": "Guest mode",
+  "home_section_live": "Live matches ({count})",
+  "@home_section_live": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_section_upcoming": "Upcoming matches",
+  "home_section_finished": "Recent results",
+  "home_match_overs": "{count, plural, =1{1 over match} other{{count} overs match}}",
+  "@home_match_overs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "home_live_need": "{team} need {runs, plural, =1{1 run} other{{runs} runs}} in {balls, plural, =1{1 ball} other{{balls} balls}}",
+  "@home_live_need": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      },
+      "runs": {
+        "type": "int"
+      },
+      "balls": {
+        "type": "int"
+      }
+    }
+  },
+  "home_live_batting": "{team} batting",
+  "@home_live_batting": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "home_live_toss": "{team} won the toss",
+  "@home_live_toss": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "home_live_starting": "Match about to start",
+  "home_live_target": "Target {target}",
+  "@home_live_target": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "home_crr": "CRR {rate}",
+  "@home_crr": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "home_rrr": "RRR {rate}",
+  "@home_rrr": {
+    "placeholders": {
+      "rate": {
+        "type": "String"
+      }
+    }
+  },
+  "home_today": "Today",
+  "home_tomorrow": "Tomorrow",
+  "home_result_won_by": "{team} won by {margin}",
+  "@home_result_won_by": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      },
+      "margin": {
+        "type": "String"
+      }
+    }
+  },
 
   "@_HOME_SEARCH": {
   },
@@ -275,6 +361,10 @@
   "@_MY_CRICKET": {
   },
   "my_cricket_screen_title": "My Cricket",
+  "my_cricket_header_subtitle": "Your matches, teams and tournaments",
+  "my_cricket_empty_matches_body": "Create a match, pick both teams and score it ball by ball.",
+  "my_cricket_empty_teams_body": "Build your squad and invite players to join your team.",
+  "my_cricket_empty_tournaments_body": "Set up a league or knockout, then add teams and matches.",
 
   "@_ADD_TOURNAMENT": {
   },
@@ -471,15 +561,22 @@
   "scan_qr_permission_settings": "Go to settings",
   "add_team_member_screen_title": "Add Team Member",
   "add_team_member_details_title": "Details",
-  "add_team_member_search_placeholder_text": "Search member name",
+  "add_team_member_search_placeholder_text": "Search by name or mobile number",
   "add_team_member_empty_title": "Your cricket crew awaits!",
   "add_team_member_empty_description_text": "Search for players already on Sports Tamil, or create a new player with just a name — no app account needed.",
   "add_team_member_search_no_result_title": "Oops! No User Found",
   "add_team_member_search_description_text": "No one on Sports Tamil by that name. Create them as a new player and add them right away.",
   "add_team_member_create_player_title": "New player",
-  "add_team_member_create_player_description": "Add a player who doesn't use Sports Tamil. Only the name is required.",
+  "add_team_member_create_player_description": "Add a player who isn't on Sports Tamil yet. Only the name is required. The mobile number stays private and lets them link their account when they sign up.",
   "add_team_member_create_player_name": "Player name",
-  "add_team_member_create_player_phone": "Phone number (optional)",
+  "add_team_member_create_player_phone": "Mobile number (optional)",
+  "add_team_member_phone_not_found_title": "No player with this number",
+  "add_team_member_phone_not_found_body": "Create the player with this number. When they sign up with it, they can link their account.",
+  "add_team_member_create_with_number": "Create player with this number",
+  "add_team_member_phone_invalid": "Enter a valid mobile number. Add the country code if it isn't {dial}.",
+  "@add_team_member_phone_invalid": {"placeholders": {"dial": {"type": "String"}}},
+  "add_team_member_player_exists": "{name} already has this number, so they were added instead.",
+  "@add_team_member_player_exists": {"placeholders": {"name": {"type": "String"}}},
   "add_team_member_create_player_button": "Create player",
   "add_team_member_create_named_player": "Create \"{name}\"",
   "@add_team_member_create_named_player": {
@@ -1092,6 +1189,46 @@
   "edit_profile_gender_prefer_not_to_say_title": "Prefer not to say",
   "edit_profile_delete_account_btn_title": "Delete account",
   "edit_profile_delete_account_description_text": "This can not undone. if you delete your account, your data will be gone forever.",
+  "profile_form_create_heading": "Create your player profile",
+  "profile_form_create_subtitle": "Takes less than a minute. Name and mobile number are required.",
+  "profile_form_edit_heading": "Your player profile",
+  "profile_form_edit_subtitle": "Keep your details up to date so teams can find you.",
+  "profile_form_photo_add": "Add photo",
+  "profile_form_photo_change": "Change photo",
+  "profile_form_photo_remove": "Remove",
+  "profile_form_photo_optional": "Optional",
+  "profile_form_section_basic": "Basic details",
+  "profile_form_section_personal": "Personal",
+  "profile_form_section_cricket": "Cricket profile",
+  "profile_form_name_label": "Full name",
+  "profile_form_name_hint": "e.g. Arun Kumar",
+  "profile_form_phone_label": "Mobile number",
+  "profile_form_phone_private": "Only you can see your number",
+  "profile_form_email_label": "Email",
+  "profile_form_email_hint": "you@example.com",
+  "profile_form_location_label": "City",
+  "profile_form_location_hint": "e.g. Chennai",
+  "profile_form_optional": "Optional",
+  "profile_form_required": "Required",
+  "profile_form_dob_label": "Date of birth",
+  "profile_form_dob_add": "Add date",
+  "profile_form_gender_label": "Gender",
+  "profile_form_role_label": "Playing role",
+  "profile_form_batting_label": "Batting",
+  "profile_form_bowling_label": "Bowling",
+  "profile_form_choose": "Choose",
+  "profile_form_error_name": "Enter your name (at least 2 letters)",
+  "profile_form_error_phone_empty": "Enter your mobile number",
+  "profile_form_error_phone_invalid": "Enter a valid {country} mobile number",
+  "@profile_form_error_phone_invalid": {"placeholders": {"country": {"type": "String"}}},
+  "profile_form_error_email": "Enter a valid email or leave it empty",
+  "profile_form_error_photo": "Couldn't use that photo. Try another one.",
+  "profile_form_create_btn": "Create profile",
+  "profile_form_save_btn": "Save changes",
+  "profile_form_sign_out": "Not you? Sign out",
+  "profile_form_country_title": "Country code",
+  "profile_form_progress": "{done} of {total} done",
+  "@profile_form_progress": {"placeholders": {"done": {"type": "int"}, "total": {"type": "int"}}},
   "transfer_teams_title": "Before You Go...",
   "transfer_teams_description": "We're sorry to see you go. Before deleting your account, please:\n• Assign new owners and admins for your teams or delete the teams\n• Transfer scoring for ongoing matches\n• Remove any scheduled matches\n•Transfer or assign responsibilities for ongoing tournaments\nThis will ensure everything is properly managed after you leave.",
   "transfer_teams_go_to_my_cricket": "Go to My Cricket",
@@ -1132,6 +1269,44 @@
   "large_attachment_upload_error_text": "Oops! Your file exceeds the maximum allowed size of 25 MB. Please choose a smaller file and try again.",
   "profile_complete_your_profile_title": "Complete your profile",
   "profile_complete_description_title": "Enhance your profile with more details to make it better!",
+  "profile_section_activity": "Activity",
+  "profile_section_preferences": "Preferences",
+  "profile_section_support": "Help & support",
+  "profile_section_about": "About",
+  "profile_edit_button": "Edit profile",
+  "profile_complete_percent": "Profile {percent}% complete",
+  "@profile_complete_percent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "profile_complete_finish": "Finish",
+  "profile_qr_title": "My player QR",
+  "profile_qr_subtitle": "Teammates scan it to add you",
+  "profile_stats_subtitle": "Runs, wickets and match history",
+  "profile_notifications_off_title": "Notifications are off",
+  "profile_notifications_off_body": "Turn them on to hear about your teams and matches.",
+  "profile_mascot_subtitle": "Tips and cheers from the tiger",
+  "profile_section_player_links": "Player links",
+  "player_claim_title": "Is this you?",
+  "player_claim_body": "An organizer added {name} with your mobile number, in {teams} teams and {matches} matches. Link this player to your account to get those matches and stats.",
+  "@player_claim_body": {"placeholders": {"name": {"type": "String"}, "teams": {"type": "int"}, "matches": {"type": "int"}}},
+  "player_claim_yes": "Yes, that's me",
+  "player_claim_no": "Not me",
+  "player_claim_sent": "Request sent. The organizer will confirm it.",
+  "player_claim_request_row": "{claimant} says they are {player}",
+  "@player_claim_request_row": {"placeholders": {"claimant": {"type": "String"}, "player": {"type": "String"}}},
+  "player_claim_request_hint": "Approving moves this player's teams, matches and stats to their account.",
+  "player_claim_approve": "Approve",
+  "player_claim_decline": "Decline",
+  "player_claim_approved_toast": "Linked. {player}'s matches and stats now belong to {claimant}.",
+  "@player_claim_approved_toast": {"placeholders": {"player": {"type": "String"}, "claimant": {"type": "String"}}},
+  "player_claim_waiting": "Waiting for the organizer to confirm {player}",
+  "@player_claim_waiting": {"placeholders": {"player": {"type": "String"}}},
+  "player_claim_declined": "The organizer didn't confirm {player}",
+  "@player_claim_declined": {"placeholders": {"player": {"type": "String"}}},
   "profile_complete_add_profile_picture": "Add profile picture",
   "profile_complete_add_personal_details": "Add personal details",
   "profile_complete_add_playing_style": "Add playing style",
@@ -1519,6 +1694,473 @@
   "play_again": "Play again",
   "play_done": "Done",
   "play_retry_save": "Retry",
+  "play_comm_six_0": "{name} launches it over long-on. That's huge!",
+  "@play_comm_six_0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_six_1": "Into the crowd! A monster hit from {name}.",
+  "@play_comm_six_1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_six_2": "Clean strike from {name}, and that's out of the ground!",
+  "@play_comm_six_2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_four_0": "{name} finds the gap and it races away to the rope.",
+  "@play_comm_four_0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_four_1": "Beautifully timed by {name}. Four runs.",
+  "@play_comm_four_1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_four_2": "Through the covers by {name}. Nobody's stopping that.",
+  "@play_comm_four_2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_two_0": "{name} pushes it into the gap and comes back for two.",
+  "@play_comm_two_0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_two_1": "Good running from {name}. Two more.",
+  "@play_comm_two_1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_two_2": "Worked away by {name} for a couple.",
+  "@play_comm_two_2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_single_0": "{name} nudges it for a quick single.",
+  "@play_comm_single_0": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_single_1": "Just a single. {name} keeps the board moving.",
+  "@play_comm_single_1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_single_2": "Soft hands from {name}. One run.",
+  "@play_comm_single_2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_dot_0": "Dot ball. Tight from the bowler.",
+  "play_comm_dot_1": "{name} can't get that one away.",
+  "@play_comm_dot_1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_dot_2": "Beaten! That one went past the edge.",
+  "play_comm_out_0": "Bowled! The stumps are everywhere.",
+  "play_comm_out_1": "Clean bowled! {name} has to walk back.",
+  "@play_comm_out_1": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_comm_out_2": "Timber! What a ball to get rid of {name}.",
+  "@play_comm_out_2": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_you": "You",
+  "play_sound_on": "Sound on",
+  "play_sound_off": "Sound off",
+  "play_this_over": "This over",
+  "play_hud_overs": "Overs {overs}/{total}",
+  "@play_hud_overs": {
+    "placeholders": {
+      "overs": {
+        "type": "String"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "play_hud_target": "Target {target}",
+  "@play_hud_target": {
+    "placeholders": {
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "play_mode_match": "Live match",
+  "play_format_title": "Pick the format",
+  "play_format_subtitle": "Both of you face the same balls. Highest score wins.",
+  "play_format_quick": "Quick",
+  "play_format_classic": "Classic",
+  "play_format_long": "Long",
+  "play_format_detail": "{overs, plural, =1{1 over} other{{overs} overs}} · {wickets} wickets",
+  "@play_format_detail": {
+    "placeholders": {
+      "overs": {
+        "type": "int"
+      },
+      "wickets": {
+        "type": "int"
+      }
+    }
+  },
+  "play_send_request": "Send match request",
+  "play_online_now": "Online now",
+  "play_recent_opponents": "Played before",
+  "play_online_label": "Online",
+  "play_select_opponent_more": "Type a name to find more players",
+  "play_select_opponent_none_online": "No one else is on Play right now. Search for a friend and send a request.",
+  "play_match_waiting_title": "Waiting for {name}",
+  "@play_match_waiting_title": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_match_waiting_body": "Your match request is on its way. It expires in 10 minutes.",
+  "play_match_cancel": "Cancel request",
+  "play_match_declined": "{name} can't play right now.",
+  "@play_match_declined": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_match_cancelled": "This match request was cancelled.",
+  "play_match_expired": "This match request expired.",
+  "play_match_back": "Back to Play",
+  "play_match_incoming_title": "{name} challenges you!",
+  "@play_match_incoming_title": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_match_incoming_body": "Live match · {format}. Ready to play?",
+  "@play_match_incoming_body": {
+    "placeholders": {
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "play_match_accept": "Accept",
+  "play_match_decline": "Decline",
+  "play_match_section": "Live matches",
+  "play_match_request_from": "{name} wants to play · {format}",
+  "@play_match_request_from": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "play_match_request_to": "Waiting for {name} · {format}",
+  "@play_match_request_to": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "play_match_in_progress": "Live vs {name} · {format}",
+  "@play_match_in_progress": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "format": {
+        "type": "String"
+      }
+    }
+  },
+  "play_match_join": "Join",
+  "play_match_unavailable": "This match is no longer available.",
+  "play_challenge_live_hint": "Live 1v1 match",
+  "play_vs": "VS",
+  "play_toss_title": "Toss time",
+  "play_toss_call_prompt": "Call it!",
+  "play_toss_heads": "Heads",
+  "play_toss_tails": "Tails",
+  "play_toss_waiting_call": "{name} is calling the toss…",
+  "@play_toss_waiting_call": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_toss_called": "{name} called {call}",
+  "@play_toss_called": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "call": {
+        "type": "String"
+      }
+    }
+  },
+  "play_toss_won": "You won the toss!",
+  "play_toss_lost": "{name} won the toss",
+  "@play_toss_lost": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_toss_choose": "Bat or bowl first?",
+  "play_toss_bat": "Bat first",
+  "play_toss_bowl": "Bowl first",
+  "play_toss_waiting_choice": "{name} is choosing…",
+  "@play_toss_waiting_choice": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_bats_first": "{name} bats first",
+  "@play_bats_first": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_live_your_innings": "Your innings",
+  "play_live_batting": "{name} is batting",
+  "@play_live_batting": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_live_watch_first": "Watch live. You chase this score next.",
+  "play_live_watch_second": "Watch live. {name} needs {target} to win.",
+  "@play_live_watch_second": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "play_live_waiting_ball": "Waiting for the next ball…",
+  "play_innings_break": "Innings break",
+  "play_innings_break_body": "{name} scored {score}. {chaser} needs {target} to win.",
+  "@play_innings_break_body": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "score": {
+        "type": "String"
+      },
+      "chaser": {
+        "type": "String"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "play_countdown_go": "GO!",
+  "play_get_ready": "Get ready",
+  "play_opponent_offline": "{name} disconnected. Waiting for them to come back…",
+  "@play_opponent_offline": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_claim_win": "Claim win",
+  "play_leave_title": "Leave the match?",
+  "play_leave_body": "You will forfeit and {name} wins.",
+  "@play_leave_body": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_leave_confirm": "Forfeit",
+  "play_leave_stay": "Stay",
+  "play_result_by_runs": "{name} won by {runs, plural, =1{1 run} other{{runs} runs}}",
+  "@play_result_by_runs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "runs": {
+        "type": "int"
+      }
+    }
+  },
+  "play_result_by_wickets": "{name} won by {wickets, plural, =1{1 wicket} other{{wickets} wickets}}",
+  "@play_result_by_wickets": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "wickets": {
+        "type": "int"
+      }
+    }
+  },
+  "play_result_tied": "It's a tie!",
+  "play_result_forfeit": "{name} won. The other player left.",
+  "@play_result_forfeit": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "play_result_you_win": "YOU WIN!",
+  "play_result_you_lose": "YOU LOSE",
+  "play_result_tie_banner": "TIE!",
+  "play_scorecard": "Scorecard",
+  "play_sc_runs": "R",
+  "play_sc_balls": "B",
+  "play_sc_fours": "4s",
+  "play_sc_sixes": "6s",
+  "play_sc_strike_rate": "SR",
+  "play_rematch": "Rematch",
+  "play_xp_earned": "+{xp} XP",
+  "@play_xp_earned": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      }
+    }
+  },
+  "play_level": "Level {level}",
+  "@play_level": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "play_xp_progress": "{xp}/{next} XP",
+  "@play_xp_progress": {
+    "placeholders": {
+      "xp": {
+        "type": "int"
+      },
+      "next": {
+        "type": "int"
+      }
+    }
+  },
+  "play_stat_streak": "{days, plural, =0{No streak} =1{1-day streak} other{{days}-day streak}}",
+  "@play_stat_streak": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "play_stat_wins": "{wins, plural, =1{1 win} other{{wins} wins}}",
+  "@play_stat_wins": {
+    "placeholders": {
+      "wins": {
+        "type": "int"
+      }
+    }
+  },
+  "play_stat_best": "Best {runs}",
+  "@play_stat_best": {
+    "placeholders": {
+      "runs": {
+        "type": "int"
+      }
+    }
+  },
+  "play_badges_title": "Badges",
+  "play_badge_first_six": "First six",
+  "play_badge_six_hitter": "3 sixes in a game",
+  "play_badge_thirty": "30 in a game",
+  "play_badge_match_winner": "Won a live match",
+  "play_badge_daily_streak": "3-day streak",
+  "play_badge_century": "100 career runs",
+  "play_badge_veteran": "25 games played",
+  "play_badge_unlocked": "Badge unlocked: {badge}",
+  "@play_badge_unlocked": {
+    "placeholders": {
+      "badge": {
+        "type": "String"
+      }
+    }
+  },
   "profile_my_stats": "My stats",
   "tab_auction_title": "Auction",
   "auction_screen_title": "Player Auctions",
@@ -1531,6 +2173,13 @@
   "auction_section_upcoming": "Upcoming",
   "auction_section_completed": "Completed",
   "auction_empty": "No auctions yet.",
+  "auction_empty_body": "Create one to register players and run live bidding.",
+  "auction_hero_stat_live": "{count} live",
+  "@auction_hero_stat_live": {"placeholders": {"count": {"type": "int"}}},
+  "auction_hero_stat_upcoming": "{count} upcoming",
+  "@auction_hero_stat_upcoming": {"placeholders": {"count": {"type": "int"}}},
+  "auction_hero_stat_completed": "{count} completed",
+  "@auction_hero_stat_completed": {"placeholders": {"count": {"type": "int"}}},
   "auction_not_found": "This auction doesn't exist or isn't public yet.",
   "auction_status_draft": "Draft",
   "auction_status_upcoming": "Upcoming",
@@ -2016,7 +2665,7 @@
     }
   },
   "mascot_welcome_guest": "Hi there! Welcome to Sports Tamil. Let's play!",
-  "mascot_sign_in_options": "Pick a way to sign in, or jump in as a guest to play.",
+  "mascot_sign_in_options": "Sign in with your email, or jump in as a guest to play.",
   "mascot_sign_in_required": "You'll need to sign in for this. It only takes a moment!",
   "mascot_sign_in_to_create": "Sign in first, then you can create teams, matches and tournaments.",
   "mascot_email_new_account": "New here? Let's make your account!",
@@ -2048,5 +2697,47 @@
       }
     }
   },
-  "mascot_profile_saved": "Profile saved!"
+  "mascot_profile_saved": "Profile saved!",
+  "mascot_profile_required": "Finish your profile first: just your name and mobile number.",
+  "mascot_profile_need_name": "First tell me your name!",
+  "mascot_profile_need_phone": "Add your mobile number. Only you can see it.",
+  "mascot_profile_bad_phone": "That number doesn't look right. Check it once more.",
+  "mascot_profile_need_both": "I need your name and mobile number to create your profile.",
+  "mascot_profile_bad_email": "That email doesn't look right. Fix it or leave it empty.",
+  "mascot_profile_photo_added": "Great photo! Looking like a hero.",
+  "mascot_profile_photo_failed": "Couldn't use that photo. Pick another one.",
+
+  "mascot_fun_six": "SIX! That ball has left the stadium and gone home!",
+  "mascot_fun_four": "FOUR! Straight to the boundary, what a shot!",
+  "mascot_fun_wicket": "WICKET! The pavilion is waiting, off you go!",
+  "mascot_fun_dot_ball": "Dot ball! A little smile for the bowler.",
+  "mascot_fun_perfect_timing": "Perfect timing! Even with eyes closed you couldn't hit it sweeter!",
+  "mascot_fun_early_shot": "A bit too early! Let the ball come, then hit.",
+  "mascot_fun_late_shot": "A bit late! The ball is already in the keeper's gloves.",
+  "mascot_fun_match_won": "Victory! You're the hero today!",
+  "mascot_fun_match_lost": "Lost this one, but the next match is ours!",
+  "mascot_fun_last_over": "Last over! Everyone to the edge of your seats!",
+  "mascot_fun_comeback": "No worries! A comeback is the real mass. One more time!",
+  "mascot_fun_team_created": "New team ready! See you on the field.",
+  "mascot_fun_tournament_created": "Tournament ready! Let the fight for the trophy begin.",
+  "mascot_fun_challenge_won": "Challenge won! Your opponent is speechless now.",
+  "mascot_fun_challenge_lost": "This challenge slipped away. When's the revenge match?",
+  "mascot_fun_empty_matches": "No matches yet. Start the first one yourself!",
+  "mascot_fun_no_players": "No players here yet. Add some people to the team!",
+  "mascot_fun_internet": "No internet! Please check your connection.",
+  "mascot_fun_auction_sold": "SOLD! A new star for the team!",
+  "mascot_fun_auction_unsold": "Unsold… no worries, the chance will come in the next round!",
+
+  "mascot_movie_baasha_style": "If I hit one six, it's like hitting a hundred!",
+  "mascot_movie_padayappa_style": "My shot, my own style!",
+  "mascot_movie_mass_entry": "The Tiger has entered the ground! The game goes to another level now!",
+  "mascot_movie_comedy_scene": "The fielder is running faster than the ball, it's a comedy scene!",
+  "mascot_movie_climax_scene": "This is the climax! Don't leave your seat till the last ball!",
+  "mascot_movie_hero_intro": "Hero entry! Raise the bat in slow motion!",
+  "mascot_movie_interval": "Interval! Have a tea and come back for the second half.",
+  "mascot_movie_dialogue_hint": "What's your dialogue? Let your bat do the talking!",
+  "mascot_movie_cool_attitude": "Let's play it cool... the scoreboard will do the talking!",
+  "mascot_movie_youth_energy": "Whistles ready? Let the next shot shake the whole ground!",
+  "mascot_movie_mass_punch": "Our game needs no noise... the scoreboard is enough!",
+  "mascot_fun_match_tied": "It's a tie! Both teams fought right to the last ball!"
 }

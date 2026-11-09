@@ -13,6 +13,8 @@ class CreatePlayerSheet extends StatefulWidget {
   static Future<bool?> show(
     BuildContext context, {
     String initialName = '',
+    String initialPhone = '',
+    String? Function(String phone)? phoneError,
     required Future<void> Function(String name, String? phone) onCreate,
   }) {
     HapticFeedback.mediumImpact();
@@ -26,17 +28,28 @@ class CreatePlayerSheet extends StatefulWidget {
       builder: (context) => Padding(
         padding:
             EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: CreatePlayerSheet(initialName: initialName, onCreate: onCreate),
+        child: CreatePlayerSheet(
+          initialName: initialName,
+          initialPhone: initialPhone,
+          phoneError: phoneError,
+          onCreate: onCreate,
+        ),
       ),
     );
   }
 
   final String initialName;
+  final String initialPhone;
+
+  /// Message for a number that can't be used, or null when it's fine.
+  final String? Function(String phone)? phoneError;
   final Future<void> Function(String name, String? phone) onCreate;
 
   const CreatePlayerSheet({
     super.key,
     required this.initialName,
+    this.initialPhone = '',
+    this.phoneError,
     required this.onCreate,
   });
 
@@ -46,14 +59,19 @@ class CreatePlayerSheet extends StatefulWidget {
 
 class _CreatePlayerSheetState extends State<CreatePlayerSheet> {
   late final TextEditingController _nameController;
-  final TextEditingController _phoneController = TextEditingController();
+  late final TextEditingController _phoneController;
   bool _saving = false;
+  String? _phoneErrorText;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.initialName);
+    _phoneController = TextEditingController(text: widget.initialPhone);
     _nameController.addListener(_onChanged);
+    _phoneController.addListener(() {
+      if (_phoneErrorText != null) setState(() => _phoneErrorText = null);
+    });
   }
 
   @override
@@ -66,9 +84,14 @@ class _CreatePlayerSheetState extends State<CreatePlayerSheet> {
   void _onChanged() => setState(() {});
 
   Future<void> _create() async {
+    final phone = _phoneController.text.trim();
+    final error = phone.isEmpty ? null : widget.phoneError?.call(phone);
+    if (error != null) {
+      setState(() => _phoneErrorText = error);
+      return;
+    }
     setState(() => _saving = true);
     try {
-      final phone = _phoneController.text.trim();
       await widget.onCreate(
           _nameController.text.trim(), phone.isEmpty ? null : phone);
       if (mounted) context.pop(true);
@@ -111,9 +134,17 @@ class _CreatePlayerSheetState extends State<CreatePlayerSheet> {
             context.l10n.add_team_member_create_player_phone,
             keyboardType: TextInputType.phone,
             inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9+]')),
+              FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
             ],
           ),
+          if (_phoneErrorText != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _phoneErrorText!,
+              style: AppTextStyle.caption
+                  .copyWith(color: context.colorScheme.alert),
+            ),
+          ],
         ],
       ),
       action: [

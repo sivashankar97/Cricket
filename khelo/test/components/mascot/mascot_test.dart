@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -64,9 +65,10 @@ void main() {
     });
   });
 
-  testWidgets('overlay shows the message without blocking taps',
-      (tester) async {
-    var taps = 0;
+  Future<ProviderContainer> pumpOverlay(
+    WidgetTester tester, {
+    VoidCallback? onTap,
+  }) async {
     final container = ProviderContainer(overrides: [
       mascotProvider.overrideWith((ref) => MascotController(() => true)),
     ]);
@@ -80,12 +82,67 @@ void main() {
           builder: (context, child) => MascotOverlay(child: child!),
           home: Scaffold(
             body: SizedBox.expand(
-              child: GestureDetector(onTap: () => taps++),
+              child: GestureDetector(onTap: onTap),
             ),
           ),
         ),
       ),
     ));
+    return container;
+  }
+
+  testWidgets('tiger peeks in from the right edge', (tester) async {
+    final container = await pumpOverlay(tester);
+    container
+        .read(mascotProvider.notifier)
+        .show(MascotPose.welcome, 'Hi!', duration: const Duration(seconds: 3));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 800));
+
+    final screenWidth =
+        tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    final tiger = tester.getRect(find.byType(Image));
+    final bubble = tester.getRect(find.text('Hi!'));
+    expect(tiger.center.dx, greaterThan(screenWidth / 2));
+    expect(bubble.right, lessThan(tiger.right));
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+      'a tap right after it appears keeps the tiger; a later tap or '
+      'scroll sends it away', (tester) async {
+    var taps = 0;
+    final container = await pumpOverlay(tester, onTap: () => taps++);
+    final mascot = container.read(mascotProvider.notifier);
+
+    mascot.show(MascotPose.welcome, 'Hi!',
+        duration: const Duration(seconds: 5));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tapAt(const Offset(20, 20));
+    expect(container.read(mascotProvider), isNotNull);
+
+    await tester.pump(const Duration(milliseconds: 800));
+    await tester.tapAt(const Offset(20, 20));
+    expect(taps, 2);
+    expect(container.read(mascotProvider), isNull);
+    await tester.pumpAndSettle();
+
+    mascot.show(MascotPose.welcome, 'Again',
+        duration: const Duration(seconds: 5));
+    await tester.pump(const Duration(milliseconds: 900));
+    final pointer = TestPointer(1, PointerDeviceKind.mouse);
+    pointer.hover(const Offset(20, 20));
+    await tester.sendEventToBinding(pointer.scroll(const Offset(0, 120)));
+    expect(container.read(mascotProvider), isNull);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('overlay shows the message without blocking taps',
+      (tester) async {
+    var taps = 0;
+    final container = await pumpOverlay(tester, onTap: () => taps++);
 
     container.read(mascotProvider.notifier).show(MascotPose.welcome, 'Hi Anu!',
         duration: const Duration(seconds: 1));

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/empty_screen.dart';
 import 'package:khelo/components/mascot/mascot_controller.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 
@@ -27,8 +28,9 @@ class _SignInRequiredViewState extends ConsumerState<SignInRequiredView> {
     if (active && !_wasActive) {
       ref.read(mascotProvider.notifier).show(
             MascotPose.help,
-            context.l10n.mascot_sign_in_required,
+            mascotText.mascot_sign_in_required,
             delay: const Duration(milliseconds: 500),
+            allowFun: false,
           );
     }
     _wasActive = active;
@@ -42,7 +44,10 @@ class _SignInRequiredViewState extends ConsumerState<SignInRequiredView> {
         title: context.l10n.sign_in_required_title,
         description: context.l10n.sign_in_required_description,
         buttonTitle: context.l10n.sign_in_options_title,
-        onTap: () => AppRoute.phoneLogin.push(context),
+        onTap: () {
+          ref.read(mascotProvider.notifier).hide();
+          AppRoute.signIn.push(context);
+        },
       ),
     );
   }

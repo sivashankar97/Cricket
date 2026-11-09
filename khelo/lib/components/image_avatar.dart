@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:khelo/components/app_image_provider.dart';
+import 'package:khelo/domain/image/profile_photo.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 
@@ -36,21 +38,32 @@ class ImageAvatar extends StatelessWidget {
         ),
         child: imageUrl == null
             ? _initialView(context)
-            : CachedNetworkImage(
-                imageUrl: imageUrl!,
-                fit: BoxFit.cover,
-                errorWidget: (context, url, error) => _initialView(context),
-                placeholder: (context, url) => _initialView(context),
-                imageBuilder: (context, imageProvider) => Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
+            : ProfilePhoto.isInline(imageUrl)
+                ? Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: appImageProvider(imageUrl!),
+                        fit: BoxFit.cover,
+                        onError: (_, __) {},
+                      ),
+                    ),
+                  )
+                : CachedNetworkImage(
+                    imageUrl: imageUrl!,
+                    fit: BoxFit.cover,
+                    errorWidget: (context, url, error) => _initialView(context),
+                    placeholder: (context, url) => _initialView(context),
+                    imageBuilder: (context, imageProvider) => Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
       ),
     );
   }

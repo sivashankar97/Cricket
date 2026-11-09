@@ -8,6 +8,8 @@ import 'package:go_router/go_router.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/confirmation_dialog.dart';
 import 'package:khelo/components/error_snackbar.dart';
+import 'package:khelo/components/mascot/mascot_controller.dart';
+import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/components/image_picker_sheet.dart';
 import 'package:khelo/components/profile_image_avatar.dart';
 import 'package:khelo/components/user_detail_cell.dart';
@@ -292,6 +294,7 @@ class _AddTeamScreenState extends ConsumerState<AddTeamScreen> {
       addTeamStateProvider.select((value) => value.team),
       (previous, current) async {
         if (current != null) {
+          ref.read(mascotProvider.notifier).react(MascotReaction.teamCreated);
           AppRoute.addTeamMember(team: current).pushReplacement(context);
         }
       },

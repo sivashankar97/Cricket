@@ -154,24 +154,6 @@ class $AssetsImagesGen {
   /// File path: assets/images/other_ball.svg
   String get otherBall => 'assets/images/other_ball.svg';
 
-  /// File path: assets/images/splash_comma.svg
-  String get splashComma => 'assets/images/splash_comma.svg';
-
-  /// File path: assets/images/splash_dot.svg
-  String get splashDot => 'assets/images/splash_dot.svg';
-
-  /// File path: assets/images/splash_mark.svg
-  String get splashMark => 'assets/images/splash_mark.svg';
-
-  /// File path: assets/images/splash_sports.svg
-  String get splashSports => 'assets/images/splash_sports.svg';
-
-  /// File path: assets/images/splash_swoosh.svg
-  String get splashSwoosh => 'assets/images/splash_swoosh.svg';
-
-  /// File path: assets/images/splash_tamil.svg
-  String get splashTamil => 'assets/images/splash_tamil.svg';
-
   /// File path: assets/images/tennis_ball.svg
   String get tennisBall => 'assets/images/tennis_ball.svg';
 
@@ -225,12 +207,6 @@ class $AssetsImagesGen {
         introGraphicLight,
         leatherBall,
         otherBall,
-        splashComma,
-        splashDot,
-        splashMark,
-        splashSports,
-        splashSwoosh,
-        splashTamil,
         tennisBall
       ];
 }

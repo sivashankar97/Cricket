@@ -505,6 +505,7 @@ class _AuctionFormScreenState extends ConsumerState<AuctionFormScreen> {
             name: t.name.text.trim(),
             shortName: t.short.text.trim().isEmpty ? null : t.short.text.trim(),
             budget: budget,
+            logoVersion: _initial?.teamById(t.id)?.logoVersion ?? 0,
           ),
       ],
     );
