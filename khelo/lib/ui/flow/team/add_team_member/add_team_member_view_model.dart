@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:data/api/team/team_model.dart';
 import 'package:data/api/user/user_models.dart';
 import 'package:data/service/team/team_service.dart';
+import 'package:data/service/tournament_team/tournament_team_service.dart';
 import 'package:data/service/user/player_link_service.dart';
 import 'package:data/service/user/user_service.dart';
 import 'package:data/storage/app_preferences.dart';
@@ -18,6 +19,7 @@ final addTeamMemberStateProvider = StateNotifierProvider.autoDispose<
   return AddTeamMemberViewNotifier(
     ref.read(userServiceProvider),
     ref.read(teamServiceProvider),
+    ref.read(tournamentTeamServiceProvider),
     ref.read(playerLinkServiceProvider),
     ref.read(currentUserPod)?.id,
   );
@@ -31,6 +33,7 @@ class InvalidPhoneError implements Exception {
 class AddTeamMemberViewNotifier extends StateNotifier<AddTeamMemberState> {
   final UserService _userService;
   final TeamService _teamService;
+  final TournamentTeamService _tournamentTeamService;
   final PlayerLinkService _playerLink;
   final String? _currentUserId;
   Timer? _debounce;
@@ -42,6 +45,7 @@ class AddTeamMemberViewNotifier extends StateNotifier<AddTeamMemberState> {
   AddTeamMemberViewNotifier(
     this._userService,
     this._teamService,
+    this._tournamentTeamService,
     this._playerLink,
     this._currentUserId,
   ) : super(AddTeamMemberState(searchController: TextEditingController()));
@@ -99,14 +103,7 @@ class AddTeamMemberViewNotifier extends StateNotifier<AddTeamMemberState> {
       RegExp(r'^\+?[\d\s\-()]{7,}$').hasMatch(input.trim());
 
   /// Full number with country code, or null when it isn't a valid mobile.
-  String? toE164(String input) {
-    final trimmed = input.trim();
-    final country = trimmed.startsWith('+')
-        ? PhoneNumber.parse(trimmed)?.country ?? defaultCountry
-        : defaultCountry;
-    if (PhoneNumber.validate(country, trimmed) != null) return null;
-    return PhoneNumber(country, PhoneNumber.clean(country, trimmed)).e164;
-  }
+  String? toE164(String input) => PhoneNumber.toE164(input, defaultCountry);
 
   /// Creates the player, or picks the existing one with the same number
   /// (`existing: true`).
@@ -139,7 +136,16 @@ class AddTeamMemberViewNotifier extends StateNotifier<AddTeamMemberState> {
   Future<void> addPlayersToTeam() async {
     state = state.copyWith(isAddInProgress: true, actionError: null);
     try {
-      await _teamService.addPlayersToTeam(_team?.id ?? '', state.selectedUsers);
+      final teamId = _team?.id ?? '';
+      final current = _team?.players.map((p) => p.id).toSet() ?? {};
+      await _tournamentTeamService.ensureOneTeamPerTournament(
+        teamId: teamId,
+        players: {
+          for (final p in state.selectedUsers)
+            if (!current.contains(p.id)) p.id: p.user.name ?? '',
+        },
+      );
+      await _teamService.addPlayersToTeam(teamId, state.selectedUsers);
       state = state.copyWith(isAddInProgress: false, isAdded: true);
     } catch (e) {
       state = state.copyWith(isAddInProgress: false, actionError: e);

@@ -2,15 +2,18 @@ import 'dart:async';
 
 import 'package:data/api/tournament_team/tournament_team_model.dart';
 import 'package:data/service/tournament_team/tournament_team_service.dart';
+import 'package:data/service/user/player_link_service.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:khelo/components/player_phone_field.dart';
 
 final tournamentTeamPlayersStateProvider = StateNotifierProvider.autoDispose
     .family<TournamentTeamPlayersViewNotifier, TournamentTeamPlayersState,
         String>((ref, teamId) {
   return TournamentTeamPlayersViewNotifier(
     ref.read(tournamentTeamServiceProvider),
+    ref.read(playerLinkServiceProvider),
     teamId,
     () => ref.read(currentUserPod)?.id,
   );
@@ -19,12 +22,14 @@ final tournamentTeamPlayersStateProvider = StateNotifierProvider.autoDispose
 class TournamentTeamPlayersViewNotifier
     extends StateNotifier<TournamentTeamPlayersState> {
   final TournamentTeamService _service;
+  final PlayerLinkService _playerLink;
   final String _teamId;
   final String? Function() _currentUserId;
   StreamSubscription? _subscription;
 
   TournamentTeamPlayersViewNotifier(
     this._service,
+    this._playerLink,
     this._teamId,
     this._currentUserId,
   ) : super(const TournamentTeamPlayersState()) {
@@ -59,15 +64,38 @@ class TournamentTeamPlayersViewNotifier
   }
 
   /// Throws on validation / network errors so the form can show them.
-  Future<void> savePlayer(TournamentTeamPlayer player) async {
+  /// A number that already belongs to a player adds that player instead.
+  Future<void> savePlayer(
+    TournamentTeamPlayer player, [
+    PlayerPhoneMatch phone = PlayerPhoneMatch.none,
+  ]) async {
+    final found = phone.player;
+    final organizerId = _currentUserId() ?? '';
     if (player.id.isEmpty) {
+      if (found != null) {
+        await _service.addExistingPlayer(
+          teamId: _teamId,
+          userId: found.id,
+          name: found.name ?? player.name,
+          existing: state.players,
+        );
+        return;
+      }
       await _service.addPlayer(
         player: player,
         existing: state.players,
-        createdBy: _currentUserId() ?? '',
+        createdBy: organizerId,
+        e164: phone.e164,
       );
     } else {
       await _service.updatePlayer(player: player, existing: state.players);
+      if (phone.isNew) {
+        await _playerLink.linkPlayerPhone(
+          playerId: player.id,
+          e164: phone.e164!,
+          organizerId: organizerId,
+        );
+      }
       await _refreshPlayers();
     }
   }
@@ -75,13 +103,13 @@ class TournamentTeamPlayersViewNotifier
   Future<void> removePlayer(TournamentTeamPlayer player) =>
       _runAction(() => _service.removePlayer(state.team!, player.id));
 
-  Future<void> toggleCaptain(TournamentTeamPlayer player) => _runAction(() =>
-      _service.setCaptain(
+  Future<void> toggleCaptain(TournamentTeamPlayer player) =>
+      _runAction(() => _service.setCaptain(
           _teamId, state.team?.captainId == player.id ? null : player.id));
 
   Future<void> toggleWicketKeeper(TournamentTeamPlayer player) =>
-      _runAction(() => _service.setWicketKeeper(_teamId,
-          state.team?.wicketKeeperId == player.id ? null : player.id));
+      _runAction(() => _service.setWicketKeeper(
+          _teamId, state.team?.wicketKeeperId == player.id ? null : player.id));
 
   Future<void> _runAction(Future<void> Function() action) async {
     try {

@@ -1295,6 +1295,41 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get player_phone_checking => 'Checking number…';
+
+  @override
+  String player_phone_found(String name) {
+    return 'Linked to $name';
+  }
+
+  @override
+  String get player_phone_found_hint =>
+      'Same player everywhere: their profile and stats carry over';
+
+  @override
+  String get player_phone_new =>
+      'New player. When they sign up with this number, their account is linked';
+
+  @override
+  String get player_phone_incomplete => 'Enter the full mobile number';
+
+  @override
+  String get player_phone_linked => 'Mobile number linked';
+
+  @override
+  String get player_phone_self => 'This number is linked to this player';
+
+  @override
+  String player_phone_taken(String name) {
+    return 'This number belongs to $name';
+  }
+
+  @override
+  String player_phone_add_existing(String name) {
+    return 'Add $name';
+  }
+
+  @override
   String get add_team_member_create_player_button => 'Create player';
 
   @override
@@ -3175,6 +3210,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get error_duplicate_player_name =>
       'This player is already in the team.';
+
+  @override
+  String error_player_in_other_team(
+      String player, String team, String tournament) {
+    return '$player is already in $team in $tournament. A player can play for one team per tournament.';
+  }
+
+  @override
+  String error_player_in_two_teams(String player, String team, String other) {
+    return '$player is in both $team and $other. A player can play for one team per tournament.';
+  }
+
+  @override
+  String get error_this_tournament => 'this tournament';
 
   @override
   String get error_duplicate_jersey_number =>

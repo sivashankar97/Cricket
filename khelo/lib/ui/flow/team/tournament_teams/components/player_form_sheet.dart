@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:khelo/components/action_bottom_sheet.dart';
+import 'package:khelo/components/player_phone_field.dart';
 import 'package:khelo/domain/extensions/app_error_extension.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/enum_extensions.dart';
@@ -25,7 +26,10 @@ class PlayerFormSheet extends StatefulWidget {
     BuildContext context, {
     required String teamId,
     TournamentTeamPlayer? player,
-    required Future<void> Function(TournamentTeamPlayer player) onSave,
+    required Future<void> Function(
+      TournamentTeamPlayer player,
+      PlayerPhoneMatch phone,
+    ) onSave,
   }) {
     HapticFeedback.mediumImpact();
     return showModalBottomSheet<bool>(
@@ -45,7 +49,10 @@ class PlayerFormSheet extends StatefulWidget {
 
   final String teamId;
   final TournamentTeamPlayer? player;
-  final Future<void> Function(TournamentTeamPlayer player) onSave;
+  final Future<void> Function(
+    TournamentTeamPlayer player,
+    PlayerPhoneMatch phone,
+  ) onSave;
 
   const PlayerFormSheet({
     super.key,
@@ -63,6 +70,8 @@ class _PlayerFormSheetState extends State<PlayerFormSheet> {
       TextEditingController(text: widget.player?.name);
   late final TextEditingController _jerseyController = TextEditingController(
       text: widget.player?.jerseyNumber?.toString() ?? '');
+  final TextEditingController _phoneController = TextEditingController();
+  PlayerPhoneMatch _match = PlayerPhoneMatch.none;
   late TournamentPlayerRole? _role = widget.player?.role;
   late BattingStyle? _battingStyle = widget.player?.battingStyle;
   late BowlingStyle? _bowlingStyle = widget.player?.bowlingStyle;
@@ -79,24 +88,58 @@ class _PlayerFormSheetState extends State<PlayerFormSheet> {
   void dispose() {
     _nameController.dispose();
     _jerseyController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
+  void _onPhoneMatch(PlayerPhoneMatch match) {
+    final name = match.player?.name;
+    final editing = widget.player != null;
+    if (!editing && name != null && name.isNotEmpty) {
+      _nameController.text = name;
+    }
+    setState(() {
+      _match = match;
+      _error = null;
+    });
+  }
+
+  /// Why the typed number can't be saved, if it can't.
+  String? _phoneProblem() {
+    final found = _match.player;
+    if (widget.player != null &&
+        found != null &&
+        found.id != widget.player!.id) {
+      return context.l10n.player_phone_taken(found.name ?? '');
+    }
+    if (_phoneController.text.trim().isNotEmpty && _match.e164 == null) {
+      return context.l10n.player_phone_incomplete;
+    }
+    return null;
+  }
+
   Future<void> _save() async {
+    final problem = _phoneProblem();
+    if (problem != null) {
+      setState(() => _error = problem);
+      return;
+    }
     setState(() {
       _saving = true;
       _error = null;
     });
     try {
-      await widget.onSave(TournamentTeamPlayer(
-        id: widget.player?.id ?? '',
-        teamId: widget.teamId,
-        name: _nameController.text.trim(),
-        role: _role,
-        battingStyle: _battingStyle,
-        bowlingStyle: _bowlingStyle,
-        jerseyNumber: int.tryParse(_jerseyController.text.trim()),
-      ));
+      await widget.onSave(
+          TournamentTeamPlayer(
+            id: widget.player?.id ?? '',
+            teamId: widget.teamId,
+            name: _nameController.text.trim(),
+            role: _role,
+            battingStyle: _battingStyle,
+            bowlingStyle: _bowlingStyle,
+            jerseyNumber: int.tryParse(_jerseyController.text.trim()),
+          ),
+          _match);
       if (mounted) context.pop(true);
     } catch (error) {
       if (!mounted) return;
@@ -163,6 +206,12 @@ class _PlayerFormSheetState extends State<PlayerFormSheet> {
             autoFocus: widget.player == null,
             textCapitalization: TextCapitalization.words,
           ),
+          const SizedBox(height: 12),
+          PlayerPhoneField(
+            controller: _phoneController,
+            selfId: widget.player?.id,
+            onChanged: _onPhoneMatch,
+          ),
           _label(context.l10n.tournament_team_player_role_label),
           Wrap(
             spacing: 8,
@@ -211,9 +260,12 @@ class _PlayerFormSheetState extends State<PlayerFormSheet> {
       action: [
         PrimaryButton(
           widget.player == null
-              ? context.l10n.common_add_title
+              ? (_match.player != null
+                  ? context.l10n
+                      .player_phone_add_existing(_match.player!.name ?? '')
+                  : context.l10n.common_add_title)
               : context.l10n.common_save_title,
-          enabled: _nameController.text.trim().isNotEmpty,
+          enabled: _nameController.text.trim().isNotEmpty && !_match.checking,
           progress: _saving,
           onPressed: _save,
         ),

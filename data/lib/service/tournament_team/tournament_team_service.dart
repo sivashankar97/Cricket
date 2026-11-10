@@ -8,6 +8,8 @@ import '../../errors/app_error_l10n_codes.dart';
 import '../../extensions/list_extensions.dart';
 import '../../extensions/string_extensions.dart';
 import '../../utils/constant/firestore_constant.dart';
+import '../user/player_link_service.dart';
+import '../../api/tournament_team/squad_clash.dart';
 
 final tournamentTeamServiceProvider = Provider(
   (ref) => TournamentTeamService(FirebaseFirestore.instance),
@@ -59,11 +61,14 @@ class TournamentTeamService {
     return _pools
         .where(FireStoreConst.createdBy, isEqualTo: userId)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => TeamPool.fromJson(doc.data()))
-            .toList()
-          ..sort(
-              (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),),)
+        .map(
+          (snapshot) =>
+              snapshot.docs.map((doc) => TeamPool.fromJson(doc.data())).toList()
+                ..sort(
+                  (a, b) =>
+                      a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+                ),
+        )
         .handleError((error, stack) => throw AppError.fromError(error, stack));
   }
 
@@ -87,8 +92,10 @@ class TournamentTeamService {
       final trimmedName = name.trim();
       final duplicates = await _pools
           .where(FireStoreConst.createdBy, isEqualTo: userId)
-          .where(FireStoreConst.nameLowercase,
-              isEqualTo: trimmedName.caseAndSpaceInsensitive,)
+          .where(
+            FireStoreConst.nameLowercase,
+            isEqualTo: trimmedName.caseAndSpaceInsensitive,
+          )
           .get();
       if (duplicates.docs.any((doc) => doc.id != poolId)) {
         throw AppError(
@@ -217,10 +224,14 @@ class TournamentTeamService {
       for (final ids in team.playerIds.chunked(10)) {
         final snapshot =
             await _users.where(FieldPath.documentId, whereIn: ids).get();
-        players.addAll(snapshot.docs.map((doc) =>
-            TournamentTeamPlayer.fromUserJson(
-                {...doc.data(), FireStoreConst.id: doc.id},
-                teamId: team.id,),),);
+        players.addAll(
+          snapshot.docs.map(
+            (doc) => TournamentTeamPlayer.fromUserJson(
+              {...doc.data(), FireStoreConst.id: doc.id},
+              teamId: team.id,
+            ),
+          ),
+        );
       }
       final order = {
         for (var i = 0; i < team.playerIds.length; i++) team.playerIds[i]: i,
@@ -241,12 +252,16 @@ class TournamentTeamService {
     String? excludeTeamId,
   }) async {
     final snapshot = await _poolQuery(userId)
-        .where(FireStoreConst.nameLowercase,
-            isEqualTo: name.caseAndSpaceInsensitive,)
+        .where(
+          FireStoreConst.nameLowercase,
+          isEqualTo: name.caseAndSpaceInsensitive,
+        )
         .get();
-    if (snapshot.docs.any((doc) =>
-        doc.id != excludeTeamId &&
-        doc.data()[FireStoreConst.poolId] == poolId,)) {
+    if (snapshot.docs.any(
+      (doc) =>
+          doc.id != excludeTeamId &&
+          doc.data()[FireStoreConst.poolId] == poolId,
+    )) {
       throw AppError(
         l10nCode: AppErrorL10nCodes.duplicateTeamName,
         message: 'A team named "$name" already exists.',
@@ -322,6 +337,44 @@ class TournamentTeamService {
     }
   }
 
+  /// Throws [PlayerTeamClashError] when one of [players] (id → name) already
+  /// plays for another team in a tournament that [teamId] is part of.
+  Future<void> ensureOneTeamPerTournament({
+    required String teamId,
+    required Map<String, String> players,
+  }) async {
+    if (players.isEmpty) return;
+    final tournaments = await _firestore
+        .collection(FireStoreConst.tournamentCollection)
+        .where(FireStoreConst.teamIds, arrayContains: teamId)
+        .get();
+    for (final tournament in tournaments.docs) {
+      final otherIds =
+          (tournament.data()[FireStoreConst.teamIds] as List? ?? const [])
+              .whereType<String>()
+              .where((id) => id != teamId)
+              .toList();
+      for (final chunk in otherIds.chunked(30)) {
+        final teams =
+            await _teams.where(FieldPath.documentId, whereIn: chunk).get();
+        for (final doc in teams.docs) {
+          final playerIds =
+              (doc.data()[FireStoreConst.teamPlayers] as List? ?? const [])
+                  .whereType<Map>()
+                  .map((p) => p['id']);
+          final clash = players.keys.where(playerIds.contains).firstOrNull;
+          if (clash != null) {
+            throw PlayerTeamClashError(
+              playerName: players[clash]!,
+              teamName: doc.data()[FireStoreConst.name] as String? ?? '',
+              tournamentName: tournament.data()[FireStoreConst.name] as String?,
+            );
+          }
+        }
+      }
+    }
+  }
+
   Future<int> tournamentUsageCount(String teamId) async {
     try {
       final snapshot = await _firestore
@@ -377,10 +430,13 @@ class TournamentTeamService {
     }
   }
 
+  /// Creates the player and adds them to the team; with [e164] the number
+  /// becomes theirs (see [PlayerLinkService]).
   Future<TournamentTeamPlayer> addPlayer({
     required TournamentTeamPlayer player,
     required List<TournamentTeamPlayer> existing,
     required String createdBy,
+    String? e164,
   }) async {
     try {
       _ensureUniquePlayer(player, existing);
@@ -397,8 +453,46 @@ class TournamentTeamService {
             TeamPlayer(id: userRef.id).toJson(),
           ]),
         });
+      if (e164 != null) {
+        PlayerLinkService.addPhoneEntry(
+          _firestore,
+          batch,
+          userId: userRef.id,
+          e164: e164,
+          createdBy: createdBy,
+        );
+      }
       await batch.commit();
       return created;
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Adds a player who already exists (found by mobile number) to the team,
+  /// keeping their profile as it is.
+  Future<void> addExistingPlayer({
+    required String teamId,
+    required String userId,
+    required String name,
+    required List<TournamentTeamPlayer> existing,
+  }) async {
+    if (existing.any((p) => p.id == userId)) {
+      throw AppError(
+        l10nCode: AppErrorL10nCodes.duplicatePlayerName,
+        message: '$name is already in this team.',
+      );
+    }
+    try {
+      await ensureOneTeamPerTournament(
+        teamId: teamId,
+        players: {userId: name},
+      );
+      await _teams.doc(teamId).update({
+        FireStoreConst.teamPlayers: FieldValue.arrayUnion([
+          TeamPlayer(id: userId).toJson(),
+        ]),
+      });
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }

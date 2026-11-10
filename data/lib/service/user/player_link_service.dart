@@ -74,14 +74,60 @@ class PlayerLinkService {
         created_at: DateTime.now(),
       );
       final batch = _db.batch()
-        ..set(ref, {...user.toJson(), 'created_by': organizerId})
-        ..set(_db.collection(_phoneIndex).doc(phoneKey(e164)), {
-          'user_id': ref.id,
-          'created_by': organizerId,
-          'updated_at': FieldValue.serverTimestamp(),
-        });
+        ..set(ref, {...user.toJson(), 'created_by': organizerId});
+      addPhoneEntry(
+        _db,
+        batch,
+        userId: ref.id,
+        e164: e164,
+        createdBy: organizerId,
+      );
       await batch.commit();
       return (user: user, existing: false);
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Adds the index entry for a player created in the same [batch].
+  static void addPhoneEntry(
+    FirebaseFirestore db,
+    WriteBatch batch, {
+    required String userId,
+    required String e164,
+    required String createdBy,
+  }) {
+    batch.set(db.collection(_phoneIndex).doc(phoneKey(e164)), {
+      'user_id': userId,
+      'created_by': createdBy,
+      'updated_at': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Gives a player the organizer added (and has no number yet) [e164].
+  /// Throws when the number already belongs to another player.
+  Future<void> linkPlayerPhone({
+    required String playerId,
+    required String e164,
+    required String organizerId,
+  }) async {
+    final owner = await playerIdForPhone(e164);
+    if (owner == playerId) return;
+    if (owner != null) {
+      throw const AppError(
+        message: 'This number already belongs to another player.',
+      );
+    }
+    try {
+      final batch = _db.batch();
+      addPhoneEntry(
+        _db,
+        batch,
+        userId: playerId,
+        e164: e164,
+        createdBy: organizerId,
+      );
+      await batch.commit();
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
@@ -231,11 +277,8 @@ class PlayerLinkService {
         from: claim.playerId,
         to: claim.claimantId,
         phoneKey: claim.phoneKey,
+        claimId: claim.id,
       );
-      await _db.collection(_claims).doc(claim.id).update({
-        'status': PlayerClaimStatus.approved.name,
-        'updated_at': FieldValue.serverTimestamp(),
-      });
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
@@ -255,10 +298,14 @@ class PlayerLinkService {
   /// Replaces [from] with [to] in every team, match, innings, ball, event,
   /// partnership and tournament it appears in, and moves its stats, leaderboard
   /// rows and phone number. Finally deletes the [from] user.
+  ///
+  /// The claim approval, number move and delete commit in one batch: the
+  /// `phone_index` rule only lets the number move with an approved claim.
   Future<void> mergePlayer({
     required String from,
     required String to,
     String? phoneKey,
+    String? claimId,
   }) async {
     final writer = _BatchWriter(_db, _batchLimit);
     final seen = <String>{};
@@ -355,14 +402,22 @@ class PlayerLinkService {
     await _mergeStats(writer, from, to);
     await writer.commit();
 
+    final finish = _db.batch();
+    if (claimId != null) {
+      finish.update(_db.collection(_claims).doc(claimId), {
+        'status': PlayerClaimStatus.approved.name,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    }
     if (phoneKey != null) {
-      await _db.collection(_phoneIndex).doc(phoneKey).update({
+      finish.update(_db.collection(_phoneIndex).doc(phoneKey), {
         'user_id': to,
         'created_by': to,
         'updated_at': FieldValue.serverTimestamp(),
       });
     }
-    await _users.doc(from).delete();
+    finish.delete(_users.doc(from));
+    await finish.commit();
   }
 
   /// Moves `collection/{from}` to `collection/{to}`, adding up numbers when

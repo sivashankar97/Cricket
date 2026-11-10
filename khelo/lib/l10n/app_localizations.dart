@@ -2271,6 +2271,60 @@ abstract class AppLocalizations {
   /// **'{name} already has this number, so they were added instead.'**
   String add_team_member_player_exists(String name);
 
+  /// No description provided for @player_phone_checking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking number…'**
+  String get player_phone_checking;
+
+  /// No description provided for @player_phone_found.
+  ///
+  /// In en, this message translates to:
+  /// **'Linked to {name}'**
+  String player_phone_found(String name);
+
+  /// No description provided for @player_phone_found_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'Same player everywhere: their profile and stats carry over'**
+  String get player_phone_found_hint;
+
+  /// No description provided for @player_phone_new.
+  ///
+  /// In en, this message translates to:
+  /// **'New player. When they sign up with this number, their account is linked'**
+  String get player_phone_new;
+
+  /// No description provided for @player_phone_incomplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the full mobile number'**
+  String get player_phone_incomplete;
+
+  /// No description provided for @player_phone_linked.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile number linked'**
+  String get player_phone_linked;
+
+  /// No description provided for @player_phone_self.
+  ///
+  /// In en, this message translates to:
+  /// **'This number is linked to this player'**
+  String get player_phone_self;
+
+  /// No description provided for @player_phone_taken.
+  ///
+  /// In en, this message translates to:
+  /// **'This number belongs to {name}'**
+  String player_phone_taken(String name);
+
+  /// No description provided for @player_phone_add_existing.
+  ///
+  /// In en, this message translates to:
+  /// **'Add {name}'**
+  String player_phone_add_existing(String name);
+
   /// No description provided for @add_team_member_create_player_button.
   ///
   /// In en, this message translates to:
@@ -5441,6 +5495,25 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This player is already in the team.'**
   String get error_duplicate_player_name;
+
+  /// No description provided for @error_player_in_other_team.
+  ///
+  /// In en, this message translates to:
+  /// **'{player} is already in {team} in {tournament}. A player can play for one team per tournament.'**
+  String error_player_in_other_team(
+      String player, String team, String tournament);
+
+  /// No description provided for @error_player_in_two_teams.
+  ///
+  /// In en, this message translates to:
+  /// **'{player} is in both {team} and {other}. A player can play for one team per tournament.'**
+  String error_player_in_two_teams(String player, String team, String other);
+
+  /// No description provided for @error_this_tournament.
+  ///
+  /// In en, this message translates to:
+  /// **'this tournament'**
+  String get error_this_tournament;
 
   /// No description provided for @error_duplicate_jersey_number.
   ///

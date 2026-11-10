@@ -1,6 +1,7 @@
 import 'package:data/api/auction/auction_models.dart';
 import 'package:data/api/tournament_team/tournament_team_model.dart';
 import 'package:data/service/auction/auction_service.dart';
+import 'package:data/service/user/player_link_service.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/confirmation_dialog.dart';
 import 'package:khelo/components/error_snackbar.dart';
+import 'package:khelo/components/player_phone_field.dart';
 import 'package:khelo/domain/auction/auction_import.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:style/button/primary_button.dart';
@@ -90,29 +92,46 @@ class _AuctionPlayersScreenState extends ConsumerState<AuctionPlayersScreen> {
         children: [
           Padding(
             padding: EdgeInsets.fromLTRB(
-                16, context.mediaQueryPadding.top + 12, 16, 0,),
+              16,
+              context.mediaQueryPadding.top + 12,
+              16,
+              0,
+            ),
             child: Column(
               children: [
                 Row(
                   children: [
-                    _action(context, CupertinoIcons.person_add,
-                        context.l10n.auction_add_player, () => _edit(auction),),
+                    _action(
+                      context,
+                      CupertinoIcons.person_add,
+                      context.l10n.auction_add_player,
+                      () => _edit(auction),
+                    ),
                     const SizedBox(width: 8),
-                    _action(context, CupertinoIcons.text_badge_plus,
-                        context.l10n.auction_add_players_bulk,
-                        () => _bulkAdd(auction),),
+                    _action(
+                      context,
+                      CupertinoIcons.text_badge_plus,
+                      context.l10n.auction_add_players_bulk,
+                      () => _bulkAdd(auction),
+                    ),
                     const SizedBox(width: 8),
-                    _action(context, CupertinoIcons.photo_on_rectangle,
-                        context.l10n.auction_upload_photos,
-                        () => _uploadPhotos(auction),),
+                    _action(
+                      context,
+                      CupertinoIcons.photo_on_rectangle,
+                      context.l10n.auction_upload_photos,
+                      () => _uploadPhotos(auction),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
                 AppTextField(
                   controller: _search,
                   hintText: context.l10n.auction_player_search,
-                  prefixIcon: Icon(CupertinoIcons.search,
-                      size: 18, color: cs.textSecondary,),
+                  prefixIcon: Icon(
+                    CupertinoIcons.search,
+                    size: 18,
+                    color: cs.textSecondary,
+                  ),
                   onChanged: (_) => setState(() {}),
                   borderType: AppTextFieldBorderType.outline,
                 ),
@@ -139,13 +158,17 @@ class _AuctionPlayersScreenState extends ConsumerState<AuctionPlayersScreen> {
                     child: Text(
                       context.l10n.auction_players_empty,
                       textAlign: TextAlign.center,
-                      style: AppTextStyle.body2
-                          .copyWith(color: cs.textSecondary),
+                      style:
+                          AppTextStyle.body2.copyWith(color: cs.textSecondary),
                     ),
                   )
                 : ListView.builder(
                     padding: EdgeInsets.fromLTRB(
-                        16, 10, 16, 40 + context.mediaQueryPadding.bottom,),
+                      16,
+                      10,
+                      16,
+                      40 + context.mediaQueryPadding.bottom,
+                    ),
                     itemCount: players.length,
                     itemBuilder: (context, i) =>
                         _playerTile(context, auction, players[i]),
@@ -199,7 +222,8 @@ class _AuctionPlayersScreenState extends ConsumerState<AuctionPlayersScreen> {
         padding: const EdgeInsets.only(right: 6),
         child: ChoiceChip(
           label: Text(
-              '${status?.label(context) ?? context.l10n.auction_filter_all} ($count)',),
+            '${status?.label(context) ?? context.l10n.auction_filter_all} ($count)',
+          ),
           selected: _filter == status,
           onSelected: (_) => setState(() => _filter = status),
         ),
@@ -250,14 +274,29 @@ class _AuctionPlayersScreenState extends ConsumerState<AuctionPlayersScreen> {
         await _service.removePlayer(auction.id, _userId, player!.id);
         return;
       }
-      final duplicate = auction.duplicateOf(result.player);
+      var saved = result.player;
+      final found = result.phone.player;
+      if (found != null) saved = saved.copyWith(userId: found.id);
+      final duplicate = auction.duplicateOf(saved);
       if (duplicate != null) {
         throw const AuctionActionException(AuctionError.duplicatePlayer);
       }
-      await _service.upsertPlayers(auction.id, _userId, [result.player]);
+      if (result.phone.isNew) {
+        final created =
+            await ref.read(playerLinkServiceProvider).createPlayerWithPhone(
+                  name: saved.name,
+                  e164: result.phone.e164!,
+                  organizerId: _userId,
+                );
+        saved = saved.copyWith(userId: created.user.id);
+      }
+      await _service.upsertPlayers(auction.id, _userId, [saved]);
       if (result.photo != null) {
         await _service.uploadPlayerPhotos(
-            auction.id, _userId, {result.player.id: result.photo!},);
+          auction.id,
+          _userId,
+          {saved.id: result.photo!},
+        );
       }
     });
   }
@@ -300,7 +339,8 @@ class _AuctionPlayersScreenState extends ConsumerState<AuctionPlayersScreen> {
       newId: _service.newId,
     );
     await _run(() async {
-      final skipped = await _service.upsertPlayers(auction.id, _userId, players);
+      final skipped =
+          await _service.upsertPlayers(auction.id, _userId, players);
       if (mounted) {
         showSnackBar(
           context,
@@ -332,7 +372,8 @@ class _AuctionPlayersScreenState extends ConsumerState<AuctionPlayersScreen> {
           );
           final existing = auction.duplicateOf(candidate) ??
               newPlayers.values
-                  .where((p) => p.name.toLowerCase() == candidate.name.toLowerCase())
+                  .where((p) =>
+                      p.name.toLowerCase() == candidate.name.toLowerCase())
                   .firstOrNull;
           if (existing != null) {
             playerId = existing.id;
@@ -344,11 +385,15 @@ class _AuctionPlayersScreenState extends ConsumerState<AuctionPlayersScreen> {
       }
       if (newPlayers.isNotEmpty) {
         await _service.upsertPlayers(
-            auction.id, _userId, newPlayers.values.toList(),);
+          auction.id,
+          _userId,
+          newPlayers.values.toList(),
+        );
       }
       await _service.uploadPlayerPhotos(auction.id, _userId, photosById);
       if (mounted) {
-        showSnackBar(context, context.l10n.auction_photos_done(photosById.length));
+        showSnackBar(
+            context, context.l10n.auction_photos_done(photosById.length));
       }
     });
   }
@@ -374,8 +419,14 @@ class _PlayerFormResult {
   final AuctionPlayer player;
   final Uint8List? photo;
   final bool remove;
+  final PlayerPhoneMatch phone;
 
-  const _PlayerFormResult(this.player, {this.photo, this.remove = false});
+  const _PlayerFormResult(
+    this.player, {
+    this.photo,
+    this.remove = false,
+    this.phone = PlayerPhoneMatch.none,
+  });
 }
 
 class _PlayerDialog extends StatefulWidget {
@@ -401,13 +452,24 @@ class _PlayerDialogState extends State<_PlayerDialog> {
   late final _number =
       TextEditingController(text: widget.player?.number?.toString());
   late final _price = TextEditingController(
-      text: '${widget.player?.basePrice ?? widget.basePrice}',);
+    text: '${widget.player?.basePrice ?? widget.basePrice}',
+  );
   late TournamentPlayerRole? _role = widget.player?.role;
+  final _phone = TextEditingController();
+  PlayerPhoneMatch _match = PlayerPhoneMatch.none;
   Uint8List? _photo;
+
+  void _onPhoneMatch(PlayerPhoneMatch match) {
+    final name = match.player?.name;
+    if (widget.player == null && name != null && name.isNotEmpty) {
+      _name.text = name;
+    }
+    setState(() => _match = match);
+  }
 
   @override
   void dispose() {
-    for (final c in [_name, _code, _number, _price]) {
+    for (final c in [_name, _code, _number, _price, _phone]) {
       c.dispose();
     }
     super.dispose();
@@ -431,9 +493,11 @@ class _PlayerDialogState extends State<_PlayerDialog> {
     final existing = widget.player;
     return AlertDialog(
       backgroundColor: cs.surface,
-      title: Text(existing == null
-          ? context.l10n.auction_add_player
-          : context.l10n.auction_edit_player,),
+      title: Text(
+        existing == null
+            ? context.l10n.auction_add_player
+            : context.l10n.auction_edit_player,
+      ),
       content: SizedBox(
         width: 420,
         child: SingleChildScrollView(
@@ -446,15 +510,23 @@ class _PlayerDialogState extends State<_PlayerDialog> {
                   if (_photo != null)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(14),
-                      child: Image.memory(_photo!,
-                          height: 72, width: 72, fit: BoxFit.cover,),
+                      child: Image.memory(
+                        _photo!,
+                        height: 72,
+                        width: 72,
+                        fit: BoxFit.cover,
+                      ),
                     )
                   else if (existing != null)
                     AuctionPhoto.player(existing, size: 72, radius: 14)
                   else
                     AuctionPhoto(
-                        photoId: '', hasPhoto: false, fallback: '?', size: 72,
-                        radius: 14,),
+                      photoId: '',
+                      hasPhoto: false,
+                      fallback: '?',
+                      size: 72,
+                      radius: 14,
+                    ),
                   const SizedBox(width: 12),
                   TextButton.icon(
                     onPressed: () async {
@@ -462,33 +534,51 @@ class _PlayerDialogState extends State<_PlayerDialog> {
                       if (bytes != null) setState(() => _photo = bytes);
                     },
                     icon: const Icon(CupertinoIcons.photo, size: 16),
-                    label: Text((existing?.hasPhoto ?? false) || _photo != null
-                        ? context.l10n.auction_photo_change
-                        : context.l10n.auction_photo_add,),
+                    label: Text(
+                      (existing?.hasPhoto ?? false) || _photo != null
+                          ? context.l10n.auction_photo_change
+                          : context.l10n.auction_photo_add,
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               _field(_name, context.l10n.auction_player_name),
               const SizedBox(height: 10),
-              Row(children: [
-                Expanded(child: _field(_code, context.l10n.auction_player_code)),
-                const SizedBox(width: 10),
-                Expanded(
-                    child: _field(_number, context.l10n.auction_player_number,
-                        number: true,),),
-              ],),
+              PlayerPhoneField(
+                controller: _phone,
+                selfId: existing?.userId,
+                alreadyLinked: existing?.userId != null,
+                onChanged: _onPhoneMatch,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                      child: _field(_code, context.l10n.auction_player_code)),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _field(
+                      _number,
+                      context.l10n.auction_player_number,
+                      number: true,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 10),
               Wrap(
                 spacing: 6,
                 runSpacing: 6,
                 children: TournamentPlayerRole.values
-                    .map((role) => ChoiceChip(
-                          label: Text(role.getString(context)),
-                          selected: _role == role,
-                          onSelected: (selected) =>
-                              setState(() => _role = selected ? role : null),
-                        ),)
+                    .map(
+                      (role) => ChoiceChip(
+                        label: Text(role.getString(context)),
+                        selected: _role == role,
+                        onSelected: (selected) =>
+                            setState(() => _role = selected ? role : null),
+                      ),
+                    )
                     .toList(),
               ),
               const SizedBox(height: 10),
@@ -503,13 +593,16 @@ class _PlayerDialogState extends State<_PlayerDialog> {
             onPressed: () => showConfirmationDialog(
               context,
               title: context.l10n.auction_remove_player,
-              message: context.l10n.auction_remove_player_confirm(existing!.name),
+              message:
+                  context.l10n.auction_remove_player_confirm(existing!.name),
               confirmBtnText: context.l10n.auction_remove_player,
               onConfirm: () => Navigator.of(context)
                   .pop(_PlayerFormResult(existing, remove: true)),
             ),
-            child: Text(context.l10n.auction_remove_player,
-                style: TextStyle(color: cs.alert),),
+            child: Text(
+              context.l10n.auction_remove_player,
+              style: TextStyle(color: cs.alert),
+            ),
           ),
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
@@ -518,24 +611,35 @@ class _PlayerDialogState extends State<_PlayerDialog> {
         TextButton(
           onPressed: () {
             final name = _name.text.trim();
-            if (name.isEmpty) return;
+            if (name.isEmpty || _match.checking) return;
+            if (_phone.text.trim().isNotEmpty && _match.e164 == null) return;
+            final found = _match.player;
+            if (found != null && found.id == existing?.userId) {
+              _match = PlayerPhoneMatch.none;
+            }
             final code = _code.text.trim();
             final base = existing ??
                 AuctionPlayer(id: widget.newId, name: name, basePrice: 0);
-            Navigator.of(context).pop(_PlayerFormResult(
-              base.copyWith(
-                name: name,
-                code: code.isEmpty ? null : code,
-                number: int.tryParse(_number.text.trim()),
-                role: _role,
-                basePrice: int.tryParse(_price.text.trim()) ?? widget.basePrice,
+            Navigator.of(context).pop(
+              _PlayerFormResult(
+                base.copyWith(
+                  name: name,
+                  code: code.isEmpty ? null : code,
+                  number: int.tryParse(_number.text.trim()),
+                  role: _role,
+                  basePrice:
+                      int.tryParse(_price.text.trim()) ?? widget.basePrice,
+                ),
+                photo: _photo,
+                phone: _match,
               ),
-              photo: _photo,
-            ),);
+            );
           },
-          child: Text(existing == null
-              ? context.l10n.common_add_title
-              : context.l10n.auction_save,),
+          child: Text(
+            existing == null
+                ? context.l10n.common_add_title
+                : context.l10n.auction_save,
+          ),
         ),
       ],
     );
@@ -595,9 +699,13 @@ class _PhotoMatchDialogState extends ConsumerState<_PhotoMatchDialog> {
             const SizedBox(height: 6),
             Text(
               context.l10n.auction_photos_summary(
-                  matched, widget.photos.length - matched,),
+                matched,
+                widget.photos.length - matched,
+              ),
               style: AppTextStyle.subtitle3.copyWith(
-                  color: cs.textPrimary, fontWeight: FontWeight.w700,),
+                color: cs.textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 10),
             Expanded(
@@ -611,8 +719,12 @@ class _PhotoMatchDialogState extends ConsumerState<_PhotoMatchDialog> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.memory(photo.bytes,
-                            height: 48, width: 48, fit: BoxFit.cover,),
+                        child: Image.memory(
+                          photo.bytes,
+                          height: 48,
+                          width: 48,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
@@ -636,9 +748,11 @@ class _PhotoMatchDialogState extends ConsumerState<_PhotoMatchDialog> {
                               DropdownMenuItem(
                                 value: p.id,
                                 child: Text(
-                                  [p.code, p.number == null ? null : '#${p.number}', p.name]
-                                      .whereType<String>()
-                                      .join(' · '),
+                                  [
+                                    p.code,
+                                    p.number == null ? null : '#${p.number}',
+                                    p.name
+                                  ].whereType<String>().join(' · '),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),

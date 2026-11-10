@@ -15,7 +15,42 @@ service cloud.firestore {
     match /{collection}/{document=**} {
       allow read, write: if signedIn()
         && !(collection in ['auctions', 'photos', 'user_private',
-                            'phone_index', 'player_claims']);
+                            'phone_index', 'player_claims', 'users']);
+    }
+
+    function userPath(userId) {
+      return /databases/$(database)/documents/users/$(userId);
+    }
+    function createdBy(data) {
+      return data.get('created_by', '');
+    }
+    function isAuctionAdminFor(data) {
+      return data.get('auction_id', '') != ''
+        && request.auth.uid in auctionAdmins(data.auction_id);
+    }
+
+    // Profiles. Signed-up accounts (no created_by) only change themselves;
+    // players added by an organizer (created_by) or an auction stay editable
+    // by organizers, whose team roles the rules can't check.
+    match /users/{userId} {
+      allow create: if signedIn()
+        && (request.auth.uid == userId
+            || createdBy(request.resource.data) == request.auth.uid
+            || isAuctionAdminFor(request.resource.data));
+      allow update: if signedIn()
+        && createdBy(request.resource.data) == createdBy(resource.data)
+        && (request.auth.uid == userId
+            || createdBy(resource.data) != ''
+            || (request.resource.data.get('auction_id', '')
+                  == resource.data.get('auction_id', '')
+                && isAuctionAdminFor(resource.data)));
+      allow delete: if signedIn()
+        && (request.auth.uid == userId
+            || createdBy(resource.data) == request.auth.uid);
+    }
+    // Career stats are written by whoever scores the match; sessions by the app.
+    match /users/{userId}/{sub}/{document=**} {
+      allow read, write: if signedIn();
     }
 
     // A player's mobile number: only they can read or change it.
@@ -24,17 +59,29 @@ service cloud.firestore {
     }
 
     // Hashed mobile number -> player id. Exact lookups only (no listing).
-    // Only the player or the organizer who added them can change an entry.
+    // An entry points at yourself or at a player you added; it only moves to
+    // another account together with an approved claim (same batch).
     match /phone_index/{key} {
       allow get: if signedIn();
       allow create: if signedIn()
-        && request.resource.data.created_by == request.auth.uid;
-      allow update, delete: if signedIn()
+        && request.resource.data.keys().hasOnly(['user_id', 'created_by', 'updated_at'])
+        && request.resource.data.created_by == request.auth.uid
+        && (request.resource.data.user_id == request.auth.uid
+            || createdBy(getAfter(userPath(request.resource.data.user_id)).data)
+                 == request.auth.uid);
+      allow update: if signedIn()
+        && request.resource.data.keys().hasOnly(['user_id', 'created_by', 'updated_at'])
+        && resource.data.created_by == request.auth.uid
+        && request.resource.data.created_by == request.resource.data.user_id
+        && getAfter(/databases/$(database)/documents/player_claims/$(resource.data.user_id + '_' + request.resource.data.user_id)).data.status == 'approved';
+      allow delete: if signedIn()
         && (resource.data.user_id == request.auth.uid
             || resource.data.created_by == request.auth.uid);
     }
 
     // "That added player is me" requests; the organizer approves or declines.
+    // Asking needs the number's index key, so you can only claim the player
+    // your own number points at.
     match /player_claims/{claimId} {
       allow get: if signedIn()
         && (claimId.matches('.*_' + request.auth.uid)
@@ -45,11 +92,17 @@ service cloud.firestore {
       allow create: if signedIn()
         && claimId == request.resource.data.player_id + '_' + request.auth.uid
         && request.resource.data.claimant_id == request.auth.uid
-        && request.resource.data.status in ['pending', 'dismissed'];
+        && request.resource.data.player_id != request.auth.uid
+        && request.resource.data.status in ['pending', 'dismissed']
+        && get(/databases/$(database)/documents/phone_index/$(request.resource.data.phone_key)).data.user_id
+             == request.resource.data.player_id
+        && request.resource.data.organizer_id
+             == createdBy(get(userPath(request.resource.data.player_id)).data);
       allow update: if signedIn()
         && resource.data.organizer_id == request.auth.uid
-        && request.resource.data.claimant_id == resource.data.claimant_id
-        && request.resource.data.player_id == resource.data.player_id
+        && resource.data.status == 'pending'
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'updated_at'])
         && request.resource.data.status in ['approved', 'declined'];
     }
 

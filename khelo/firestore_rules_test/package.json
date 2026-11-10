@@ -1,0 +1,12 @@
+{
+  "name": "firestore-rules-test",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "firebase emulators:exec --only firestore --project demo-khelo \"node rules.test.mjs && node auction_batch.test.mjs\""
+  },
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^5.0.2",
+    "firebase": "^12.19.0"
+  },
+  "private": true
+}

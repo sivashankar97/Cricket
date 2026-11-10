@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:data/api/team/team_model.dart';
+import 'package:data/api/tournament_team/squad_clash.dart';
 import 'package:data/api/tournament_team/tournament_team_model.dart';
 import 'package:data/extensions/list_extensions.dart';
 import 'package:data/service/team/team_service.dart';
@@ -178,6 +179,7 @@ class TournamentTeamPickerViewNotifier
       for (final chunk in ids.chunked(10)) {
         teams.addAll(await _teamService.getTeamsByIds(chunk));
       }
+      _ensureOneTeamPerPlayer(teams);
       final poolId = state.ungroupedSelected ? null : state.selectedPoolId;
       if (state.poolChosen) {
         _lastPoolPref.state = poolId ?? _ungroupedPrefValue;
@@ -189,6 +191,24 @@ class TournamentTeamPickerViewNotifier
       debugPrint('TournamentTeamPickerViewNotifier: confirm error -> $error');
       return null;
     }
+  }
+
+  void _ensureOneTeamPerPlayer(List<TeamModel> teams) {
+    final clash = findSquadClash(teams.map((team) => (
+          id: team.id,
+          name: team.name,
+          playerIds: team.players.map((p) => p.id),
+        )));
+    if (clash == null) return;
+    final player = teams
+        .expand((team) => team.players)
+        .firstWhere((p) => p.id == clash.playerId)
+        .user;
+    throw PlayerTeamClashError(
+      playerName: player.name ?? '',
+      teamName: clash.team.name,
+      otherTeamName: clash.other.name,
+    );
   }
 
   @override

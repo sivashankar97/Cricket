@@ -118,6 +118,10 @@ class AuctionPlayer {
   /// document with this player's [id].
   final int photoVersion;
 
+  /// The player's profile (`users` id), linked by mobile number. The number
+  /// itself is never stored here: published auctions are public.
+  final String? userId;
+
   const AuctionPlayer({
     required this.id,
     required this.name,
@@ -130,6 +134,7 @@ class AuctionPlayer {
     this.price,
     this.order = 0,
     this.photoVersion = 0,
+    this.userId,
   });
 
   bool get hasPhoto => photoVersion > 0;
@@ -150,6 +155,7 @@ class AuctionPlayer {
         price: (json['price'] as num?)?.toInt(),
         order: (json['order'] as num?)?.toInt() ?? 0,
         photoVersion: (json['photo_version'] as num?)?.toInt() ?? 0,
+        userId: json['user_id'] as String?,
       );
 
   Map<String, dynamic> toJson() => {
@@ -164,6 +170,7 @@ class AuctionPlayer {
         'price': price,
         'order': order,
         'photo_version': photoVersion,
+        'user_id': userId,
       };
 
   AuctionPlayer copyWith({
@@ -177,6 +184,7 @@ class AuctionPlayer {
     Object? price = _unset,
     int? order,
     int? photoVersion,
+    Object? userId = _unset,
   }) =>
       AuctionPlayer(
         id: id,
@@ -190,6 +198,7 @@ class AuctionPlayer {
         price: price == _unset ? this.price : price as int?,
         order: order ?? this.order,
         photoVersion: photoVersion ?? this.photoVersion,
+        userId: userId == _unset ? this.userId : userId as String?,
       );
 
   /// Back to the bidding pool, keeping the player's details.
@@ -476,9 +485,11 @@ class Auction {
       players.where((p) => p.status != AuctionPlayerStatus.retained).length;
 
   int get processedCount => players
-      .where((p) =>
-          p.status == AuctionPlayerStatus.sold ||
-          p.status == AuctionPlayerStatus.unsold,)
+      .where(
+        (p) =>
+            p.status == AuctionPlayerStatus.sold ||
+            p.status == AuctionPlayerStatus.unsold,
+      )
       .length;
 
   int get nextOrder =>
@@ -517,7 +528,9 @@ class Auction {
   // ── Setup ────────────────────────────────────────────────────────────────
 
   void _requireSetup() {
-    if (!status.isSetup) throw const AuctionActionException(AuctionError.notEditable);
+    if (!status.isSetup) {
+      throw const AuctionActionException(AuctionError.notEditable);
+    }
   }
 
   void _requireNotCompleted() {
@@ -533,7 +546,10 @@ class Auction {
     final name = candidate.name.caseAndSpaceInsensitive;
     return players.where((p) {
       if (p.id == candidate.id) return false;
-      if (code != null && code.isNotEmpty && p.code?.trim().toLowerCase() == code) {
+      if (candidate.userId != null && p.userId == candidate.userId) return true;
+      if (code != null &&
+          code.isNotEmpty &&
+          p.code?.trim().toLowerCase() == code) {
         return true;
       }
       return p.name.caseAndSpaceInsensitive == name &&
@@ -560,25 +576,29 @@ class Auction {
         if (auction.players.length >= maxPlayers) {
           throw const AuctionActionException(AuctionError.tooManyPlayers);
         }
-        auction = auction._copy(players: [
-          ...auction.players,
-          player.copyWith(
-            order: auction.nextOrder,
-            status: AuctionPlayerStatus.available,
-            teamId: null,
-            price: null,
-          ),
-        ],);
+        auction = auction._copy(
+          players: [
+            ...auction.players,
+            player.copyWith(
+              order: auction.nextOrder,
+              status: AuctionPlayerStatus.available,
+              teamId: null,
+              price: null,
+            ),
+          ],
+        );
       } else {
         // Status, team and price only change through auction actions.
         auction = auction._copy(
-          players: auction._replacePlayer(player.copyWith(
-            status: existing.status,
-            teamId: existing.teamId,
-            price: existing.price,
-            order: existing.order,
-            photoVersion: max(existing.photoVersion, player.photoVersion),
-          ),),
+          players: auction._replacePlayer(
+            player.copyWith(
+              status: existing.status,
+              teamId: existing.teamId,
+              price: existing.price,
+              order: existing.order,
+              photoVersion: max(existing.photoVersion, player.photoVersion),
+            ),
+          ),
         );
       }
     }
@@ -598,13 +618,15 @@ class Auction {
   Auction setPhotoVersion(String playerId, int version) {
     final player = playerById(playerId);
     if (player == null) return this;
-    return _copy(players: _replacePlayer(player.copyWith(photoVersion: version)));
+    return _copy(
+        players: _replacePlayer(player.copyWith(photoVersion: version)),);
   }
 
   Auction setTeams(List<AuctionTeam> teams) {
     _requireSetup();
     final ids = teams.map((t) => t.id).toSet();
-    final orphaned = players.any((p) => p.teamId != null && !ids.contains(p.teamId));
+    final orphaned =
+        players.any((p) => p.teamId != null && !ids.contains(p.teamId));
     if (orphaned) throw const AuctionActionException(AuctionError.invalidTeam);
     return _copy(teams: teams);
   }
@@ -613,20 +635,26 @@ class Auction {
     _requireSetup();
     final player = playerById(playerId);
     final team = teamById(teamId);
-    if (team == null) throw const AuctionActionException(AuctionError.invalidTeam);
+    if (team == null) {
+      throw const AuctionActionException(AuctionError.invalidTeam);
+    }
     if (player == null || player.status != AuctionPlayerStatus.available) {
       throw const AuctionActionException(AuctionError.playerUnavailable);
     }
-    if (squadFull(teamId)) throw const AuctionActionException(AuctionError.squadFull);
+    if (squadFull(teamId)) {
+      throw const AuctionActionException(AuctionError.squadFull);
+    }
     if (price < 0 || price > remainingFor(team)) {
       throw const AuctionActionException(AuctionError.overBudget);
     }
     return _copy(
-      players: _replacePlayer(player.copyWith(
-        status: AuctionPlayerStatus.retained,
-        teamId: teamId,
-        price: price,
-      ),),
+      players: _replacePlayer(
+        player.copyWith(
+          status: AuctionPlayerStatus.retained,
+          teamId: teamId,
+          price: price,
+        ),
+      ),
     );
   }
 
@@ -640,7 +668,9 @@ class Auction {
   }
 
   void _requireReady() {
-    if (teams.length < 2) throw const AuctionActionException(AuctionError.needTeams);
+    if (teams.length < 2) {
+      throw const AuctionActionException(AuctionError.needTeams);
+    }
     if (playersWith(AuctionPlayerStatus.available).isEmpty) {
       throw const AuctionActionException(AuctionError.needPlayers);
     }
@@ -696,7 +726,9 @@ class Auction {
   /// to the pool — only allowed before anyone has bid on them.
   Auction showPlayer(String playerId) {
     _requireLive();
-    if (bids.isNotEmpty) throw const AuctionActionException(AuctionError.hasBids);
+    if (bids.isNotEmpty) {
+      throw const AuctionActionException(AuctionError.hasBids);
+    }
     final target = playerById(playerId);
     if (target == null ||
         !(target.status == AuctionPlayerStatus.available ||
@@ -709,7 +741,9 @@ class Auction {
   /// Next available player after the current one, in queue order.
   Auction nextPlayer() {
     _requireLive();
-    if (bids.isNotEmpty) throw const AuctionActionException(AuctionError.hasBids);
+    if (bids.isNotEmpty) {
+      throw const AuctionActionException(AuctionError.hasBids);
+    }
     final afterOrder = currentPlayer?.order ?? 0;
     final pool = _withCurrentReturned()
         .playersWith(AuctionPlayerStatus.available)
@@ -718,7 +752,8 @@ class Auction {
     if (pool.isEmpty) {
       throw const AuctionActionException(AuctionError.noPlayersLeft);
     }
-    final next = pool.where((p) => p.order > afterOrder).firstOrNull ?? pool.first;
+    final next =
+        pool.where((p) => p.order > afterOrder).firstOrNull ?? pool.first;
     return showPlayer(next.id);
   }
 
@@ -726,13 +761,17 @@ class Auction {
   /// bring back. Only before any bid on the current player.
   Auction previousPlayer() {
     _requireLive();
-    if (bids.isNotEmpty) throw const AuctionActionException(AuctionError.hasBids);
+    if (bids.isNotEmpty) {
+      throw const AuctionActionException(AuctionError.hasBids);
+    }
     final beforeOrder = currentPlayer?.order ?? nextOrder;
     final candidates = orderedPlayers
-        .where((p) =>
-            p.order < beforeOrder &&
-            (p.status == AuctionPlayerStatus.available ||
-                p.status == AuctionPlayerStatus.unsold),)
+        .where(
+          (p) =>
+              p.order < beforeOrder &&
+              (p.status == AuctionPlayerStatus.available ||
+                  p.status == AuctionPlayerStatus.unsold),
+        )
         .toList();
     if (candidates.isEmpty) {
       throw const AuctionActionException(AuctionError.noPreviousPlayer);
@@ -756,7 +795,8 @@ class Auction {
     if (nextBidAmount != expectedAmount) {
       throw const AuctionActionException(AuctionError.bidMoved);
     }
-    return _copy(bids: [...bids, AuctionBid(teamId: teamId, amount: expectedAmount)]);
+    return _copy(
+        bids: [...bids, AuctionBid(teamId: teamId, amount: expectedAmount)],);
   }
 
   Auction undoBid() {
@@ -771,7 +811,9 @@ class Auction {
     final player = currentPlayer;
     final team = leadingTeam;
     final amount = currentBid;
-    if (player == null) throw const AuctionActionException(AuctionError.noPlayer);
+    if (player == null) {
+      throw const AuctionActionException(AuctionError.noPlayer);
+    }
     if (team == null || amount == null) {
       throw const AuctionActionException(AuctionError.noBid);
     }
@@ -779,33 +821,42 @@ class Auction {
       throw const AuctionActionException(AuctionError.overBudget);
     }
     return _copy(
-      players: _replacePlayer(player.copyWith(
-        status: AuctionPlayerStatus.sold,
-        teamId: team.id,
-        price: amount,
-      ),),
+      players: _replacePlayer(
+        player.copyWith(
+          status: AuctionPlayerStatus.sold,
+          teamId: team.id,
+          price: amount,
+        ),
+      ),
     )._clearCurrent()._showNext(afterOrder: player.order);
   }
 
   Auction markUnsold() {
     _requireLive();
     final player = currentPlayer;
-    if (player == null) throw const AuctionActionException(AuctionError.noPlayer);
-    if (bids.isNotEmpty) throw const AuctionActionException(AuctionError.hasBids);
+    if (player == null) {
+      throw const AuctionActionException(AuctionError.noPlayer);
+    }
+    if (bids.isNotEmpty) {
+      throw const AuctionActionException(AuctionError.hasBids);
+    }
     return _copy(
-      players: _replacePlayer(player.copyWith(status: AuctionPlayerStatus.unsold)),
+      players:
+          _replacePlayer(player.copyWith(status: AuctionPlayerStatus.unsold)),
     )._clearCurrent()._showNext(afterOrder: player.order);
   }
 
   /// Puts every unsold player back in the pool for another round.
   Auction reopenUnsold() {
     _requireLive();
-    final reopened = _copy(players: [
-      for (final p in players)
-        p.status == AuctionPlayerStatus.unsold
-            ? p.copyWith(status: AuctionPlayerStatus.available)
-            : p,
-    ],);
+    final reopened = _copy(
+      players: [
+        for (final p in players)
+          p.status == AuctionPlayerStatus.unsold
+              ? p.copyWith(status: AuctionPlayerStatus.available)
+              : p,
+      ],
+    );
     return reopened.currentPlayerId == null ? reopened._showNext() : reopened;
   }
 
@@ -814,9 +865,11 @@ class Auction {
   AuctionCompletionCheck get completionCheck => AuctionCompletionCheck(
         playerInAuction: currentPlayerId != null && bids.isNotEmpty,
         availableLeft: players
-            .where((p) =>
-                p.status == AuctionPlayerStatus.available ||
-                p.status == AuctionPlayerStatus.inAuction,)
+            .where(
+              (p) =>
+                  p.status == AuctionPlayerStatus.available ||
+                  p.status == AuctionPlayerStatus.inAuction,
+            )
             .length,
         overBudgetTeamIds:
             teams.where((t) => remainingFor(t) < 0).map((t) => t.id).toList(),
@@ -830,7 +883,9 @@ class Auction {
   /// unsold. Throws if anything else is inconsistent.
   Auction complete({required DateTime now, bool markRemainingUnsold = false}) {
     _requireNotCompleted();
-    if (status.isSetup) throw const AuctionActionException(AuctionError.notLive);
+    if (status.isSetup) {
+      throw const AuctionActionException(AuctionError.notLive);
+    }
     final check = completionCheck;
     if (check.hasBlockingIssues ||
         (check.availableLeft > 0 && !markRemainingUnsold)) {
@@ -855,7 +910,8 @@ class Auction {
   // ── Helpers ──────────────────────────────────────────────────────────────
 
   Auction _putUp(AuctionPlayer player) => _copy(
-        players: _replacePlayer(player.copyWith(status: AuctionPlayerStatus.inAuction)),
+        players: _replacePlayer(
+            player.copyWith(status: AuctionPlayerStatus.inAuction),),
         currentPlayerId: player.id,
         biddingOpen: false,
         bids: const [],
@@ -865,7 +921,8 @@ class Auction {
     final player = currentPlayer;
     if (player == null) return this;
     return _copy(
-      players: _replacePlayer(player.copyWith(status: AuctionPlayerStatus.available)),
+      players: _replacePlayer(
+          player.copyWith(status: AuctionPlayerStatus.available),),
     )._clearCurrent();
   }
 
@@ -879,7 +936,8 @@ class Auction {
   Auction _showNext({int afterOrder = 0}) {
     final pool = playersWith(AuctionPlayerStatus.available);
     if (pool.isEmpty) return this;
-    return _putUp(pool.where((p) => p.order > afterOrder).firstOrNull ?? pool.first);
+    return _putUp(
+        pool.where((p) => p.order > afterOrder).firstOrNull ?? pool.first,);
   }
 
   List<AuctionPlayer> _replacePlayer(AuctionPlayer player) =>

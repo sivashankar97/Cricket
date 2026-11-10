@@ -74,8 +74,10 @@ class AuctionService {
           .orderBy('created_at', descending: true)
           .limit(limit)
           .snapshots()
-          .map((s) =>
-              s.docs.map((d) => AuctionLogEntry.fromJson(d.data())).toList(),)
+          .map(
+            (s) =>
+                s.docs.map((d) => AuctionLogEntry.fromJson(d.data())).toList(),
+          )
           .handleError(
             (error, stack) => throw AppError.fromError(error, stack),
           );
@@ -88,8 +90,10 @@ class AuctionService {
 
   List<Auction> _sorted(QuerySnapshot<Map<String, dynamic>> snapshot) =>
       snapshot.docs.map((doc) => Auction.fromJson(doc.data())).toList()
-        ..sort((a, b) => (b.auctionDate ?? b.createdAt)
-            .compareTo(a.auctionDate ?? a.createdAt),);
+        ..sort(
+          (a, b) => (b.auctionDate ?? b.createdAt)
+              .compareTo(a.auctionDate ?? a.createdAt),
+        );
 
   // ── Setup ────────────────────────────────────────────────────────────────
 
@@ -159,8 +163,12 @@ class AuctionService {
         userId,
         (auction) => (
           auction.retain(playerId, teamId, price),
-          _entry(AuctionLogType.retained,
-              playerId: playerId, teamId: teamId, amount: price,),
+          _entry(
+            AuctionLogType.retained,
+            playerId: playerId,
+            teamId: teamId,
+            amount: price,
+          ),
         ),
       );
 
@@ -188,7 +196,10 @@ class AuctionService {
       for (var i = 0; i < entries.length; i += 25) {
         final batch = _firestore.batch();
         for (final entry in entries.skip(i).take(25)) {
-          batch.set(_photos.doc(entry.key), _photoJson(auctionId, userId, entry.value));
+          batch.set(
+            _photos.doc(entry.key),
+            _photoJson(auctionId, userId, entry.value),
+          );
         }
         await batch.commit();
       }
@@ -284,13 +295,22 @@ class AuctionService {
       _simple(auctionId, userId, (a) => a.resume(), AuctionLogType.resumed);
 
   Future<void> showPlayer(String auctionId, String userId, String playerId) =>
-      _simple(auctionId, userId, (a) => a.showPlayer(playerId), AuctionLogType.shown);
+      _simple(
+        auctionId,
+        userId,
+        (a) => a.showPlayer(playerId),
+        AuctionLogType.shown,
+      );
 
   Future<void> nextPlayer(String auctionId, String userId) =>
       _simple(auctionId, userId, (a) => a.nextPlayer(), AuctionLogType.shown);
 
-  Future<void> previousPlayer(String auctionId, String userId) =>
-      _simple(auctionId, userId, (a) => a.previousPlayer(), AuctionLogType.shown);
+  Future<void> previousPlayer(String auctionId, String userId) => _simple(
+        auctionId,
+        userId,
+        (a) => a.previousPlayer(),
+        AuctionLogType.shown,
+      );
 
   Future<void> startBidding(String auctionId, String userId) => _simple(
         auctionId,
@@ -309,8 +329,12 @@ class AuctionService {
         final updated = auction.placeBid(teamId, amount);
         return (
           updated,
-          _entry(AuctionLogType.bid,
-              playerId: auction.currentPlayerId, teamId: teamId, amount: amount,),
+          _entry(
+            AuctionLogType.bid,
+            playerId: auction.currentPlayerId,
+            teamId: teamId,
+            amount: amount,
+          ),
         );
       });
 
@@ -319,10 +343,12 @@ class AuctionService {
         final undone = auction.leadingBid;
         return (
           auction.undoBid(),
-          _entry(AuctionLogType.bidUndone,
-              playerId: auction.currentPlayerId,
-              teamId: undone?.teamId,
-              amount: undone?.amount,),
+          _entry(
+            AuctionLogType.bidUndone,
+            playerId: auction.currentPlayerId,
+            teamId: undone?.teamId,
+            amount: undone?.amount,
+          ),
         );
       });
 
@@ -330,10 +356,12 @@ class AuctionService {
       _update(auctionId, userId, (auction) {
         return (
           auction.sell(),
-          _entry(AuctionLogType.sold,
-              playerId: auction.currentPlayerId,
-              teamId: auction.leadingTeamId,
-              amount: auction.currentBid,),
+          _entry(
+            AuctionLogType.sold,
+            playerId: auction.currentPlayerId,
+            teamId: auction.leadingTeamId,
+            amount: auction.currentBid,
+          ),
         );
       });
 
@@ -375,6 +403,7 @@ class AuctionService {
       }
       final poolName = await _availablePoolName(Auction.fromJson(beforeData));
       final logos = await _teamLogoUrls(Auction.fromJson(beforeData));
+      final linked = await _linkedProfiles(Auction.fromJson(beforeData));
 
       return await _firestore.runTransaction((tx) async {
         final auctionRef = _auctions.doc(auctionId);
@@ -406,12 +435,18 @@ class AuctionService {
                 now: now,
                 markRemainingUnsold: markRemainingUnsold,
               );
-        final onTeams = completed.players.where((p) => p.status.isOnTeam).toList();
+        final onTeams =
+            completed.players.where((p) => p.status.isOnTeam).toList();
         if (onTeams.length > _maxGeneratedPlayers) {
           throw const AuctionActionException(AuctionError.tooManyPlayers);
         }
+        final profiles =
+            onTeams.map((p) => p.userId).where(linked.containsKey).toList();
+        if (profiles.length != profiles.toSet().length) {
+          throw const AuctionActionException(AuctionError.duplicatePlayer);
+        }
 
-        _writeTournament(tx, completed, ids, poolName, now, logos);
+        _writeTournament(tx, completed, ids, poolName, now, logos, linked);
         tx.set(
           auctionRef,
           completed.withTournament(ids.tournament).toJson(),
@@ -442,8 +477,10 @@ class AuctionService {
     for (final name in candidates) {
       final taken = await pools
           .where(FireStoreConst.createdBy, isEqualTo: auction.createdBy)
-          .where(FireStoreConst.nameLowercase,
-              isEqualTo: name.caseAndSpaceInsensitive,)
+          .where(
+            FireStoreConst.nameLowercase,
+            isEqualTo: name.caseAndSpaceInsensitive,
+          )
           .get();
       if (taken.docs.every((d) => d.id == _GeneratedIds(auction.id).pool)) {
         return name;
@@ -465,6 +502,30 @@ class AuctionService {
     return logos;
   }
 
+  /// Profiles that players are linked to (by mobile number), mapped to
+  /// whether they were added by an organizer (true) or are signed-up accounts
+  /// (false). Missing profiles are left out.
+  Future<Map<String, bool>> _linkedProfiles(Auction auction) async {
+    final ids = auction.players
+        .map((p) => p.userId)
+        .whereType<String>()
+        .toSet()
+        .toList();
+    final result = <String, bool>{};
+    for (var i = 0; i < ids.length; i += 30) {
+      final chunk = ids.sublist(i, i + 30 > ids.length ? ids.length : i + 30);
+      final snapshot = await _firestore
+          .collection(FireStoreConst.usersCollection)
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+      for (final doc in snapshot.docs) {
+        final createdBy = doc.data()[FireStoreConst.createdBy] as String?;
+        result[doc.id] = createdBy != null && createdBy.isNotEmpty;
+      }
+    }
+    return result;
+  }
+
   void _writeTournament(
     Transaction tx,
     Auction auction,
@@ -472,6 +533,7 @@ class AuctionService {
     String poolName,
     DateTime now,
     Map<String, String> logos,
+    Map<String, bool> linked,
   ) {
     final owner = auction.createdBy;
     final teamsRef = _firestore.collection(FireStoreConst.teamsCollection);
@@ -493,9 +555,28 @@ class AuctionService {
       },
     );
 
+    // Linked players join under their own profile, so stats build up on one
+    // player. Signed-up accounts are never written to.
+    String profileId(AuctionPlayer p) =>
+        linked.containsKey(p.userId) ? p.userId! : ids.player(p.id);
+
     for (final team in auction.teams) {
       final squad = auction.squadOf(team.id);
       for (final player in squad) {
+        final editable = linked[player.userId];
+        if (editable != null) {
+          final details = {
+            if (player.role != null)
+              FireStoreConst.playerRole: player.role!.playerRole.value,
+            if (player.number != null)
+              FireStoreConst.jerseyNumber: player.number,
+            if (player.hasPhoto) 'photo_id': player.id,
+          };
+          if (editable && details.isNotEmpty) {
+            tx.update(usersRef.doc(player.userId), details);
+          }
+          continue;
+        }
         tx.set(usersRef.doc(ids.player(player.id)), {
           FireStoreConst.id: ids.player(player.id),
           FireStoreConst.name: player.name,
@@ -521,7 +602,8 @@ class AuctionService {
         FireStoreConst.createdAt: now.toIso8601String(),
         FireStoreConst.createdTime: Timestamp.fromDate(now),
         FireStoreConst.teamPlayers: [
-          for (final player in squad) TeamPlayer(id: ids.player(player.id)).toJson(),
+          for (final player in squad)
+            TeamPlayer(id: profileId(player)).toJson(),
         ],
         FireStoreConst.isTournamentTeam: true,
         FireStoreConst.captainId: null,
@@ -548,7 +630,9 @@ class AuctionService {
       ],
     );
     tx.set(
-      _firestore.collection(FireStoreConst.tournamentCollection).doc(ids.tournament),
+      _firestore
+          .collection(FireStoreConst.tournamentCollection)
+          .doc(ids.tournament),
       {
         ...tournament.toJson(),
         FireStoreConst.poolId: ids.pool,

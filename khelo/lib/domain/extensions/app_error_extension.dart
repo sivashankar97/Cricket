@@ -1,3 +1,4 @@
+import 'package:data/api/tournament_team/squad_clash.dart';
 import 'package:data/errors/app_error_l10n_codes.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
@@ -5,6 +6,20 @@ import 'package:data/errors/app_error.dart';
 
 extension AppErrorExtensions on Object {
   String l10nMessage(BuildContext context) {
+    final clash = this;
+    if (clash is PlayerTeamClashError) {
+      return clash.otherTeamName == null
+          ? context.l10n.error_player_in_other_team(
+              clash.playerName,
+              clash.teamName,
+              clash.tournamentName ?? context.l10n.error_this_tournament,
+            )
+          : context.l10n.error_player_in_two_teams(
+              clash.playerName,
+              clash.teamName,
+              clash.otherTeamName!,
+            );
+    }
     if (this is AppError) {
       switch ((this as AppError).l10nCode) {
         case AppErrorL10nCodes.noInternetConnection:

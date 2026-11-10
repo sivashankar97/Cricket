@@ -139,6 +139,17 @@ class PhoneNumber {
     return null;
   }
 
+  /// Full number with country code for what someone typed, or null when it
+  /// isn't a valid mobile. Numbers without `+` use [defaultCountry].
+  static String? toE164(String input, PhoneCountry defaultCountry) {
+    final trimmed = input.trim();
+    final country = trimmed.startsWith('+')
+        ? parse(trimmed)?.country ?? defaultCountry
+        : defaultCountry;
+    if (validate(country, trimmed) != null) return null;
+    return PhoneNumber(country, clean(country, trimmed)).e164;
+  }
+
   /// Reads a stored number (`+919876543210`, `+91 98765 43210`). Unknown
   /// country codes fall back to India with the digits as typed.
   static PhoneNumber? parse(String? stored) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:khelo/components/error_snackbar.dart';
+import 'package:khelo/components/player_phone_field.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/flow/score_board/components/bottom_sheet_wrapper.dart';
 import 'package:style/button/primary_button.dart';
@@ -62,6 +63,7 @@ class _CreatePlayerSheetState extends State<CreatePlayerSheet> {
   late final TextEditingController _phoneController;
   bool _saving = false;
   String? _phoneErrorText;
+  PlayerPhoneMatch _match = PlayerPhoneMatch.none;
 
   @override
   void initState() {
@@ -82,6 +84,12 @@ class _CreatePlayerSheetState extends State<CreatePlayerSheet> {
   }
 
   void _onChanged() => setState(() {});
+
+  void _onPhoneMatch(PlayerPhoneMatch match) {
+    final name = match.player?.name;
+    if (name != null && name.isNotEmpty) _nameController.text = name;
+    setState(() => _match = match);
+  }
 
   Future<void> _create() async {
     final phone = _phoneController.text.trim();
@@ -128,14 +136,9 @@ class _CreatePlayerSheetState extends State<CreatePlayerSheet> {
             textCapitalization: TextCapitalization.words,
           ),
           const SizedBox(height: 12),
-          _field(
-            context,
-            _phoneController,
-            context.l10n.add_team_member_create_player_phone,
-            keyboardType: TextInputType.phone,
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[0-9+ ]')),
-            ],
+          PlayerPhoneField(
+            controller: _phoneController,
+            onChanged: _onPhoneMatch,
           ),
           if (_phoneErrorText != null) ...[
             const SizedBox(height: 6),
@@ -149,7 +152,10 @@ class _CreatePlayerSheetState extends State<CreatePlayerSheet> {
       ),
       action: [
         PrimaryButton(
-          context.l10n.add_team_member_create_player_button,
+          _match.player != null
+              ? context.l10n
+                  .player_phone_add_existing(_match.player!.name ?? '')
+              : context.l10n.add_team_member_create_player_button,
           enabled: _nameController.text.trim().isNotEmpty,
           progress: _saving,
           onPressed: _create,

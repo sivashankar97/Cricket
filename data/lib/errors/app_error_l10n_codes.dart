@@ -12,4 +12,5 @@ class AppErrorL10nCodes {
   static const teamUsedInTournament = "team-used-in-tournament";
   static const duplicatePoolName = "duplicate-pool-name";
   static const poolUsedInTournament = "pool-used-in-tournament";
+  static const playerInOtherTeam = "player-in-other-team";
 }
