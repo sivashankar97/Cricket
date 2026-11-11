@@ -68,6 +68,24 @@ await check('organizer approves: claim + number + delete in one batch', async ()
 });
 await check('approving twice is refused', () => assertFails(updateDoc(doc(db('org'), 'player_claims/p1_bob'), { status: 'approved' })));
 await check('delete own account', () => assertSucceeds(deleteDoc(doc(db('carol'), 'users/carol'))));
+await check('organizer merges own duplicate into a numbered player', async () => {
+  const o = db('org');
+  await assertSucceeds(setDoc(doc(o, 'users/p4'), { id: 'p4', name: 'Shankar', created_by: 'org' }));
+  await assertSucceeds(setDoc(doc(o, 'phone_index/K4'), { user_id: 'p4', created_by: 'org', updated_at: serverTimestamp() }));
+  await assertSucceeds(updateDoc(doc(db('alice'), 'teams/t1'), { team_players: [{ id: 'p2', role: 'player' }] }));
+  await assertSucceeds(setDoc(doc(db('alice'), 'users/p2/user_stat/s'), { matches: 2 }));
+  await assertSucceeds(deleteDoc(doc(o, 'users/p4')));
+});
+await check('a number left by a deleted player can be reused', async () => {
+  const o = db('org'); const b = writeBatch(o);
+  b.set(doc(o, 'users/p5'), { id: 'p5', name: 'Shankaran', created_by: 'org' });
+  b.set(doc(o, 'phone_index/K4'), { user_id: 'p5', created_by: 'org', updated_at: serverTimestamp() });
+  await assertSucceeds(b.commit());
+});
+await check('signed-up user takes back a freed own number', async () => {
+  await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), 'phone_index/KF'), { user_id: 'gone', created_by: 'org' }));
+  await assertSucceeds(setDoc(doc(db('alice'), 'phone_index/KF'), { user_id: 'alice', created_by: 'alice', updated_at: serverTimestamp() }));
+});
 
 await seed();
 await check('"Not me" saves a dismissed claim', () => assertSucceeds(setDoc(doc(db('bob'), 'player_claims/p1_bob'), claim('dismissed'))));
@@ -104,6 +122,11 @@ await check('organizer moves number to someone with a pending claim', () => asse
 await check('non-admin writes auction player', () => assertFails(setDoc(doc(m, 'users/auction_A_x'), { id: 'auction_A_x', name: 'x', auction_id: 'A' })));
 await check('move auction player to own auction', () => assertFails(updateDoc(doc(db('org'), 'users/auction_A_x'), { auction_id: 'B' })));
 await check('guest creates a profile', () => assertFails(setDoc(doc(db('guest', 'anonymous'), 'users/guest'), { id: 'guest' })));
+await check('take a number held by a live player', () => assertFails(setDoc(doc(m, 'phone_index/K1'), { user_id: 'mallory', created_by: 'mallory' })));
+await check('point a freed number at someone else\'s player', async () => {
+  await env.withSecurityRulesDisabled((ctx) => setDoc(doc(ctx.firestore(), 'phone_index/KD'), { user_id: 'gone', created_by: 'org' }));
+  await assertFails(setDoc(doc(m, 'phone_index/KD'), { user_id: 'p1', created_by: 'mallory' }));
+});
 await check('list number index', async () => {
   const { getDocs } = await import('firebase/firestore');
   await assertFails(getDocs(collection(m, 'phone_index')));

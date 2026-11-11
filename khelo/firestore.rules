@@ -62,18 +62,24 @@ service cloud.firestore {
     // An entry points at yourself or at a player you added; it only moves to
     // another account together with an approved claim (same batch).
     match /phone_index/{key} {
+      function isNewEntryValid() {
+        return request.resource.data.keys().hasOnly(['user_id', 'created_by', 'updated_at'])
+          && request.resource.data.created_by == request.auth.uid
+          && (request.resource.data.user_id == request.auth.uid
+              || createdBy(getAfter(userPath(request.resource.data.user_id)).data)
+                   == request.auth.uid);
+      }
       allow get: if signedIn();
-      allow create: if signedIn()
-        && request.resource.data.keys().hasOnly(['user_id', 'created_by', 'updated_at'])
-        && request.resource.data.created_by == request.auth.uid
-        && (request.resource.data.user_id == request.auth.uid
-            || createdBy(getAfter(userPath(request.resource.data.user_id)).data)
-                 == request.auth.uid);
+      allow create: if signedIn() && isNewEntryValid();
       allow update: if signedIn()
         && request.resource.data.keys().hasOnly(['user_id', 'created_by', 'updated_at'])
         && resource.data.created_by == request.auth.uid
         && request.resource.data.created_by == request.resource.data.user_id
         && getAfter(/databases/$(database)/documents/player_claims/$(resource.data.user_id + '_' + request.resource.data.user_id)).data.status == 'approved';
+      // A number whose player was deleted (or merged away) is free again.
+      allow update: if signedIn()
+        && !exists(userPath(resource.data.user_id))
+        && isNewEntryValid();
       allow delete: if signedIn()
         && (resource.data.user_id == request.auth.uid
             || resource.data.created_by == request.auth.uid);

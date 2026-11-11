@@ -61,6 +61,7 @@ void main() {
     });
 
     test('moves own number when it changes', () async {
+      await db.collection('users').doc('me').set({'id': 'me', 'name': 'Me'});
       await service.registerOwnPhone(userId: 'me', e164: _number);
       await service.registerOwnPhone(
         userId: 'me',

@@ -114,8 +114,9 @@ class _AddTournamentScreenState extends ConsumerState<AddTournamentScreen> {
                   title: context.l10n.add_tournament_delete_title,
                   message: context.l10n.add_tournament_delete_description,
                   confirmBtnText: context.l10n.common_delete_title,
-                  onConfirm: () {
-                    notifier.deleteTournament();
+                  onConfirm: () async {
+                    if (!await notifier.deleteTournament()) return;
+                    if (!context.mounted) return;
                     context.pop();
                     context.pop();
                   },

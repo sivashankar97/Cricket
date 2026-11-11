@@ -34,6 +34,10 @@ extension AppErrorExtensions on Object {
           return context.l10n.error_duplicate_team_name;
         case AppErrorL10nCodes.duplicatePlayerName:
           return context.l10n.error_duplicate_player_name;
+        case AppErrorL10nCodes.mergeNotAllowed:
+          return context.l10n.error_merge_not_allowed;
+        case AppErrorL10nCodes.tournamentHasPlayedMatches:
+          return context.l10n.error_tournament_has_played_matches;
         case AppErrorL10nCodes.duplicateJerseyNumber:
           return context.l10n.error_duplicate_jersey_number;
         case AppErrorL10nCodes.teamUsedInTournament:

@@ -1395,6 +1395,42 @@ abstract class AppLocalizations {
   /// **'Delete tournament!'**
   String get add_tournament_delete_title;
 
+  /// No description provided for @tournament_delete_action.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete tournament'**
+  String get tournament_delete_action;
+
+  /// No description provided for @tournament_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete {name}?'**
+  String tournament_delete_title(String name);
+
+  /// No description provided for @tournament_delete_message.
+  ///
+  /// In en, this message translates to:
+  /// **'The tournament and its scheduled matches are removed. This can\'t be undone.'**
+  String get tournament_delete_message;
+
+  /// No description provided for @tournament_delete_with_pool.
+  ///
+  /// In en, this message translates to:
+  /// **'Also delete the team pool \"{pool}\" and its teams'**
+  String tournament_delete_with_pool(String pool);
+
+  /// No description provided for @tournament_delete_pool_note.
+  ///
+  /// In en, this message translates to:
+  /// **'Player profiles and stats are kept.'**
+  String get tournament_delete_pool_note;
+
+  /// No description provided for @error_tournament_has_played_matches.
+  ///
+  /// In en, this message translates to:
+  /// **'This tournament has played matches. Their scores and player stats depend on it, so it can\'t be deleted.'**
+  String get error_tournament_has_played_matches;
+
   /// No description provided for @add_tournament_delete_description.
   ///
   /// In en, this message translates to:
@@ -2318,6 +2354,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This number belongs to {name}'**
   String player_phone_taken(String name);
+
+  /// No description provided for @player_merge_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Same player as {name}?'**
+  String player_merge_title(String name);
+
+  /// No description provided for @player_merge_message.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} already has this number. {current}\'s teams, matches and stats move to {name}, and the duplicate {current} record is removed. This can\'t be undone.'**
+  String player_merge_message(String current, String name);
+
+  /// No description provided for @player_merge_confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Merge into {name}'**
+  String player_merge_confirm(String name);
+
+  /// No description provided for @player_merge_hint.
+  ///
+  /// In en, this message translates to:
+  /// **'This number belongs to {name}. Saving merges this player into {name}.'**
+  String player_merge_hint(String name);
+
+  /// No description provided for @error_merge_not_allowed.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the organizer who added this player can merge it.'**
+  String get error_merge_not_allowed;
 
   /// No description provided for @player_phone_add_existing.
   ///

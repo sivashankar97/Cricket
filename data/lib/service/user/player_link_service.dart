@@ -4,9 +4,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../api/tournament_team/squad_clash.dart';
 import '../../api/user/player_claim.dart';
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
+import '../../errors/app_error_l10n_codes.dart';
 import '../../utils/constant/firestore_constant.dart';
 
 final playerLinkServiceProvider = Provider(
@@ -38,10 +40,14 @@ class PlayerLinkService {
 
   // ── Number lookup ────────────────────────────────────────────────────────
 
+  /// The player holding [e164]. A number whose player was deleted or merged
+  /// away counts as free.
   Future<String?> playerIdForPhone(String e164) async {
     try {
       final doc = await _db.collection(_phoneIndex).doc(phoneKey(e164)).get();
-      return doc.data()?['user_id'] as String?;
+      final id = doc.data()?['user_id'] as String?;
+      if (id == null || id.isEmpty) return null;
+      return (await _users.doc(id).get()).exists ? id : null;
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
@@ -143,8 +149,7 @@ class PlayerLinkService {
   }) async {
     try {
       final ref = _db.collection(_phoneIndex).doc(phoneKey(e164));
-      final current = await ref.get();
-      if (!current.exists) {
+      if (await playerIdForPhone(e164) == null) {
         await ref.set({
           'user_id': userId,
           'created_by': userId,
@@ -285,6 +290,77 @@ class PlayerLinkService {
   }
 
   // ── Merge ────────────────────────────────────────────────────────────────
+
+  /// Folds [duplicateId], a player [organizerId] added, into [playerId], the
+  /// player who holds the number: teams, matches and stats move over and the
+  /// duplicate is deleted. Its own number (if any) becomes free.
+  Future<void> mergeDuplicateInto({
+    required String duplicateId,
+    required String playerId,
+    required String organizerId,
+  }) async {
+    if (duplicateId == playerId) return;
+    try {
+      final duplicate = (await _users.doc(duplicateId).get()).data();
+      if (duplicate == null || duplicate['created_by'] != organizerId) {
+        throw const AppError(
+          l10nCode: AppErrorL10nCodes.mergeNotAllowed,
+          message: 'Only the organizer who added this player can merge it.',
+        );
+      }
+      await _ensureMergeKeepsOneTeam(
+        duplicateId: duplicateId,
+        playerId: playerId,
+      );
+      await mergePlayer(from: duplicateId, to: playerId);
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Refuses a merge that would put [playerId] in two teams of a tournament
+  /// (or twice in one team).
+  Future<void> _ensureMergeKeepsOneTeam({
+    required String duplicateId,
+    required String playerId,
+  }) async {
+    final player = (await _users.doc(playerId).get()).data();
+    final playerName = player?['name'] as String? ?? '';
+    final duplicateTeams = await _teamsWithPlayer(duplicateId).get();
+    final playerTeams = {
+      for (final doc in (await _teamsWithPlayer(playerId).get()).docs)
+        doc.id: doc.data()[FireStoreConst.name] as String? ?? '',
+    };
+    if (playerTeams.isEmpty) return;
+    for (final doc in duplicateTeams.docs) {
+      if (playerTeams.containsKey(doc.id)) {
+        throw PlayerTeamClashError(
+          playerName: playerName,
+          teamName: playerTeams[doc.id]!,
+        );
+      }
+    }
+    final duplicateTeamIds = duplicateTeams.docs.map((d) => d.id).toList();
+    for (final chunk in _chunks(duplicateTeamIds, 30)) {
+      final tournaments = await _db
+          .collection(FireStoreConst.tournamentCollection)
+          .where(FireStoreConst.teamIds, arrayContainsAny: chunk)
+          .get();
+      for (final tournament in tournaments.docs) {
+        final teamIds =
+            (tournament.data()[FireStoreConst.teamIds] as List? ?? const [])
+                .whereType<String>();
+        final clash = teamIds.where(playerTeams.containsKey).firstOrNull;
+        if (clash != null) {
+          throw PlayerTeamClashError(
+            playerName: playerName,
+            teamName: playerTeams[clash]!,
+            tournamentName: tournament.data()[FireStoreConst.name] as String?,
+          );
+        }
+      }
+    }
+  }
 
   Query<Map<String, dynamic>> _teamsWithPlayer(String playerId) =>
       _db.collection(FireStoreConst.teamsCollection).where(

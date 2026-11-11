@@ -5,6 +5,7 @@ import 'package:khelo/components/empty_screen.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/tournament/components/sliver_header_delegate.dart';
+import 'package:khelo/ui/flow/tournament/detail/components/delete_tournament_dialog.dart';
 import 'package:khelo/ui/flow/tournament/detail/components/flexible_space.dart';
 import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_matches_tab.dart';
 import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_overview_tab.dart';
@@ -242,7 +243,38 @@ class _TournamentDetailScreenState
               .push(context);
         },
       ),
+      if (_isOrganizer(state))
+        BottomSheetAction(
+          title: context.l10n.tournament_delete_action,
+          icon: Icon(Icons.delete_outline, color: context.colorScheme.alert),
+          onTap: () {
+            context.pop();
+            _deleteTournament(context, state);
+          },
+        ),
     ]);
+  }
+
+  bool _isOrganizer(TournamentDetailState state) =>
+      state.tournament!.created_by == state.currentUserId ||
+      state.tournament!.members.any((member) =>
+          member.id == state.currentUserId && member.role.isOrganizer);
+
+  Future<void> _deleteTournament(
+    BuildContext context,
+    TournamentDetailState state,
+  ) async {
+    final pool = await notifier.poolDeletableWithTournament();
+    if (!context.mounted) return;
+    final withPool = await showDeleteTournamentDialog(
+      context,
+      tournamentName: state.tournament!.name,
+      pool: pool,
+    );
+    if (withPool == null) return;
+    final deleted =
+        await notifier.deleteTournament(pool: withPool ? pool : null);
+    if (deleted && context.mounted) context.pop();
   }
 
   Widget _backButton(BuildContext context) {

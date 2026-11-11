@@ -87,6 +87,13 @@ class TournamentTeamPlayersViewNotifier
         createdBy: organizerId,
         e164: phone.e164,
       );
+    } else if (found != null && found.id != player.id) {
+      await _playerLink.mergeDuplicateInto(
+        duplicateId: player.id,
+        playerId: found.id,
+        organizerId: organizerId,
+      );
+      await _refreshPlayers();
     } else {
       await _service.updatePlayer(player: player, existing: state.players);
       if (phone.isNew) {

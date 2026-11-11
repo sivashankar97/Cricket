@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:khelo/components/action_bottom_sheet.dart';
+import 'package:khelo/components/confirmation_dialog.dart';
 import 'package:khelo/components/player_phone_field.dart';
 import 'package:khelo/domain/extensions/app_error_extension.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
@@ -106,24 +107,46 @@ class _PlayerFormSheetState extends State<PlayerFormSheet> {
 
   /// Why the typed number can't be saved, if it can't.
   String? _phoneProblem() {
-    final found = _match.player;
-    if (widget.player != null &&
-        found != null &&
-        found.id != widget.player!.id) {
-      return context.l10n.player_phone_taken(found.name ?? '');
-    }
     if (_phoneController.text.trim().isNotEmpty && _match.e164 == null) {
       return context.l10n.player_phone_incomplete;
     }
     return null;
   }
 
-  Future<void> _save() async {
+  /// The other player who holds the number typed while editing.
+  UserModel? get _mergeTarget {
+    final found = _match.player;
+    final editing = widget.player;
+    if (editing == null || found == null || found.id == editing.id) {
+      return null;
+    }
+    return found;
+  }
+
+  void _save() {
     final problem = _phoneProblem();
     if (problem != null) {
       setState(() => _error = problem);
       return;
     }
+    final target = _mergeTarget;
+    if (target == null) {
+      _submit();
+      return;
+    }
+    final name = _nameController.text.trim();
+    final targetName = target.name ?? '';
+    showConfirmationDialog(
+      context,
+      title: context.l10n.player_merge_title(targetName),
+      message: context.l10n.player_merge_message(name, targetName),
+      confirmBtnText: context.l10n.player_merge_confirm(targetName),
+      isDestructiveAction: false,
+      onConfirm: _submit,
+    );
+  }
+
+  Future<void> _submit() async {
     setState(() {
       _saving = true;
       _error = null;
@@ -212,6 +235,15 @@ class _PlayerFormSheetState extends State<PlayerFormSheet> {
             selfId: widget.player?.id,
             onChanged: _onPhoneMatch,
           ),
+          if (_mergeTarget != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                context.l10n.player_merge_hint(_mergeTarget!.name ?? ''),
+                style: AppTextStyle.caption
+                    .copyWith(color: context.colorScheme.textSecondary),
+              ),
+            ),
           _label(context.l10n.tournament_team_player_role_label),
           Wrap(
             spacing: 8,

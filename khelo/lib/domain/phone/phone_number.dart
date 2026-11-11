@@ -139,15 +139,31 @@ class PhoneNumber {
     return null;
   }
 
+  /// Countries a number without `+` can belong to when it doesn't fit the
+  /// default one. Their mobile prefixes don't overlap, so at most one fits.
+  static const _localFallbacks = ['IN', 'LK'];
+
   /// Full number with country code for what someone typed, or null when it
-  /// isn't a valid mobile. Numbers without `+` use [defaultCountry].
+  /// isn't a valid mobile. Numbers without `+` use [defaultCountry], or India /
+  /// Sri Lanka when only one of them fits (e.g. `0771234567` → `+94771234567`).
   static String? toE164(String input, PhoneCountry defaultCountry) {
     final trimmed = input.trim();
-    final country = trimmed.startsWith('+')
-        ? parse(trimmed)?.country ?? defaultCountry
-        : defaultCountry;
-    if (validate(country, trimmed) != null) return null;
-    return PhoneNumber(country, clean(country, trimmed)).e164;
+    if (trimmed.startsWith('+')) {
+      final country = parse(trimmed)?.country ?? defaultCountry;
+      if (validate(country, trimmed) != null) return null;
+      return PhoneNumber(country, clean(country, trimmed)).e164;
+    }
+    if (validate(defaultCountry, trimmed) == null) {
+      return PhoneNumber(defaultCountry, clean(defaultCountry, trimmed)).e164;
+    }
+    final fits = PhoneCountry.all
+        .where((c) =>
+            _localFallbacks.contains(c.code) &&
+            c.code != defaultCountry.code &&
+            validate(c, trimmed) == null)
+        .toList();
+    if (fits.length != 1) return null;
+    return PhoneNumber(fits.single, clean(fits.single, trimmed)).e164;
   }
 
   /// Reads a stored number (`+919876543210`, `+91 98765 43210`). Unknown

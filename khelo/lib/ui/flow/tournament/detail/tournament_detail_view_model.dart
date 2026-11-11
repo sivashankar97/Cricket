@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:data/api/match/match_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
+import 'package:data/api/tournament_team/tournament_team_model.dart';
 import 'package:data/service/match/match_service.dart';
 import 'package:data/service/tournament/tournament_service.dart';
 import 'package:data/service/tournament_team/tournament_team_service.dart';
@@ -105,6 +106,51 @@ class TournamentDetailStateViewNotifier
       debugPrint(
           "TournamentDetailStateViewNotifier: error while selecting teams -> $e");
     }
+  }
+
+  /// The tournament's team pool, when no other tournament uses it, so it can
+  /// be deleted with the tournament.
+  Future<TeamPool?> poolDeletableWithTournament() async {
+    final id = state.tournament?.id;
+    if (id == null) return null;
+    try {
+      final pool = await _tournamentTeamService.poolOfTournament(id);
+      if (pool == null) return null;
+      final usage = await _tournamentTeamService.poolUsageCount(pool.id);
+      return usage <= 1 ? pool : null;
+    } catch (e) {
+      debugPrint(
+          "TournamentDetailStateViewNotifier: error while loading pool -> $e");
+      return null;
+    }
+  }
+
+  /// Deletes the tournament, and [pool] with its teams when given.
+  Future<bool> deleteTournament({TeamPool? pool}) async {
+    final id = state.tournament?.id;
+    if (id == null) return false;
+    _tournamentSubscription?.cancel();
+    _matchSubscription?.cancel();
+    try {
+      state = state.copyWith(actionError: null);
+      await _tournamentService.deleteTournament(id);
+    } catch (e) {
+      state = state.copyWith(actionError: e);
+      debugPrint(
+          "TournamentDetailStateViewNotifier: error while deleting tournament -> $e");
+      loadTournament();
+      return false;
+    }
+    if (pool != null) {
+      try {
+        await _tournamentTeamService.deletePool(pool.id);
+      } catch (e) {
+        state = state.copyWith(actionError: e);
+        debugPrint(
+            "TournamentDetailStateViewNotifier: error while deleting pool -> $e");
+      }
+    }
+    return true;
   }
 
   void onMatchFilter(String? filter) {

@@ -8,6 +8,8 @@ import '../../api/tournament/tournament_details.dart';
 import '../../api/tournament/tournament_model.dart';
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
+import '../../errors/app_error_l10n_codes.dart';
+import '../../extensions/list_extensions.dart';
 import '../../utils/constant/firestore_constant.dart';
 import '../match/match_service.dart';
 import '../team/team_service.dart';
@@ -541,8 +543,50 @@ class TournamentService {
     }
   }
 
+  /// Deletes the tournament and its matches. Refused once a match has
+  /// started, because scores and player stats depend on it.
   Future<void> deleteTournament(String tournamentId) async {
     try {
+      final tournament = await _firestore
+          .collection(FireStoreConst.tournamentCollection)
+          .doc(tournamentId)
+          .get();
+      final matchIds = {
+        ...(tournament.data()?[FireStoreConst.matchIds] as List? ?? const [])
+            .whereType<String>(),
+      };
+      final linked = await _firestore
+          .collection(FireStoreConst.matchesCollection)
+          .where(FireStoreConst.tournamentId, isEqualTo: tournamentId)
+          .get();
+      matchIds.addAll(linked.docs.map((doc) => doc.id));
+
+      final matches = <DocumentReference>[];
+      for (final chunk in matchIds.toList().chunked(30)) {
+        final snapshot = await _firestore
+            .collection(FireStoreConst.matchesCollection)
+            .where(FieldPath.documentId, whereIn: chunk)
+            .get();
+        for (final doc in snapshot.docs) {
+          final status = doc.data()[FireStoreConst.matchStatus];
+          if (status != null && status != MatchStatus.yetToStart.value) {
+            throw AppError(
+              l10nCode: AppErrorL10nCodes.tournamentHasPlayedMatches,
+              message: 'This tournament has played matches, so it can\'t be '
+                  'deleted.',
+            );
+          }
+          matches.add(doc.reference);
+        }
+      }
+
+      for (final chunk in matches.chunked(400)) {
+        final batch = _firestore.batch();
+        for (final ref in chunk) {
+          batch.delete(ref);
+        }
+        await batch.commit();
+      }
       await _tournamentCollection.doc(tournamentId).delete();
     } catch (error, stack) {
       throw AppError.fromError(error, stack);

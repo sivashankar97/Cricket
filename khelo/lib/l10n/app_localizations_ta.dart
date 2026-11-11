@@ -778,6 +778,31 @@ class AppLocalizationsTa extends AppLocalizations {
   String get add_tournament_delete_title => 'Delete tournament!';
 
   @override
+  String get tournament_delete_action => 'Delete tournament';
+
+  @override
+  String tournament_delete_title(String name) {
+    return 'Delete $name?';
+  }
+
+  @override
+  String get tournament_delete_message =>
+      'The tournament and its scheduled matches are removed. This can\'t be undone.';
+
+  @override
+  String tournament_delete_with_pool(String pool) {
+    return 'Also delete the team pool \"$pool\" and its teams';
+  }
+
+  @override
+  String get tournament_delete_pool_note =>
+      'Player profiles and stats are kept.';
+
+  @override
+  String get error_tournament_has_played_matches =>
+      'This tournament has played matches. Their scores and player stats depend on it, so it can\'t be deleted.';
+
+  @override
   String get add_tournament_delete_description =>
       'This action will permanently delete the tournament, along with all match data. Are you sure you want to delete?';
 
@@ -1323,6 +1348,30 @@ class AppLocalizationsTa extends AppLocalizations {
   String player_phone_taken(String name) {
     return 'This number belongs to $name';
   }
+
+  @override
+  String player_merge_title(String name) {
+    return 'Same player as $name?';
+  }
+
+  @override
+  String player_merge_message(String current, String name) {
+    return '$name already has this number. $current\'s teams, matches and stats move to $name, and the duplicate $current record is removed. This can\'t be undone.';
+  }
+
+  @override
+  String player_merge_confirm(String name) {
+    return 'Merge into $name';
+  }
+
+  @override
+  String player_merge_hint(String name) {
+    return 'This number belongs to $name. Saving merges this player into $name.';
+  }
+
+  @override
+  String get error_merge_not_allowed =>
+      'Only the organizer who added this player can merge it.';
 
   @override
   String player_phone_add_existing(String name) {

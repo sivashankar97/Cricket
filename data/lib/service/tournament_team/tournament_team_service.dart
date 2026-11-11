@@ -198,6 +198,22 @@ class TournamentTeamService {
     }
   }
 
+  /// The pool [tournamentId]'s teams were picked from, if it still exists.
+  Future<TeamPool?> poolOfTournament(String tournamentId) async {
+    try {
+      final tournament = await _firestore
+          .collection(FireStoreConst.tournamentCollection)
+          .doc(tournamentId)
+          .get();
+      final poolId = tournament.data()?[FireStoreConst.poolId] as String?;
+      if (poolId == null || poolId.isEmpty) return null;
+      final pool = (await _pools.doc(poolId).get()).data();
+      return pool == null ? null : TeamPool.fromJson(pool);
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
   /// Records which pool a tournament's teams were picked from.
   Future<void> setTournamentPool(String tournamentId, String? poolId) async {
     try {

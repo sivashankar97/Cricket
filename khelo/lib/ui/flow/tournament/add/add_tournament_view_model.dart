@@ -261,13 +261,16 @@ class AddTournamentViewNotifier extends StateNotifier<AddTournamentState> {
     onChange();
   }
 
-  void deleteTournament() async {
+  Future<bool> deleteTournament() async {
     try {
+      state = state.copyWith(actionError: null);
       await _tournamentService.deleteTournament(_editedTournament!.id);
+      return true;
     } catch (error) {
       state = state.copyWith(actionError: error);
       debugPrint(
           "AddTournamentViewNotifier: error while deleting tournament -> $error");
+      return false;
     }
   }
 
