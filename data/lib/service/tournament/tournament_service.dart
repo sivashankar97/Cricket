@@ -5,6 +5,7 @@ import '../../api/ball_score/ball_score_model.dart';
 import '../../api/match/match_model.dart';
 import '../../api/team/team_model.dart';
 import '../../api/tournament/tournament_details.dart';
+import '../../api/tournament/tournament_extras.dart';
 import '../../api/tournament/tournament_model.dart';
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
@@ -86,6 +87,56 @@ class TournamentService {
   ) async {
     try {
       await _rawTournamentDoc(tournamentId).update(details.toJson());
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Raw fields of [ids] in [collection], keyed by document id.
+  Future<Map<String, Map<String, dynamic>>> _rawDocs(
+    String collection,
+    List<String> ids,
+  ) async {
+    final result = <String, Map<String, dynamic>>{};
+    for (final chunk in ids.toSet().toList().chunked(30)) {
+      final snapshot = await _firestore
+          .collection(collection)
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+      for (final doc in snapshot.docs) {
+        result[doc.id] = doc.data();
+      }
+    }
+    return result;
+  }
+
+  Future<Map<String, MatchExtras>> getMatchExtras(List<String> matchIds) async {
+    try {
+      final docs = await _rawDocs(FireStoreConst.matchesCollection, matchIds);
+      return docs.map((id, data) => MapEntry(id, MatchExtras.fromJson(data)));
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  Future<Map<String, TeamExtras>> getTeamExtras(List<String> teamIds) async {
+    try {
+      final docs = await _rawDocs(FireStoreConst.teamsCollection, teamIds);
+      return docs.map((id, data) => MapEntry(id, TeamExtras.fromJson(data)));
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// `photo_id` of each user that has an auction photo.
+  Future<Map<String, String>> getUserPhotoIds(List<String> userIds) async {
+    try {
+      final docs = await _rawDocs(FireStoreConst.usersCollection, userIds);
+      return {
+        for (final entry in docs.entries)
+          if (entry.value['photo_id'] is String)
+            entry.key: entry.value['photo_id'] as String,
+      };
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }

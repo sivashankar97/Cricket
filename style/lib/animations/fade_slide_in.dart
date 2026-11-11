@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'app_animations.dart';
 
 /// Fades and slides [child] up into place once, when first built.
-/// Use [delay] to stagger several items.
+/// Use [delay] to stagger several items. Shows [child] straight away when the
+/// platform asks for reduced motion.
 class FadeSlideIn extends StatefulWidget {
   final Widget child;
   final Duration delay;
@@ -23,7 +24,7 @@ class _FadeSlideInState extends State<FadeSlideIn>
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: widget.delay + AppAnimations.slow,
-  )..forward();
+  );
 
   late final Animation<double> _animation = CurvedAnimation(
     parent: _controller,
@@ -33,6 +34,17 @@ class _FadeSlideInState extends State<FadeSlideIn>
       curve: AppAnimations.curve,
     ),
   );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_controller.isAnimating || _controller.isCompleted) return;
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) {
+      _controller.value = 1;
+    } else {
+      _controller.forward();
+    }
+  }
 
   @override
   void dispose() {

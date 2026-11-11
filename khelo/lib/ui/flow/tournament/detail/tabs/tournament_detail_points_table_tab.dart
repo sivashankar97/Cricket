@@ -1,28 +1,27 @@
-import 'package:data/api/team/team_model.dart';
-import 'package:data/api/tournament/tournament_model.dart';
+import 'package:data/api/tournament/tournament_extras.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:khelo/components/image_avatar.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
-import 'package:khelo/domain/extensions/string_extensions.dart';
-import 'package:khelo/ui/app_route.dart';
+import 'package:style/animations/motion.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 
 import '../../../../../components/empty_screen.dart';
+import '../../../../app_route.dart';
+import '../components/tournament_widgets.dart';
+import '../summary/tournament_summary.dart';
+import '../summary/tournament_summary_provider.dart';
 
 class TournamentDetailPointsTableTab extends ConsumerWidget {
-  final List<TournamentTeamStat> teamStats;
-
-  const TournamentDetailPointsTableTab({
-    super.key,
-    required this.teamStats,
-  });
+  const TournamentDetailPointsTableTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (teamStats.isEmpty) {
+    final summary = ref.watch(tournamentSummaryProvider);
+    final extras = ref.watch(tournamentTeamExtrasProvider);
+    final rows = summary.standings.where((r) => r.played > 0).toList();
+    if (rows.isEmpty) {
       return EmptyScreen(
         title: context.l10n.tournament_detail_points_table_empty_title,
         description:
@@ -30,119 +29,182 @@ class TournamentDetailPointsTableTab extends ConsumerWidget {
         isShowButton: false,
       );
     }
-
     return ListView(
       padding: context.mediaQueryPadding.copyWith(top: 0) +
-          EdgeInsets.all(16).copyWith(bottom: 24),
+          const EdgeInsets.fromLTRB(16, 12, 16, 40),
       children: [
-        Text(
-          context.l10n.tournament_detail_points_table_points_title,
-          style: AppTextStyle.header4
-              .copyWith(color: context.colorScheme.textPrimary),
+        PointsTable(rows: rows, extras: extras),
+        const SizedBox(height: 12),
+        Appear(
+          index: rows.length,
+          child: Text(
+            context.l10n.tournament_points_note,
+            style: AppTextStyle.caption
+                .copyWith(color: context.colorScheme.textDisabled),
+          ),
         ),
-        const SizedBox(height: 16),
-        _buildTable(context),
       ],
     );
   }
+}
 
-  Widget _buildTable(BuildContext context) {
-    final headers = [
-      context.l10n.tournament_detail_points_table_team,
-      context.l10n.common_m_title,
-      context.l10n.tournament_detail_points_table_wins,
-      context.l10n.tournament_detail_points_table_losses,
-      context.l10n.tournament_detail_points_table_pts,
-      context.l10n.tournament_detail_points_table_nrr,
-    ];
+class PointsTable extends StatelessWidget {
+  final List<StandingRow> rows;
+  final Map<String, TeamExtras> extras;
+  final bool showForm;
 
-    return ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: DataTable(
-            columnSpacing: 8,
-            headingRowHeight: 40,
-            horizontalMargin: 16,
-            dataRowMaxHeight: 64,
-            decoration: BoxDecoration(color: context.colorScheme.containerHigh),
-            dataRowColor: WidgetStateProperty.all(context.colorScheme.surface),
-            columns: headers
-                .map((title) => _dataColumn(
-                      context,
-                      title: title,
-                      width: (title == headers.first)
-                          ? context.mediaQuerySize.width * 0.4
-                          : context.mediaQuerySize.width * 0.07,
-                    ))
-                .toList(),
-            rows: teamStats
-                .map(
-                  (stat) => DataRow(cells: [
-                    _teamProfileDataCell(context, stat.team),
-                    _dataCell(context, text: stat.played_matches.toString()),
-                    _dataCell(context, text: stat.wins.toString()),
-                    _dataCell(context, text: stat.losses.toString()),
-                    _dataCell(
-                      context,
-                      text: stat.points.toString(),
-                      textColor: context.colorScheme.textPrimary,
-                    ),
-                    _dataCell(context, text: stat.nrr.toStringAsFixed(1)),
-                  ]),
-                )
-                .toList()));
-  }
+  const PointsTable({
+    super.key,
+    required this.rows,
+    required this.extras,
+    this.showForm = true,
+  });
 
-  DataCell _teamProfileDataCell(BuildContext context, TeamModel? team) {
-    return team == null
-        ? const DataCell(SizedBox.shrink())
-        : DataCell(OnTapScale(
-            onTap: () => AppRoute.teamDetail(teamId: team.id).push(context),
-            child: Row(
+  static const _numWidth = 30.0;
+  static const _nrrWidth = 50.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = context.colorScheme;
+    final header = AppTextStyle.caption.copyWith(
+      color: cs.textDisabled,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.4,
+    );
+    final l10n = context.l10n;
+    Widget num(String text, {double width = _numWidth, TextStyle? style}) =>
+        SizedBox(
+          width: width,
+          child: Text(text, textAlign: TextAlign.center, style: style),
+        );
+    return MediaQuery.withNoTextScaling(
+      child: TournamentCard(
+        padding: const EdgeInsets.fromLTRB(12, 10, 12, 4),
+        child: Column(
+          children: [
+            Row(
               children: [
-                ImageAvatar(
-                  initial: team.name_initial ?? team.name.initials(limit: 1),
-                  imageUrl: team.profile_img_url,
-                  size: 32,
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  team.name_initial ?? team.name.initials(limit: 2),
-                  style: AppTextStyle.subtitle2.copyWith(
-                    color: context.colorScheme.textPrimary,
-                  ),
-                )
+                SizedBox(width: 22, child: Text('#', style: header)),
+                Expanded(
+                    child: Text(l10n.tournament_col_team.toUpperCase(),
+                        style: header)),
+                num(l10n.tournament_col_played, style: header),
+                num(l10n.tournament_col_won, style: header),
+                num(l10n.tournament_col_lost, style: header),
+                num(l10n.tournament_col_nrr, width: _nrrWidth, style: header),
+                num(l10n.tournament_col_points,
+                    style: header.copyWith(color: cs.primary)),
               ],
             ),
-          ));
-  }
-
-  DataColumn _dataColumn(
-    BuildContext context, {
-    required String title,
-    required double width,
-  }) {
-    return DataColumn(
-        label: SizedBox(
-      width: width,
-      child: Text(
-        title,
-        style: AppTextStyle.body2.copyWith(
-          color: context.colorScheme.textPrimary,
+            const SizedBox(height: 6),
+            for (var i = 0; i < rows.length; i++)
+              Appear(
+                key: ValueKey(rows[i].team.id),
+                index: i,
+                child: OnTapScale(
+                  onTap: () => AppRoute.teamDetail(teamId: rows[i].team.id)
+                      .push(context),
+                  child: _row(context, i, rows[i], num),
+                ),
+              ),
+          ],
         ),
       ),
-    ));
+    );
   }
 
-  DataCell _dataCell(
-    BuildContext context, {
-    required String text,
-    Color? textColor,
-  }) {
-    return DataCell(Text(
-      text,
-      style: AppTextStyle.caption.copyWith(
-        color: textColor ?? context.colorScheme.textDisabled,
+  Widget _row(
+    BuildContext context,
+    int index,
+    StandingRow row,
+    Widget Function(String, {double width, TextStyle? style}) num,
+  ) {
+    final cs = context.colorScheme;
+    final value = AppTextStyle.body2.copyWith(color: cs.textPrimary);
+    final owner = extras[row.team.id]?.ownerName;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: cs.outline, width: 0.5)),
       ),
-    ));
+      child: Column(
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 22,
+                child: Text(
+                  '${index + 1}',
+                  style: AppTextStyle.subtitle3.copyWith(
+                    color: index < 4 ? cs.primary : cs.textSecondary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              TeamBadge(row.team, size: 30),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      row.team.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.subtitle3.copyWith(
+                          color: cs.textPrimary, fontWeight: FontWeight.w600),
+                    ),
+                    if (owner != null)
+                      Text(
+                        owner,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTextStyle.caption
+                            .copyWith(color: cs.textDisabled),
+                      ),
+                  ],
+                ),
+              ),
+              num('${row.played}', style: value),
+              num('${row.won}', style: value),
+              num('${row.lost}', style: value),
+              SizedBox(
+                width: _nrrWidth,
+                child: CountUp(
+                  value: row.nrr,
+                  decimals: 2,
+                  format: formatNrr,
+                  textAlign: TextAlign.center,
+                  style: value.copyWith(
+                    color: row.nrr >= 0 ? cs.textPrimary : cs.alert,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: _numWidth,
+                child: CountUp(
+                  value: row.points,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyle.subtitle2.copyWith(
+                    color: cs.primary,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (showForm && row.form.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsets.only(left: 60),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: FormDots(row.form, size: 18),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

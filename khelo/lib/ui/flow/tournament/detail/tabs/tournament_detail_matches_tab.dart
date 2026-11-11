@@ -1,27 +1,25 @@
 import 'package:data/api/match/match_model.dart';
 import 'package:data/api/team/team_model.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:khelo/components/match_detail_cell.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/tournament/detail/components/filter_tab_view.dart';
-import 'package:style/button/action_button.dart';
+import 'package:style/animations/app_animations.dart';
+import 'package:style/animations/fade_slide_in.dart';
+import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 
 import '../../../../../components/action_bottom_sheet.dart';
 import '../../../../../components/empty_screen.dart';
+import '../components/tournament_match_card.dart';
+import '../components/tournament_widgets.dart';
+import '../summary/tournament_summary_provider.dart';
 import '../tournament_detail_view_model.dart';
 
-enum TournamentMatchStatusFilter {
-  all,
-  live,
-  upcoming,
-  past,
-}
+enum TournamentMatchStatusFilter { all, live, upcoming, completed }
 
 class TournamentDetailMatchesTab extends ConsumerStatefulWidget {
   final Function(String) onMatchFilter;
@@ -40,61 +38,100 @@ class TournamentDetailMatchesTab extends ConsumerStatefulWidget {
 
 class _TournamentDetailMatchesTabState
     extends ConsumerState<TournamentDetailMatchesTab> {
-  TournamentMatchStatusFilter _selectedStatus =
-      TournamentMatchStatusFilter.all;
+  TournamentMatchStatusFilter _status = TournamentMatchStatusFilter.all;
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(tournamentDetailStateProvider);
+    final extras = ref.watch(tournamentMatchExtrasProvider);
 
-    final canManageTournament = state.tournament != null &&
+    final canManage = state.tournament != null &&
         (state.tournament!.created_by == state.currentUserId ||
             state.tournament!.members
                 .any((element) => element.id == state.currentUserId));
 
-    if (state.filteredMatches.isEmpty && state.matches.isEmpty) {
+    if (state.matches.isEmpty) {
       return EmptyScreen(
         title: context.l10n.tournament_detail_matches_empty_title,
         description: context.l10n.tournament_detail_matches_empty_description,
         buttonTitle: context.l10n.tournament_detail_matches_schedule_btn,
-        isShowButton: canManageTournament,
+        isShowButton: canManage,
         onTap: widget.onAddMatchTap,
       );
     }
 
-    final allMatches = state.filteredMatches;
-    final liveMatches = allMatches
-        .where((m) => m.match_status == MatchStatus.running)
-        .toList();
-    final upcomingMatches = allMatches
+    int number(MatchModel m) => matchNumberOf(m, state.matches, extras);
+    final all = state.filteredMatches;
+    final live =
+        all.where((m) => m.match_status == MatchStatus.running).toList();
+    final upcoming = all
         .where((m) => m.match_status == MatchStatus.yetToStart)
-        .toList();
-    final pastMatches = allMatches
+        .toList()
+      ..sort((a, b) => number(a).compareTo(number(b)));
+    final completed = all
         .where((m) =>
             m.match_status == MatchStatus.finish ||
             m.match_status == MatchStatus.abandoned)
-        .toList();
+        .toList()
+      ..sort((a, b) => number(b).compareTo(number(a)));
+
+    final shown = switch (_status) {
+      TournamentMatchStatusFilter.all => [...live, ...upcoming, ...completed],
+      TournamentMatchStatusFilter.live => live,
+      TournamentMatchStatusFilter.upcoming => upcoming,
+      TournamentMatchStatusFilter.completed => completed,
+    };
 
     return ListView(
       padding: context.mediaQueryPadding.copyWith(top: 0) +
-          const EdgeInsets.all(16).copyWith(bottom: 32),
+          const EdgeInsets.fromLTRB(16, 12, 16, 32),
       children: [
-        _topActionBar(context, state, canManageTournament),
+        FadeSlideIn(child: _topActionBar(context, state, canManage)),
         const SizedBox(height: 12),
-        _statusFilterBar(
-          context,
-          allCount: allMatches.length,
-          liveCount: liveMatches.length,
-          upcomingCount: upcomingMatches.length,
-          pastCount: pastMatches.length,
+        FadeSlideIn(
+          delay: AppAnimations.fast ~/ 4,
+          child: _statusFilterBar(context, {
+            TournamentMatchStatusFilter.all: all.length,
+            TournamentMatchStatusFilter.live: live.length,
+            TournamentMatchStatusFilter.upcoming: upcoming.length,
+            TournamentMatchStatusFilter.completed: completed.length,
+          }),
         ),
-        const SizedBox(height: 16),
-        ..._buildFilteredMatchList(
-          context,
-          liveMatches: liveMatches,
-          upcomingMatches: upcomingMatches,
-          pastMatches: pastMatches,
-          allMatches: allMatches,
+        const SizedBox(height: 12),
+        AnimatedSwitcher(
+          duration: AppAnimations.fast,
+          child: KeyedSubtree(
+            key: ValueKey('${_status.name}-${state.matchFilter}'),
+            child: shown.isEmpty
+                ? _emptyStatusView(context)
+                : Column(
+                    children: [
+                      for (var i = 0; i < shown.length; i++)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Appear(
+                            key: ValueKey(shown[i].id),
+                            index: i,
+                            child: TournamentMatchCard(
+                              match: shown[i],
+                              number: number(shown[i]),
+                              extras: extras,
+                              onTap: () => _handleMatchTap(context, shown[i]),
+                              actionLabel: switch (shown[i].match_status) {
+                                MatchStatus.yetToStart =>
+                                  context.l10n.common_edit,
+                                MatchStatus.running => context
+                                    .l10n.tournament_match_continue_scoring,
+                                _ => null,
+                              },
+                              onAction: () =>
+                                  _handleMatchActionTap(context, shown[i]),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+          ),
         ),
       ],
     );
@@ -103,14 +140,14 @@ class _TournamentDetailMatchesTabState
   Widget _topActionBar(
     BuildContext context,
     TournamentDetailState state,
-    bool canManageTournament,
+    bool canManage,
   ) {
     return Row(
       children: [
         Expanded(
           child: FilterTabView(
             title: context.l10n.tournament_detail_matches_filter_by_teams_title,
-            onFilter: () => showFilterOptionSelectionSheet(
+            onFilter: () => _showTeamFilterSheet(
               context,
               matchFilter: state.matchFilter,
               teams: state.tournament?.teams ?? [],
@@ -120,34 +157,27 @@ class _TournamentDetailMatchesTabState
                 context.l10n.tournament_detail_matches_filter_all_teams_option,
           ),
         ),
-        if (canManageTournament) ...[
+        if (canManage) ...[
           const SizedBox(width: 8),
-          actionButton(
-            context,
-            onPressed: widget.onAddMatchTap,
-            icon: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          OnTapScale(
+            onTap: widget.onAddMatchTap,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
               decoration: BoxDecoration(
-                color: context.colorScheme.primary.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: context.colorScheme.primary.withValues(alpha: 0.25),
-                ),
+                color: context.colorScheme.primary,
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    CupertinoIcons.calendar_badge_plus,
-                    size: 16,
-                    color: context.colorScheme.primary,
-                  ),
+                  Icon(CupertinoIcons.calendar_badge_plus,
+                      size: 16, color: context.colorScheme.onPrimary),
                   const SizedBox(width: 6),
                   Text(
                     context.l10n.tournament_detail_matches_schedule_btn,
                     style: AppTextStyle.caption.copyWith(
-                      color: context.colorScheme.primary,
-                      fontWeight: FontWeight.w600,
+                      color: context.colorScheme.onPrimary,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ],
@@ -160,251 +190,76 @@ class _TournamentDetailMatchesTabState
   }
 
   Widget _statusFilterBar(
-    BuildContext context, {
-    required int allCount,
-    required int liveCount,
-    required int upcomingCount,
-    required int pastCount,
-  }) {
+    BuildContext context,
+    Map<TournamentMatchStatusFilter, int> counts,
+  ) {
+    final cs = context.colorScheme;
+    String label(TournamentMatchStatusFilter f) => switch (f) {
+          TournamentMatchStatusFilter.all =>
+            context.l10n.tournament_detail_matches_all_status,
+          TournamentMatchStatusFilter.live =>
+            context.l10n.tournament_detail_matches_live_status,
+          TournamentMatchStatusFilter.upcoming =>
+            context.l10n.tournament_detail_matches_upcoming_status,
+          TournamentMatchStatusFilter.completed =>
+            context.l10n.tournament_matches_completed_status,
+        };
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _statusChip(
-            context,
-            title: '${context.l10n.tournament_detail_matches_all_status} ($allCount)',
-            isSelected: _selectedStatus == TournamentMatchStatusFilter.all,
-            onTap: () => setState(() => _selectedStatus = TournamentMatchStatusFilter.all),
-          ),
-          const SizedBox(width: 8),
-          _statusChip(
-            context,
-            title: '${context.l10n.tournament_detail_matches_live_status} ($liveCount)',
-            isSelected: _selectedStatus == TournamentMatchStatusFilter.live,
-            badgeColor: liveCount > 0 ? context.colorScheme.alert : null,
-            onTap: () => setState(() => _selectedStatus = TournamentMatchStatusFilter.live),
-          ),
-          const SizedBox(width: 8),
-          _statusChip(
-            context,
-            title: '${context.l10n.tournament_detail_matches_upcoming_status} ($upcomingCount)',
-            isSelected: _selectedStatus == TournamentMatchStatusFilter.upcoming,
-            onTap: () => setState(() => _selectedStatus = TournamentMatchStatusFilter.upcoming),
-          ),
-          const SizedBox(width: 8),
-          _statusChip(
-            context,
-            title: '${context.l10n.tournament_detail_matches_past_status} ($pastCount)',
-            isSelected: _selectedStatus == TournamentMatchStatusFilter.past,
-            onTap: () => setState(() => _selectedStatus = TournamentMatchStatusFilter.past),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _statusChip(
-    BuildContext context, {
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-    Color? badgeColor,
-  }) {
-    final cs = context.colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : cs.containerLow,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? cs.primary
-                : cs.outline.withValues(alpha: 0.3),
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (badgeColor != null) ...[
-              Container(
-                width: 8,
-                height: 8,
-                margin: const EdgeInsets.only(right: 6),
-                decoration: BoxDecoration(
-                  color: isSelected ? Colors.white : badgeColor,
-                  shape: BoxShape.circle,
+          for (final f in TournamentMatchStatusFilter.values)
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: OnTapScale(
+                onTap: () => setState(() => _status = f),
+                child: AnimatedContainer(
+                  duration: AppAnimations.fast,
+                  curve: AppAnimations.curve,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: f == _status ? cs.textPrimary : cs.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: f == _status
+                          ? cs.textPrimary
+                          : cs.outline.withValues(alpha: 0.5),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (f == TournamentMatchStatusFilter.live &&
+                          (counts[f] ?? 0) > 0) ...[
+                        Container(
+                          width: 7,
+                          height: 7,
+                          margin: const EdgeInsets.only(right: 6),
+                          decoration: BoxDecoration(
+                              color: cs.alert, shape: BoxShape.circle),
+                        ),
+                      ],
+                      Text(
+                        '${label(f)} ${counts[f] ?? 0}',
+                        style: AppTextStyle.caption.copyWith(
+                          color: f == _status ? cs.surface : cs.textPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-            Text(
-              title,
-              style: AppTextStyle.caption.copyWith(
-                color: isSelected ? Colors.white : cs.textPrimary,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-              ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildFilteredMatchList(
-    BuildContext context, {
-    required List<MatchModel> liveMatches,
-    required List<MatchModel> upcomingMatches,
-    required List<MatchModel> pastMatches,
-    required List<MatchModel> allMatches,
-  }) {
-    switch (_selectedStatus) {
-      case TournamentMatchStatusFilter.live:
-        if (liveMatches.isEmpty) {
-          return [
-            _emptyStatusView(
-              context,
-              title: context.l10n.tournament_detail_matches_no_live,
-              icon: CupertinoIcons.dot_radiowaves_left_right,
-            )
-          ];
-        }
-        return liveMatches.map((m) => _matchItem(context, m)).toList();
-
-      case TournamentMatchStatusFilter.upcoming:
-        if (upcomingMatches.isEmpty) {
-          return [
-            _emptyStatusView(
-              context,
-              title: context.l10n.tournament_detail_matches_no_upcoming,
-              icon: CupertinoIcons.calendar_today,
-            )
-          ];
-        }
-        return upcomingMatches.map((m) => _matchItem(context, m)).toList();
-
-      case TournamentMatchStatusFilter.past:
-        if (pastMatches.isEmpty) {
-          return [
-            _emptyStatusView(
-              context,
-              title: context.l10n.tournament_detail_matches_no_past,
-              icon: CupertinoIcons.checkmark_seal,
-            )
-          ];
-        }
-        return pastMatches.map((m) => _matchItem(context, m)).toList();
-
-      case TournamentMatchStatusFilter.all:
-        if (allMatches.isEmpty) {
-          return [
-            _emptyStatusView(
-              context,
-              title: context.l10n.tournament_detail_matches_filter_empty_title,
-              icon: CupertinoIcons.search,
-            )
-          ];
-        }
-
-        final widgets = <Widget>[];
-
-        if (liveMatches.isNotEmpty) {
-          widgets.add(_sectionHeader(
-            context,
-            title: context.l10n.tournament_detail_matches_live_section,
-            count: liveMatches.length,
-            isLive: true,
-          ));
-          widgets.addAll(liveMatches.map((m) => _matchItem(context, m)));
-          widgets.add(const SizedBox(height: 16));
-        }
-
-        if (upcomingMatches.isNotEmpty) {
-          widgets.add(_sectionHeader(
-            context,
-            title: context.l10n.tournament_detail_matches_upcoming_section,
-            count: upcomingMatches.length,
-            icon: CupertinoIcons.calendar_today,
-          ));
-          widgets.addAll(upcomingMatches.map((m) => _matchItem(context, m)));
-          widgets.add(const SizedBox(height: 16));
-        }
-
-        if (pastMatches.isNotEmpty) {
-          widgets.add(_sectionHeader(
-            context,
-            title: context.l10n.tournament_detail_matches_past_section,
-            count: pastMatches.length,
-            icon: CupertinoIcons.checkmark_seal,
-          ));
-          widgets.addAll(pastMatches.map((m) => _matchItem(context, m)));
-        }
-
-        return widgets;
-    }
-  }
-
-  Widget _sectionHeader(
-    BuildContext context, {
-    required String title,
-    required int count,
-    bool isLive = false,
-    IconData? icon,
-  }) {
-    final cs = context.colorScheme;
-    return Padding(
-      padding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
-      child: Row(
-        children: [
-          if (isLive) ...[
-            Container(
-              width: 8,
-              height: 8,
-              margin: const EdgeInsets.only(right: 6),
-              decoration: BoxDecoration(
-                color: cs.alert,
-                shape: BoxShape.circle,
-              ),
-            ),
-          ] else if (icon != null) ...[
-            Icon(icon, size: 16, color: cs.primary),
-            const SizedBox(width: 6),
-          ],
-          Text(
-            '$title ($count)',
-            style: AppTextStyle.subtitle2.copyWith(
-              color: isLive ? cs.alert : cs.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
         ],
-      ),
-    );
-  }
-
-  Widget _matchItem(BuildContext context, MatchModel match) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: MatchDetailCell(
-        showTournamentBadge: false,
-        backgroundColor: context.colorScheme.surface,
-        match: match,
-        showActionButtons: match.match_status == MatchStatus.running ||
-            match.match_status == MatchStatus.yetToStart,
-        onTap: () => _handleMatchTap(context, match),
-        onActionTap: () => _handleMatchActionTap(context, match),
       ),
     );
   }
 
   void _handleMatchTap(BuildContext context, MatchModel match) {
     if (match.match_status == MatchStatus.running) {
-      if (match.toss_decision == null || match.toss_winner_id == null) {
-        AppRoute.addTossDetail(matchId: match.id).push(context);
-      } else {
-        AppRoute.scoreBoard(matchId: match.id).push(context);
-      }
+      _openScoring(context, match);
     } else {
       AppRoute.matchDetailTab(matchId: match.id).push(context);
     }
@@ -414,25 +269,41 @@ class _TournamentDetailMatchesTabState
     if (match.match_status == MatchStatus.yetToStart) {
       AppRoute.addMatch(matchId: match.id).push(context);
     } else if (match.match_status == MatchStatus.running) {
-      if (match.toss_decision == null || match.toss_winner_id == null) {
-        AppRoute.addTossDetail(matchId: match.id).push(context);
-      } else {
-        AppRoute.scoreBoard(matchId: match.id).push(context);
-      }
+      _openScoring(context, match);
     }
   }
 
-  Widget _emptyStatusView(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-  }) {
+  void _openScoring(BuildContext context, MatchModel match) {
+    if (match.toss_decision == null || match.toss_winner_id == null) {
+      AppRoute.addTossDetail(matchId: match.id).push(context);
+    } else {
+      AppRoute.scoreBoard(matchId: match.id).push(context);
+    }
+  }
+
+  Widget _emptyStatusView(BuildContext context) {
     final cs = context.colorScheme;
-    return Container(
+    final (title, icon) = switch (_status) {
+      TournamentMatchStatusFilter.live => (
+          context.l10n.tournament_detail_matches_no_live,
+          CupertinoIcons.dot_radiowaves_left_right
+        ),
+      TournamentMatchStatusFilter.upcoming => (
+          context.l10n.tournament_detail_matches_no_upcoming,
+          CupertinoIcons.calendar_today
+        ),
+      TournamentMatchStatusFilter.completed => (
+          context.l10n.tournament_detail_matches_no_past,
+          CupertinoIcons.checkmark_seal
+        ),
+      TournamentMatchStatusFilter.all => (
+          context.l10n.tournament_detail_matches_filter_empty_title,
+          CupertinoIcons.search
+        ),
+    };
+    return Padding(
       padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
-      alignment: Alignment.center,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 48, color: cs.textDisabled),
           const SizedBox(height: 12),
@@ -446,24 +317,24 @@ class _TournamentDetailMatchesTabState
     );
   }
 
-  void showFilterOptionSelectionSheet(
+  Future<void> _showTeamFilterSheet(
     BuildContext context, {
     required Function(String) onTap,
     String? matchFilter,
     required List<TeamModel> teams,
   }) async {
-    final filterOptions = [
+    final options = [
       context.l10n.tournament_detail_matches_filter_all_teams_option,
-      ...teams.map((e) => e.name)
+      ...teams.map((e) => e.name),
     ];
-    final matchFiltered = matchFilter ?? filterOptions.first;
+    final selected = matchFilter ?? options.first;
     return await showActionBottomSheet(
       context: context,
-      items: filterOptions
+      items: options
           .map((option) => BottomSheetAction(
                 title: option,
-                enabled: matchFiltered != option,
-                showCheck: matchFiltered == option,
+                enabled: selected != option,
+                showCheck: selected == option,
                 onTap: () {
                   context.pop();
                   onTap(option);

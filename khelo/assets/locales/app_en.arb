@@ -2773,5 +2773,182 @@
   "mascot_movie_cool_attitude": "Let's play it cool... the scoreboard will do the talking!",
   "mascot_movie_youth_energy": "Whistles ready? Let the next shot shake the whole ground!",
   "mascot_movie_mass_punch": "Our game needs no noise... the scoreboard is enough!",
-  "mascot_fun_match_tied": "It's a tie! Both teams fought right to the last ball!"
+  "mascot_fun_match_tied": "It's a tie! Both teams fought right to the last ball!",
+  "tournament_col_player": "Player",
+  "tournament_col_team": "Team",
+  "tournament_col_innings": "Inn",
+  "tournament_col_runs": "Runs",
+  "tournament_col_highest": "HS",
+  "tournament_col_average": "Avg",
+  "tournament_col_strike_rate": "SR",
+  "tournament_col_fours": "4s",
+  "tournament_col_sixes": "6s",
+  "tournament_col_fifties": "50s",
+  "tournament_col_hundreds": "100s",
+  "tournament_col_overs": "Ov",
+  "tournament_col_maidens": "Mdn",
+  "tournament_col_runs_conceded": "Runs",
+  "tournament_col_wickets": "Wkts",
+  "tournament_col_best": "Best",
+  "tournament_col_economy": "Econ",
+  "tournament_col_catches": "Ct",
+  "tournament_col_run_outs": "RO",
+  "tournament_col_stumpings": "St",
+  "tournament_col_total": "Total",
+  "tournament_col_points": "Pts",
+  "tournament_col_bat": "Bat",
+  "tournament_col_bowl": "Bowl",
+  "tournament_col_field": "Field",
+  "tournament_col_played": "P",
+  "tournament_col_won": "W",
+  "tournament_col_lost": "L",
+  "tournament_col_nrr": "NRR",
+  "tournament_col_form": "Last 5",
+  "tournament_form_win": "W",
+  "tournament_form_loss": "L",
+  "tournament_form_tie": "T",
+  "tournament_form_no_result": "N",
+  "tournament_live_pill": "Live",
+  "tournament_upcoming_pill": "Upcoming",
+  "tournament_result_pill": "Result",
+  "tournament_walkover_pill": "Walkover",
+  "tournament_no_result_pill": "No result",
+  "tournament_match_number": "Match {number}",
+  "@tournament_match_number": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_won_by_walkover": "{team} won by walkover",
+  "@tournament_won_by_walkover": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "tournament_match_tied": "Match tied",
+  "tournament_won_by_runs": "{team} won by {runs, plural, =1{1 run} other{{runs} runs}}",
+  "@tournament_won_by_runs": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      },
+      "runs": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_won_by_wickets": "{team} won by {wickets, plural, =1{1 wicket} other{{wickets} wickets}}",
+  "@tournament_won_by_wickets": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      },
+      "wickets": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_overs_short": "({overs} ov)",
+  "@tournament_overs_short": {
+    "placeholders": {
+      "overs": {
+        "type": "String"
+      }
+    }
+  },
+  "tournament_match_continue_scoring": "Continue scoring",
+  "tournament_matches_completed_status": "Completed",
+  "tournament_stat_matches_played": "Played",
+  "tournament_stat_players": "Players",
+  "tournament_stats_batting": "Batting",
+  "tournament_stats_bowling": "Bowling",
+  "tournament_stats_fielding": "Fielding",
+  "tournament_stats_records": "Records",
+  "tournament_stats_mvp": "MVP",
+  "tournament_stats_loading": "Crunching ball-by-ball stats…",
+  "tournament_stats_empty_title": "No stats yet",
+  "tournament_stats_empty_description": "Player stats appear here once matches are completed.",
+  "tournament_stats_most_runs": "Most runs",
+  "tournament_stats_most_wickets": "Most wickets",
+  "tournament_stats_best_fielder": "Best fielder",
+  "tournament_stats_mvp_leader": "Most valuable player",
+  "tournament_stats_innings_sr": "{innings, plural, =1{1 innings} other{{innings} innings}} · SR {sr}",
+  "@tournament_stats_innings_sr": {
+    "placeholders": {
+      "innings": {
+        "type": "int"
+      },
+      "sr": {
+        "type": "String"
+      }
+    }
+  },
+  "tournament_stats_best_economy": "Best {best} · Econ {economy}",
+  "@tournament_stats_best_economy": {
+    "placeholders": {
+      "best": {
+        "type": "String"
+      },
+      "economy": {
+        "type": "String"
+      }
+    }
+  },
+  "tournament_stats_dismissals": "Dismissals",
+  "tournament_stats_catches": "{count, plural, =1{1 catch} other{{count} catches}}",
+  "@tournament_stats_catches": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_stats_mvp_formula": "MVP points: 1 per run, +1 per four, +2 per six, +10 per fifty or hundred; 20 per wicket, 10 per maiden; 8 per catch, 10 per run out or stumping.",
+  "tournament_record_highest_score": "Highest individual score",
+  "tournament_record_best_average": "Best batting average",
+  "tournament_record_min_innings": "Min. {count} innings",
+  "@tournament_record_min_innings": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_record_best_strike_rate": "Best strike rate",
+  "tournament_record_min_balls": "Min. {count} balls",
+  "@tournament_record_min_balls": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_record_most_fours": "Most fours",
+  "tournament_record_most_sixes": "Most sixes",
+  "tournament_record_best_bowling": "Best bowling in a match",
+  "tournament_record_best_economy": "Best economy",
+  "tournament_record_min_overs": "Min. {count} overs",
+  "@tournament_record_min_overs": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tournament_overview_champions": "Champions",
+  "tournament_overview_recent_results": "Recent results",
+  "tournament_overview_top_performers": "Top performers",
+  "tournament_points_note": "2 points for a win, 1 for a tie or no result. Teams level on points are ranked by net run rate (NRR). Top 4 qualify for the playoffs.",
+  "tournament_team_owner": "Owner: {name}",
+  "@tournament_team_owner": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  }
 }

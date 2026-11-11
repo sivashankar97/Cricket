@@ -8215,6 +8215,492 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It\'s a tie! Both teams fought right to the last ball!'**
   String get mascot_fun_match_tied;
+
+  /// No description provided for @tournament_col_player.
+  ///
+  /// In en, this message translates to:
+  /// **'Player'**
+  String get tournament_col_player;
+
+  /// No description provided for @tournament_col_team.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get tournament_col_team;
+
+  /// No description provided for @tournament_col_innings.
+  ///
+  /// In en, this message translates to:
+  /// **'Inn'**
+  String get tournament_col_innings;
+
+  /// No description provided for @tournament_col_runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs'**
+  String get tournament_col_runs;
+
+  /// No description provided for @tournament_col_highest.
+  ///
+  /// In en, this message translates to:
+  /// **'HS'**
+  String get tournament_col_highest;
+
+  /// No description provided for @tournament_col_average.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg'**
+  String get tournament_col_average;
+
+  /// No description provided for @tournament_col_strike_rate.
+  ///
+  /// In en, this message translates to:
+  /// **'SR'**
+  String get tournament_col_strike_rate;
+
+  /// No description provided for @tournament_col_fours.
+  ///
+  /// In en, this message translates to:
+  /// **'4s'**
+  String get tournament_col_fours;
+
+  /// No description provided for @tournament_col_sixes.
+  ///
+  /// In en, this message translates to:
+  /// **'6s'**
+  String get tournament_col_sixes;
+
+  /// No description provided for @tournament_col_fifties.
+  ///
+  /// In en, this message translates to:
+  /// **'50s'**
+  String get tournament_col_fifties;
+
+  /// No description provided for @tournament_col_hundreds.
+  ///
+  /// In en, this message translates to:
+  /// **'100s'**
+  String get tournament_col_hundreds;
+
+  /// No description provided for @tournament_col_overs.
+  ///
+  /// In en, this message translates to:
+  /// **'Ov'**
+  String get tournament_col_overs;
+
+  /// No description provided for @tournament_col_maidens.
+  ///
+  /// In en, this message translates to:
+  /// **'Mdn'**
+  String get tournament_col_maidens;
+
+  /// No description provided for @tournament_col_runs_conceded.
+  ///
+  /// In en, this message translates to:
+  /// **'Runs'**
+  String get tournament_col_runs_conceded;
+
+  /// No description provided for @tournament_col_wickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Wkts'**
+  String get tournament_col_wickets;
+
+  /// No description provided for @tournament_col_best.
+  ///
+  /// In en, this message translates to:
+  /// **'Best'**
+  String get tournament_col_best;
+
+  /// No description provided for @tournament_col_economy.
+  ///
+  /// In en, this message translates to:
+  /// **'Econ'**
+  String get tournament_col_economy;
+
+  /// No description provided for @tournament_col_catches.
+  ///
+  /// In en, this message translates to:
+  /// **'Ct'**
+  String get tournament_col_catches;
+
+  /// No description provided for @tournament_col_run_outs.
+  ///
+  /// In en, this message translates to:
+  /// **'RO'**
+  String get tournament_col_run_outs;
+
+  /// No description provided for @tournament_col_stumpings.
+  ///
+  /// In en, this message translates to:
+  /// **'St'**
+  String get tournament_col_stumpings;
+
+  /// No description provided for @tournament_col_total.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get tournament_col_total;
+
+  /// No description provided for @tournament_col_points.
+  ///
+  /// In en, this message translates to:
+  /// **'Pts'**
+  String get tournament_col_points;
+
+  /// No description provided for @tournament_col_bat.
+  ///
+  /// In en, this message translates to:
+  /// **'Bat'**
+  String get tournament_col_bat;
+
+  /// No description provided for @tournament_col_bowl.
+  ///
+  /// In en, this message translates to:
+  /// **'Bowl'**
+  String get tournament_col_bowl;
+
+  /// No description provided for @tournament_col_field.
+  ///
+  /// In en, this message translates to:
+  /// **'Field'**
+  String get tournament_col_field;
+
+  /// No description provided for @tournament_col_played.
+  ///
+  /// In en, this message translates to:
+  /// **'P'**
+  String get tournament_col_played;
+
+  /// No description provided for @tournament_col_won.
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get tournament_col_won;
+
+  /// No description provided for @tournament_col_lost.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get tournament_col_lost;
+
+  /// No description provided for @tournament_col_nrr.
+  ///
+  /// In en, this message translates to:
+  /// **'NRR'**
+  String get tournament_col_nrr;
+
+  /// No description provided for @tournament_col_form.
+  ///
+  /// In en, this message translates to:
+  /// **'Last 5'**
+  String get tournament_col_form;
+
+  /// No description provided for @tournament_form_win.
+  ///
+  /// In en, this message translates to:
+  /// **'W'**
+  String get tournament_form_win;
+
+  /// No description provided for @tournament_form_loss.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get tournament_form_loss;
+
+  /// No description provided for @tournament_form_tie.
+  ///
+  /// In en, this message translates to:
+  /// **'T'**
+  String get tournament_form_tie;
+
+  /// No description provided for @tournament_form_no_result.
+  ///
+  /// In en, this message translates to:
+  /// **'N'**
+  String get tournament_form_no_result;
+
+  /// No description provided for @tournament_live_pill.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get tournament_live_pill;
+
+  /// No description provided for @tournament_upcoming_pill.
+  ///
+  /// In en, this message translates to:
+  /// **'Upcoming'**
+  String get tournament_upcoming_pill;
+
+  /// No description provided for @tournament_result_pill.
+  ///
+  /// In en, this message translates to:
+  /// **'Result'**
+  String get tournament_result_pill;
+
+  /// No description provided for @tournament_walkover_pill.
+  ///
+  /// In en, this message translates to:
+  /// **'Walkover'**
+  String get tournament_walkover_pill;
+
+  /// No description provided for @tournament_no_result_pill.
+  ///
+  /// In en, this message translates to:
+  /// **'No result'**
+  String get tournament_no_result_pill;
+
+  /// No description provided for @tournament_match_number.
+  ///
+  /// In en, this message translates to:
+  /// **'Match {number}'**
+  String tournament_match_number(int number);
+
+  /// No description provided for @tournament_won_by_walkover.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} won by walkover'**
+  String tournament_won_by_walkover(String team);
+
+  /// No description provided for @tournament_match_tied.
+  ///
+  /// In en, this message translates to:
+  /// **'Match tied'**
+  String get tournament_match_tied;
+
+  /// No description provided for @tournament_won_by_runs.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} won by {runs, plural, =1{1 run} other{{runs} runs}}'**
+  String tournament_won_by_runs(String team, int runs);
+
+  /// No description provided for @tournament_won_by_wickets.
+  ///
+  /// In en, this message translates to:
+  /// **'{team} won by {wickets, plural, =1{1 wicket} other{{wickets} wickets}}'**
+  String tournament_won_by_wickets(String team, int wickets);
+
+  /// No description provided for @tournament_overs_short.
+  ///
+  /// In en, this message translates to:
+  /// **'({overs} ov)'**
+  String tournament_overs_short(String overs);
+
+  /// No description provided for @tournament_match_continue_scoring.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue scoring'**
+  String get tournament_match_continue_scoring;
+
+  /// No description provided for @tournament_matches_completed_status.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get tournament_matches_completed_status;
+
+  /// No description provided for @tournament_stat_matches_played.
+  ///
+  /// In en, this message translates to:
+  /// **'Played'**
+  String get tournament_stat_matches_played;
+
+  /// No description provided for @tournament_stat_players.
+  ///
+  /// In en, this message translates to:
+  /// **'Players'**
+  String get tournament_stat_players;
+
+  /// No description provided for @tournament_stats_batting.
+  ///
+  /// In en, this message translates to:
+  /// **'Batting'**
+  String get tournament_stats_batting;
+
+  /// No description provided for @tournament_stats_bowling.
+  ///
+  /// In en, this message translates to:
+  /// **'Bowling'**
+  String get tournament_stats_bowling;
+
+  /// No description provided for @tournament_stats_fielding.
+  ///
+  /// In en, this message translates to:
+  /// **'Fielding'**
+  String get tournament_stats_fielding;
+
+  /// No description provided for @tournament_stats_records.
+  ///
+  /// In en, this message translates to:
+  /// **'Records'**
+  String get tournament_stats_records;
+
+  /// No description provided for @tournament_stats_mvp.
+  ///
+  /// In en, this message translates to:
+  /// **'MVP'**
+  String get tournament_stats_mvp;
+
+  /// No description provided for @tournament_stats_loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Crunching ball-by-ball stats…'**
+  String get tournament_stats_loading;
+
+  /// No description provided for @tournament_stats_empty_title.
+  ///
+  /// In en, this message translates to:
+  /// **'No stats yet'**
+  String get tournament_stats_empty_title;
+
+  /// No description provided for @tournament_stats_empty_description.
+  ///
+  /// In en, this message translates to:
+  /// **'Player stats appear here once matches are completed.'**
+  String get tournament_stats_empty_description;
+
+  /// No description provided for @tournament_stats_most_runs.
+  ///
+  /// In en, this message translates to:
+  /// **'Most runs'**
+  String get tournament_stats_most_runs;
+
+  /// No description provided for @tournament_stats_most_wickets.
+  ///
+  /// In en, this message translates to:
+  /// **'Most wickets'**
+  String get tournament_stats_most_wickets;
+
+  /// No description provided for @tournament_stats_best_fielder.
+  ///
+  /// In en, this message translates to:
+  /// **'Best fielder'**
+  String get tournament_stats_best_fielder;
+
+  /// No description provided for @tournament_stats_mvp_leader.
+  ///
+  /// In en, this message translates to:
+  /// **'Most valuable player'**
+  String get tournament_stats_mvp_leader;
+
+  /// No description provided for @tournament_stats_innings_sr.
+  ///
+  /// In en, this message translates to:
+  /// **'{innings, plural, =1{1 innings} other{{innings} innings}} · SR {sr}'**
+  String tournament_stats_innings_sr(int innings, String sr);
+
+  /// No description provided for @tournament_stats_best_economy.
+  ///
+  /// In en, this message translates to:
+  /// **'Best {best} · Econ {economy}'**
+  String tournament_stats_best_economy(String best, String economy);
+
+  /// No description provided for @tournament_stats_dismissals.
+  ///
+  /// In en, this message translates to:
+  /// **'Dismissals'**
+  String get tournament_stats_dismissals;
+
+  /// No description provided for @tournament_stats_catches.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 catch} other{{count} catches}}'**
+  String tournament_stats_catches(int count);
+
+  /// No description provided for @tournament_stats_mvp_formula.
+  ///
+  /// In en, this message translates to:
+  /// **'MVP points: 1 per run, +1 per four, +2 per six, +10 per fifty or hundred; 20 per wicket, 10 per maiden; 8 per catch, 10 per run out or stumping.'**
+  String get tournament_stats_mvp_formula;
+
+  /// No description provided for @tournament_record_highest_score.
+  ///
+  /// In en, this message translates to:
+  /// **'Highest individual score'**
+  String get tournament_record_highest_score;
+
+  /// No description provided for @tournament_record_best_average.
+  ///
+  /// In en, this message translates to:
+  /// **'Best batting average'**
+  String get tournament_record_best_average;
+
+  /// No description provided for @tournament_record_min_innings.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. {count} innings'**
+  String tournament_record_min_innings(int count);
+
+  /// No description provided for @tournament_record_best_strike_rate.
+  ///
+  /// In en, this message translates to:
+  /// **'Best strike rate'**
+  String get tournament_record_best_strike_rate;
+
+  /// No description provided for @tournament_record_min_balls.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. {count} balls'**
+  String tournament_record_min_balls(int count);
+
+  /// No description provided for @tournament_record_most_fours.
+  ///
+  /// In en, this message translates to:
+  /// **'Most fours'**
+  String get tournament_record_most_fours;
+
+  /// No description provided for @tournament_record_most_sixes.
+  ///
+  /// In en, this message translates to:
+  /// **'Most sixes'**
+  String get tournament_record_most_sixes;
+
+  /// No description provided for @tournament_record_best_bowling.
+  ///
+  /// In en, this message translates to:
+  /// **'Best bowling in a match'**
+  String get tournament_record_best_bowling;
+
+  /// No description provided for @tournament_record_best_economy.
+  ///
+  /// In en, this message translates to:
+  /// **'Best economy'**
+  String get tournament_record_best_economy;
+
+  /// No description provided for @tournament_record_min_overs.
+  ///
+  /// In en, this message translates to:
+  /// **'Min. {count} overs'**
+  String tournament_record_min_overs(int count);
+
+  /// No description provided for @tournament_overview_champions.
+  ///
+  /// In en, this message translates to:
+  /// **'Champions'**
+  String get tournament_overview_champions;
+
+  /// No description provided for @tournament_overview_recent_results.
+  ///
+  /// In en, this message translates to:
+  /// **'Recent results'**
+  String get tournament_overview_recent_results;
+
+  /// No description provided for @tournament_overview_top_performers.
+  ///
+  /// In en, this message translates to:
+  /// **'Top performers'**
+  String get tournament_overview_top_performers;
+
+  /// No description provided for @tournament_points_note.
+  ///
+  /// In en, this message translates to:
+  /// **'2 points for a win, 1 for a tie or no result. Teams level on points are ranked by net run rate (NRR). Top 4 qualify for the playoffs.'**
+  String get tournament_points_note;
+
+  /// No description provided for @tournament_team_owner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner: {name}'**
+  String tournament_team_owner(String name);
 }
 
 class _AppLocalizationsDelegate

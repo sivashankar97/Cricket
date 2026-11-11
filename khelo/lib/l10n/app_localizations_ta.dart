@@ -4930,4 +4930,298 @@ class AppLocalizationsTa extends AppLocalizations {
   @override
   String get mascot_fun_match_tied =>
       'ஆட்டம் சமன்ல முடிஞ்சிருக்கு! இரு அணிகளும் கடைசி வரை போராடிட்டாங்க!';
+
+  @override
+  String get tournament_col_player => 'Player';
+
+  @override
+  String get tournament_col_team => 'Team';
+
+  @override
+  String get tournament_col_innings => 'Inn';
+
+  @override
+  String get tournament_col_runs => 'Runs';
+
+  @override
+  String get tournament_col_highest => 'HS';
+
+  @override
+  String get tournament_col_average => 'Avg';
+
+  @override
+  String get tournament_col_strike_rate => 'SR';
+
+  @override
+  String get tournament_col_fours => '4s';
+
+  @override
+  String get tournament_col_sixes => '6s';
+
+  @override
+  String get tournament_col_fifties => '50s';
+
+  @override
+  String get tournament_col_hundreds => '100s';
+
+  @override
+  String get tournament_col_overs => 'Ov';
+
+  @override
+  String get tournament_col_maidens => 'Mdn';
+
+  @override
+  String get tournament_col_runs_conceded => 'Runs';
+
+  @override
+  String get tournament_col_wickets => 'Wkts';
+
+  @override
+  String get tournament_col_best => 'Best';
+
+  @override
+  String get tournament_col_economy => 'Econ';
+
+  @override
+  String get tournament_col_catches => 'Ct';
+
+  @override
+  String get tournament_col_run_outs => 'RO';
+
+  @override
+  String get tournament_col_stumpings => 'St';
+
+  @override
+  String get tournament_col_total => 'Total';
+
+  @override
+  String get tournament_col_points => 'Pts';
+
+  @override
+  String get tournament_col_bat => 'Bat';
+
+  @override
+  String get tournament_col_bowl => 'Bowl';
+
+  @override
+  String get tournament_col_field => 'Field';
+
+  @override
+  String get tournament_col_played => 'P';
+
+  @override
+  String get tournament_col_won => 'W';
+
+  @override
+  String get tournament_col_lost => 'L';
+
+  @override
+  String get tournament_col_nrr => 'NRR';
+
+  @override
+  String get tournament_col_form => 'Last 5';
+
+  @override
+  String get tournament_form_win => 'W';
+
+  @override
+  String get tournament_form_loss => 'L';
+
+  @override
+  String get tournament_form_tie => 'T';
+
+  @override
+  String get tournament_form_no_result => 'N';
+
+  @override
+  String get tournament_live_pill => 'Live';
+
+  @override
+  String get tournament_upcoming_pill => 'Upcoming';
+
+  @override
+  String get tournament_result_pill => 'Result';
+
+  @override
+  String get tournament_walkover_pill => 'Walkover';
+
+  @override
+  String get tournament_no_result_pill => 'No result';
+
+  @override
+  String tournament_match_number(int number) {
+    return 'Match $number';
+  }
+
+  @override
+  String tournament_won_by_walkover(String team) {
+    return '$team won by walkover';
+  }
+
+  @override
+  String get tournament_match_tied => 'Match tied';
+
+  @override
+  String tournament_won_by_runs(String team, int runs) {
+    String _temp0 = intl.Intl.pluralLogic(
+      runs,
+      locale: localeName,
+      other: '$runs runs',
+      one: '1 run',
+    );
+    return '$team won by $_temp0';
+  }
+
+  @override
+  String tournament_won_by_wickets(String team, int wickets) {
+    String _temp0 = intl.Intl.pluralLogic(
+      wickets,
+      locale: localeName,
+      other: '$wickets wickets',
+      one: '1 wicket',
+    );
+    return '$team won by $_temp0';
+  }
+
+  @override
+  String tournament_overs_short(String overs) {
+    return '($overs ov)';
+  }
+
+  @override
+  String get tournament_match_continue_scoring => 'Continue scoring';
+
+  @override
+  String get tournament_matches_completed_status => 'Completed';
+
+  @override
+  String get tournament_stat_matches_played => 'Played';
+
+  @override
+  String get tournament_stat_players => 'Players';
+
+  @override
+  String get tournament_stats_batting => 'Batting';
+
+  @override
+  String get tournament_stats_bowling => 'Bowling';
+
+  @override
+  String get tournament_stats_fielding => 'Fielding';
+
+  @override
+  String get tournament_stats_records => 'Records';
+
+  @override
+  String get tournament_stats_mvp => 'MVP';
+
+  @override
+  String get tournament_stats_loading => 'Crunching ball-by-ball stats…';
+
+  @override
+  String get tournament_stats_empty_title => 'No stats yet';
+
+  @override
+  String get tournament_stats_empty_description =>
+      'Player stats appear here once matches are completed.';
+
+  @override
+  String get tournament_stats_most_runs => 'Most runs';
+
+  @override
+  String get tournament_stats_most_wickets => 'Most wickets';
+
+  @override
+  String get tournament_stats_best_fielder => 'Best fielder';
+
+  @override
+  String get tournament_stats_mvp_leader => 'Most valuable player';
+
+  @override
+  String tournament_stats_innings_sr(int innings, String sr) {
+    String _temp0 = intl.Intl.pluralLogic(
+      innings,
+      locale: localeName,
+      other: '$innings innings',
+      one: '1 innings',
+    );
+    return '$_temp0 · SR $sr';
+  }
+
+  @override
+  String tournament_stats_best_economy(String best, String economy) {
+    return 'Best $best · Econ $economy';
+  }
+
+  @override
+  String get tournament_stats_dismissals => 'Dismissals';
+
+  @override
+  String tournament_stats_catches(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count catches',
+      one: '1 catch',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get tournament_stats_mvp_formula =>
+      'MVP points: 1 per run, +1 per four, +2 per six, +10 per fifty or hundred; 20 per wicket, 10 per maiden; 8 per catch, 10 per run out or stumping.';
+
+  @override
+  String get tournament_record_highest_score => 'Highest individual score';
+
+  @override
+  String get tournament_record_best_average => 'Best batting average';
+
+  @override
+  String tournament_record_min_innings(int count) {
+    return 'Min. $count innings';
+  }
+
+  @override
+  String get tournament_record_best_strike_rate => 'Best strike rate';
+
+  @override
+  String tournament_record_min_balls(int count) {
+    return 'Min. $count balls';
+  }
+
+  @override
+  String get tournament_record_most_fours => 'Most fours';
+
+  @override
+  String get tournament_record_most_sixes => 'Most sixes';
+
+  @override
+  String get tournament_record_best_bowling => 'Best bowling in a match';
+
+  @override
+  String get tournament_record_best_economy => 'Best economy';
+
+  @override
+  String tournament_record_min_overs(int count) {
+    return 'Min. $count overs';
+  }
+
+  @override
+  String get tournament_overview_champions => 'Champions';
+
+  @override
+  String get tournament_overview_recent_results => 'Recent results';
+
+  @override
+  String get tournament_overview_top_performers => 'Top performers';
+
+  @override
+  String get tournament_points_note =>
+      '2 points for a win, 1 for a tie or no result. Teams level on points are ranked by net run rate (NRR). Top 4 qualify for the playoffs.';
+
+  @override
+  String tournament_team_owner(String name) {
+    return 'Owner: $name';
+  }
 }

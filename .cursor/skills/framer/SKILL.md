@@ -12,10 +12,11 @@ Every component on the tournament pages (`khelo/lib/ui/flow/tournament/`) gets m
 
 | Need | Widget | Notes |
 |------|--------|-------|
-| Item appears | `FadeSlideIn(delay:)` | Fade + 6% slide up, once |
-| List / grid appears | `FadeSlideIn(delay: AppStagger.of(index))` | 40 ms step, capped at 8 items, so long lists don't drag |
-| Number appears | `CountUp(value:, decimals:, style:)` | Counts from 0 on first build; integers and decimals (NRR, SR, econ) |
-| Bar / progress | `GrowBar(fraction:, color:)` | Grows from 0 to `fraction` (0–1) |
+| Item appears | `FadeSlideIn(delay:)` (`fade_slide_in.dart`) | Fade + 6% slide up, once |
+| List / grid appears | `Appear(index:)` from `detail/components/tournament_widgets.dart`, i.e. `FadeSlideIn(delay: AppStagger.of(index))` | 40 ms step, capped at 8 items, so long lists don't drag |
+| Number appears | `CountUp(value:, decimals:, style:, format:)` (`motion.dart`) | Counts from 0 on first build; integers and decimals (NRR, SR, econ) |
+| Bar / progress | `GrowBar(fraction:, color:)` (`motion.dart`) | Grows from 0 to `fraction` (0–1) |
+| Stacked bar / any content | `GrowIn(child:, delay:)` (`motion.dart`) | Reveals the child from the left as one piece |
 | Tappable card or row | `OnTapScale(onTap:)` | Scales to 0.96 while pressed |
 | Content swaps (tabs, filters, sub-tabs) | `AnimatedSwitcher(duration: AppAnimations.fast)` with a `ValueKey` per state | Fade between states, never a hard cut |
 | Tab change | `PageController.animateToTab` | Already in `app_animations.dart` |
@@ -28,7 +29,7 @@ Timing comes only from `AppAnimations` (`fast` 250 ms, `normal` 380 ms, `slow` 4
 3. **Stagger by position** with `AppStagger.of(index)`; cap at 8 so items after the 8th appear together.
 4. **Numbers count up** (runs, wickets, points, NRR, strike rate). Keep the final text identical to the static version, e.g. `+1.28`, `176.1`.
 5. **Bars grow** for comparisons (team runs, MVP point splits, form, progress such as "matches played 32 / 32").
-6. **Respect reduced motion:** the shared widgets skip animation when `MediaQuery.disableAnimationsOf(context)` is true. New helpers must do the same.
+6. **Respect reduced motion:** the shared widgets skip animation when `MediaQuery.maybeDisableAnimationsOf(context)` is true. New helpers must do the same.
 7. **Taps:** wrap tappable cards in `OnTapScale`; keep `InkWell` ripples off cards that already scale.
 8. **No layout jumps:** animate opacity / transform only; reserve the final size up front.
 9. **Colours stay on theme:** motion never introduces new colours. Use `context.colorScheme` (navy / red / white, green only for success). See the vault's `Design System.md`.

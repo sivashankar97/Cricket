@@ -1,21 +1,29 @@
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:data/api/match/match_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
+import 'package:khelo/domain/extensions/enum_extensions.dart';
 import 'package:khelo/domain/formatter/date_formatter.dart';
-import 'package:style/extensions/context_extensions.dart';
+import 'package:style/animations/fade_slide_in.dart';
+import 'package:style/animations/motion.dart';
 import 'package:style/text/app_text_style.dart';
+import 'package:style/theme/colors.dart';
 
+import '../../../../../components/app_image_provider.dart';
 import '../../../../../components/image_avatar.dart';
-import '../../../../../gen/assets.gen.dart';
+import 'tournament_widgets.dart';
 
+/// Tournament hero: cover, logo, name, format, dates, status and stat tiles.
 class FlexibleSpace extends StatefulWidget {
+  static const expandedHeight = 392.0;
+
   final TournamentModel tournament;
+  final List<MatchModel> matches;
 
   const FlexibleSpace({
     super.key,
     required this.tournament,
+    required this.matches,
   });
 
   @override
@@ -23,69 +31,59 @@ class FlexibleSpace extends StatefulWidget {
 }
 
 class _FlexibleSpaceState extends State<FlexibleSpace> {
+  String? _bannerUrl;
+  ImageProvider? _banner;
+
+  ImageProvider? get banner {
+    final url = widget.tournament.banner_img_url;
+    if (url != _bannerUrl) {
+      _bannerUrl = url;
+      _banner = url == null ? null : appImageProvider(url);
+    }
+    return _banner;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final hasBanner = widget.tournament.banner_img_url != null;
-
-    return LayoutBuilder(
-        builder: (BuildContext context, BoxConstraints constraints) {
+    return LayoutBuilder(builder: (context, constraints) {
       final isCollapsed = constraints.biggest.height < 150;
-
       return FlexibleSpaceBar(
         centerTitle: true,
-        title: isCollapsed
-            ? AnimatedOpacity(
-                opacity: isCollapsed ? 1 : 0,
-                duration: const Duration(milliseconds: 100),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 64, right: 84),
-                  child: Text(
-                    widget.tournament.name,
-                    style: AppTextStyle.header2.copyWith(
-                      color: context.colorScheme.textPrimary,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                    textScaler: TextScaler.noScaling,
-                  ),
-                ),
-              )
-            : null,
-        background: Stack(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: context.colorScheme.primary,
-                image: (widget.tournament.banner_img_url != null)
-                    ? DecorationImage(
-                        image: CachedNetworkImageProvider(
-                            widget.tournament.banner_img_url ?? ''),
-                        fit: BoxFit.fill,
-                      )
-                    : null,
-              ),
-              child: (widget.tournament.banner_img_url == null)
-                  ? Center(
-                      child: SvgPicture.asset(
-                        Assets.images.icTournaments,
-                        height: 40,
-                        width: 40,
-                        colorFilter: ColorFilter.mode(
-                          context.colorScheme.onPrimary,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    )
-                  : null,
+        title: AnimatedOpacity(
+          opacity: isCollapsed ? 1 : 0,
+          duration: const Duration(milliseconds: 150),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 64, right: 84),
+            child: Text(
+              widget.tournament.name,
+              style: AppTextStyle.header2.copyWith(color: Colors.white),
+              overflow: TextOverflow.ellipsis,
+              textScaler: TextScaler.noScaling,
             ),
-            if (hasBanner)
-              Container(color: Colors.black.withValues(alpha: 0.4)),
+          ),
+        ),
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            _cover(),
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x66010127), Color(0xF2010127)],
+                  stops: [0, 0.62],
+                ),
+              ),
+            ),
             Positioned(
               left: 16,
-              bottom: 24,
+              right: 16,
+              bottom: 16,
               child: AnimatedOpacity(
                 opacity: isCollapsed ? 0 : 1,
-                duration: const Duration(milliseconds: 100),
-                child: _profileView(context, widget.tournament),
+                duration: const Duration(milliseconds: 150),
+                child: MediaQuery.withNoTextScaling(child: _details(context)),
               ),
             ),
           ],
@@ -94,61 +92,178 @@ class _FlexibleSpaceState extends State<FlexibleSpace> {
     });
   }
 
-  Widget _profileView(BuildContext context, TournamentModel tournament) {
-    final (title, subtitle) = getTextColors();
+  Widget _cover() {
+    final image = banner;
+    if (image == null) {
+      return Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [brandNavyColor, Color(0xFF12124A)],
+          ),
+        ),
+        alignment: const Alignment(0.7, -0.4),
+        child: Container(
+          width: 140,
+          height: 140,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: brandRedColor.withValues(alpha: 0.35),
+          ),
+        ),
+      );
+    }
+    return FadeSlideIn(
+      child: Image(image: image, fit: BoxFit.cover, gaplessPlayback: true),
+    );
+  }
+
+  Widget _details(BuildContext context) {
+    final t = widget.tournament;
+    final status = t.getTournamentStatus(widget.matches);
+    final played = widget.matches
+        .where((m) =>
+            m.match_status == MatchStatus.finish ||
+            m.match_status == MatchStatus.abandoned)
+        .length;
+    final players =
+        t.teams.fold<int>(0, (sum, team) => sum + team.players.length);
+    final white70 = Colors.white.withValues(alpha: 0.72);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        ImageAvatar(
-          initial: tournament.name.characters.first.toUpperCase(),
-          size: 80,
-          imageUrl: tournament.profile_img_url,
-          border: Border.all(
-            color: context.colorScheme.outline,
-            width: 1.5,
+        FadeSlideIn(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              ImageAvatar(
+                initial: t.name.characters.first.toUpperCase(),
+                imageUrl: t.profile_img_url,
+                size: 68,
+                border: Border.all(color: Colors.white, width: 2),
+                backgroundColor: Colors.white,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    StatusPill(
+                      status.getString(context),
+                      color: status == TournamentStatus.finish
+                          ? Colors.white
+                          : brandRedColor,
+                      dot: status == TournamentStatus.running,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      t.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyle.header1.copyWith(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          backgroundColor: context.colorScheme.onPrimary,
         ),
-        const SizedBox(height: 16),
-        SizedBox(
-          width: context.mediaQuerySize.width - 32,
+        const SizedBox(height: 8),
+        FadeSlideIn(
+          delay: AppStagger.of(1),
           child: Text(
-            tournament.name,
-            style: AppTextStyle.header1.copyWith(
-              color: title,
-            ),
-            overflow: TextOverflow.ellipsis,
-            textScaler: TextScaler.noScaling,
-            maxLines: 2,
+            '${t.type.getString(context)}  ·  ${DateFormatter.formatDateRange(
+              context,
+              startDate: t.start_date,
+              endDate: t.end_date,
+              formatType: DateFormatType.dayMonth,
+            )}',
+            style: AppTextStyle.body2.copyWith(color: white70),
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 14),
         Row(
           children: [
-            SvgPicture.asset(
-              Assets.images.icCalendar,
-              height: 24,
-              width: 24,
-              colorFilter: ColorFilter.mode(
-                subtitle,
-                BlendMode.srcIn,
+            _tile(context, 2, context.l10n.common_teams_title,
+                CountUp(value: t.teams.length, style: _tileValue)),
+            const SizedBox(width: 8),
+            _tile(
+              context,
+              3,
+              context.l10n.tournament_stat_matches_played,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
+                children: [
+                  CountUp(value: played, style: _tileValue),
+                  Text(' / ${widget.matches.length}',
+                      style: AppTextStyle.caption.copyWith(color: white70)),
+                ],
               ),
+              progress: widget.matches.isEmpty
+                  ? null
+                  : played / widget.matches.length,
             ),
             const SizedBox(width: 8),
-            Text(
-              context.l10n.tournament_detail_start_from_title(tournament
-                  .start_date
-                  .format(context, DateFormatType.dayMonth)),
-              style: AppTextStyle.body1.copyWith(
-                color: subtitle,
-              ),
-            ),
+            _tile(context, 4, context.l10n.tournament_stat_players,
+                CountUp(value: players, style: _tileValue)),
           ],
-        )
+        ),
       ],
     );
   }
 
-  (Color, Color) getTextColors() =>
-      (Colors.white, Colors.white.withValues(alpha: 0.86));
+  static final _tileValue =
+      AppTextStyle.header3.copyWith(color: Colors.white, height: 1.1);
+
+  Widget _tile(
+    BuildContext context,
+    int index,
+    String label,
+    Widget value, {
+    double? progress,
+  }) {
+    return Expanded(
+      child: FadeSlideIn(
+        delay: AppStagger.of(index),
+        child: Container(
+          height: 74,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyle.caption.copyWith(
+                  color: Colors.white.withValues(alpha: 0.6),
+                  fontSize: 10,
+                  letterSpacing: 0.6,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              value,
+              if (progress != null)
+                GrowBar(
+                  fraction: progress,
+                  color: brandRedColor,
+                  trackColor: Colors.white.withValues(alpha: 0.15),
+                  height: 4,
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

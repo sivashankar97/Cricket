@@ -8,6 +8,7 @@ import '../../api/team/team_model.dart';
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
 import '../../extensions/list_extensions.dart';
+import '../../utils/combine_latest.dart';
 import '../../utils/constant/firestore_constant.dart';
 import '../../utils/dummy_deactivated_account.dart';
 import '../team/team_service.dart';
@@ -756,7 +757,20 @@ class MatchService {
     }
   }
 
+  /// Firestore allows at most 30 values in a `whereIn` query, so larger
+  /// lists are queried in chunks and merged.
   Stream<List<MatchModel>> streamMatchesByIds(List<String> matchIds) {
+    final ids = matchIds.toSet().toList();
+    if (ids.length <= 30) return _streamMatchChunk(ids);
+    final streams = ids.chunked(30).map(_streamMatchChunk).toList();
+    return streams.skip(1).fold(
+          streams.first,
+          (merged, next) => combineLatest2(merged, next)
+              .map((lists) => [...lists.$1, ...lists.$2]),
+        );
+  }
+
+  Stream<List<MatchModel>> _streamMatchChunk(List<String> matchIds) {
     try {
       if (matchIds.isEmpty) return Stream.value([]);
       return _matchCollection

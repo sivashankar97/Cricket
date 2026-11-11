@@ -7,6 +7,7 @@ import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/tournament/components/sliver_header_delegate.dart';
 import 'package:khelo/ui/flow/tournament/detail/components/delete_tournament_dialog.dart';
 import 'package:khelo/ui/flow/tournament/detail/components/flexible_space.dart';
+import 'package:khelo/ui/flow/tournament/detail/summary/tournament_summary_provider.dart';
 import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_matches_tab.dart';
 import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_overview_tab.dart';
 import 'package:khelo/ui/flow/tournament/detail/tabs/tournament_detail_points_table_tab.dart';
@@ -16,12 +17,14 @@ import 'package:khelo/ui/flow/tournament/detail/tournament_detail_view_model.dar
 import 'package:khelo/ui/flow/tournament/team_picker/tournament_team_picker_view_model.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:style/animations/app_animations.dart';
+import 'package:style/animations/fade_slide_in.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/platform.dart';
 import 'package:style/button/more_option_button.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/theme/colors.dart';
 
 import '../../../../components/action_bottom_sheet.dart';
 import '../../../../components/app_page.dart';
@@ -60,6 +63,17 @@ class _TournamentDetailScreenState
       initialPage: ref.read(tournamentDetailStateProvider).selectedTab,
     );
     runPostFrame(() => notifier.setData(widget.tournamentId));
+    // Tabs are disposed when off screen; keep the shared data loaded so
+    // switching tabs doesn't refetch every ball.
+    for (final provider in [
+      tournamentSummaryProvider,
+      tournamentSummaryLoadingProvider,
+      tournamentMatchExtrasProvider,
+      tournamentTeamExtrasProvider,
+      tournamentPlayerPhotosProvider,
+    ]) {
+      ref.listenManual(provider, (_, __) {});
+    }
   }
 
   void _observeActionError(BuildContext context) {
@@ -109,10 +123,14 @@ class _TournamentDetailScreenState
         return [
           SliverAppBar(
             pinned: true,
-            expandedHeight: 300,
-            backgroundColor: context.colorScheme.surface,
+            expandedHeight: FlexibleSpace.expandedHeight,
+            backgroundColor: brandNavyColor,
+            surfaceTintColor: Colors.transparent,
             leading: _backButton(context),
-            flexibleSpace: FlexibleSpace(tournament: state.tournament!),
+            flexibleSpace: FlexibleSpace(
+              tournament: state.tournament!,
+              matches: state.matches,
+            ),
             actions: [
               _shareButton(
                 context,
@@ -125,8 +143,8 @@ class _TournamentDetailScreenState
                 moreOptionButton(
                   context,
                   size: 20,
-                  backgroundColor: context.colorScheme.containerHighOnSurface
-                      .withValues(alpha: 0.4),
+                  backgroundColor: Colors.white.withValues(alpha: 0.16),
+                  tintColor: Colors.white,
                   onPressed: () => _moreActionButton(context, state),
                 )
               ],
@@ -135,7 +153,7 @@ class _TournamentDetailScreenState
           SliverPersistentHeader(
             pinned: true,
             delegate: SliverPersistentDelegate(
-              child: _tabSelection(context),
+              child: FadeSlideIn(child: _tabSelection(context)),
               size: 70,
             ),
           ),
@@ -155,18 +173,14 @@ class _TournamentDetailScreenState
           TournamentDetailOverviewTab(
             controller: _controller,
           ),
-          TournamentDetailTeamsTab(
-            onSelected: notifier.onTeamsSelected,
-          ),
           TournamentDetailMatchesTab(
             onMatchFilter: notifier.onMatchFilter,
             onAddMatchTap: () => _handleAddMatchTap(context, state),
           ),
-          TournamentDetailPointsTableTab(
-            teamStats: state.teamStats,
-          ),
-          TournamentDetailStatsTab(
-            onFiltered: notifier.onStatFilter,
+          const TournamentDetailPointsTableTab(),
+          const TournamentDetailStatsTab(),
+          TournamentDetailTeamsTab(
+            onSelected: notifier.onTeamsSelected,
           ),
         ],
       ),
@@ -176,10 +190,10 @@ class _TournamentDetailScreenState
   Widget _tabSelection(BuildContext context) {
     final tabs = [
       context.l10n.tournament_detail_overview_tab,
-      context.l10n.common_teams_title,
       context.l10n.common_matches_title,
       context.l10n.tournament_detail_points_table_tab,
       context.l10n.common_stats_title,
+      context.l10n.common_teams_title,
     ];
 
     return SingleChildScrollView(
@@ -282,12 +296,11 @@ class _TournamentDetailScreenState
         onPressed: context.pop,
         icon: CircleAvatar(
           radius: 16,
-          backgroundColor:
-              context.colorScheme.containerHighOnSurface.withValues(alpha: 0.4),
+          backgroundColor: Colors.white.withValues(alpha: 0.16),
           child: Icon(
             isIOS ? Icons.arrow_back_ios_new : Icons.arrow_back,
             size: 20,
-            color: context.colorScheme.textPrimary,
+            color: Colors.white,
           ),
         ));
   }
@@ -298,12 +311,11 @@ class _TournamentDetailScreenState
       onPressed: onShareTap,
       icon: CircleAvatar(
         radius: 16,
-        backgroundColor:
-            context.colorScheme.containerHighOnSurface.withValues(alpha: 0.4),
+        backgroundColor: Colors.white.withValues(alpha: 0.16),
         child: Icon(
           isIOS ? Icons.share : Icons.share_outlined,
           size: 20,
-          color: context.colorScheme.textPrimary,
+          color: Colors.white,
         ),
       ),
     );
