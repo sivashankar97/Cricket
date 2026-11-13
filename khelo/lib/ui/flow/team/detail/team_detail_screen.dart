@@ -22,7 +22,7 @@ import 'package:style/button/more_option_button.dart';
 import 'package:style/button/secondary_button.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 
 import '../../../../main.dart';
@@ -143,7 +143,7 @@ class _TeamDetailScreenState extends ConsumerState<TeamDetailScreen> {
 
   Widget _body(BuildContext context, TeamDetailState state) {
     if (state.loading) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonDetail();
     }
     if (state.error != null) {
       return ErrorScreen(

@@ -106,25 +106,24 @@ class UserService {
   }
 
   Future<List<UserModel>> getUsersByIds(List<String> ids) async {
-    final List<UserModel> users = [];
     try {
       if (ids.isEmpty) return [];
-      for (final tenIds in ids.chunked(10)) {
-        final snapshot =
-            await _userRef.where(FireStoreConst.id, whereIn: tenIds).get();
-
-        users.addAll(snapshot.docs.map((user) => user.data()).toList());
-
-        final deactivatedUserIds =
-            tenIds.where((id) => !users.map((user) => user.id).contains(id));
-        users.addAll(
-          deactivatedUserIds.map(
-            (id) => deActiveDummyUserAccount(id),
-          ),
-        );
-      }
-
-      return users;
+      final chunks = await Future.wait(
+        ids.toSet().toList().chunked(30).map((chunkIds) async {
+          final snapshot =
+              await _userRef.where(FireStoreConst.id, whereIn: chunkIds).get();
+          final found = {
+            for (final doc in snapshot.docs) doc.data().id: doc.data(),
+          };
+          return [
+            ...found.values,
+            ...chunkIds
+                .where((id) => !found.containsKey(id))
+                .map(deActiveDummyUserAccount),
+          ];
+        }),
+      );
+      return chunks.expand((users) => users).toList();
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }

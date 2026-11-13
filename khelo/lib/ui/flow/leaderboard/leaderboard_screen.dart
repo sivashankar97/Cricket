@@ -14,6 +14,7 @@ import 'package:style/callback/on_visible_callback.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/theme/shadows.dart';
 import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 
 import '../../../components/empty_screen.dart';
@@ -138,7 +139,7 @@ class _LeaderboardScreenState extends ConsumerState<LeaderboardScreen> {
             ? state.bowlingLeaderboard
             : state.fieldingLeaderboard;
     if (state.loading && players.isEmpty) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonList();
     } else if (state.error != null) {
       return ErrorScreen(
         error: state.error,

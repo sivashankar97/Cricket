@@ -15,7 +15,7 @@ import 'package:style/button/action_button.dart';
 import 'package:style/button/secondary_button.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 
 import 'component/user_detail_batting_content.dart';
@@ -116,7 +116,7 @@ class _UserDetailScreenState extends ConsumerState<UserDetailScreen> {
 
   Widget _body(BuildContext context, UserDetailViewState state) {
     if (state.loading) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonDetail();
     }
     if (state.error != null) {
       return ErrorScreen(

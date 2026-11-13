@@ -16,7 +16,7 @@ import 'package:style/button/bottom_sticky_overlay.dart';
 import 'package:style/button/more_option_button.dart';
 import 'package:style/button/primary_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/shadows.dart';
 import 'package:khelo/components/mascot/mascot_on_appear.dart';
@@ -61,7 +61,7 @@ class TournamentTeamPlayersScreen extends ConsumerWidget {
       ],
       body: Builder(builder: (context) {
         if (state.loading && team == null) {
-          return const Center(child: AppProgressIndicator());
+          return const SkeletonList();
         }
         if (team == null) {
           return ErrorScreen(error: state.error, onRetryTap: notifier.load);

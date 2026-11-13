@@ -13,7 +13,7 @@ import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/text/search_text_field.dart';
 
@@ -82,7 +82,7 @@ class _TournamentTeamListScreenState
   Widget _body(BuildContext context, TournamentTeamListState state) {
     final teams = state.poolTeams;
     if (state.loading && teams.isEmpty) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonList();
     }
     if (state.error != null && teams.isEmpty) {
       return ErrorScreen(error: state.error, onRetryTap: _notifier.load);
@@ -139,7 +139,8 @@ class _TournamentTeamListScreenState
   ) {
     return TournamentTeamTile(
       team: team,
-      onTap: () => AppRoute.tournamentTeamPlayers(teamId: team.id).push(context),
+      onTap: () =>
+          AppRoute.tournamentTeamPlayers(teamId: team.id).push(context),
       trailing: IconButton(
         tooltip: context.l10n.team_pools_team_actions,
         icon: Icon(

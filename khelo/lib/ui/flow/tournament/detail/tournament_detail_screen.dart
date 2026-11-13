@@ -23,7 +23,7 @@ import 'package:style/platform.dart';
 import 'package:style/button/more_option_button.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/theme/colors.dart';
 
 import '../../../../components/action_bottom_sheet.dart';
@@ -101,7 +101,7 @@ class _TournamentDetailScreenState
 
   Widget _body(BuildContext context, TournamentDetailState state) {
     if (state.loading) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonDetail(headerHeight: 220);
     }
     if (state.error != null) {
       return ErrorScreen(

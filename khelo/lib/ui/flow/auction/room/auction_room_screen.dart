@@ -15,7 +15,7 @@ import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 
@@ -73,7 +73,7 @@ class _AuctionRoomScreenState extends ConsumerState<AuctionRoomScreen>
       return AppPage(
         title: context.l10n.auction_screen_title,
         body: state.isLoading
-            ? const Center(child: AppProgressIndicator())
+            ? const SkeletonDetail()
             : state.hasError
                 ? ErrorScreen(
                     error: state.error,
@@ -87,7 +87,8 @@ class _AuctionRoomScreenState extends ConsumerState<AuctionRoomScreen>
                         context.l10n.auction_not_found,
                         textAlign: TextAlign.center,
                         style: AppTextStyle.body1.copyWith(
-                            color: context.colorScheme.textSecondary,),
+                          color: context.colorScheme.textSecondary,
+                        ),
                       ),
                     ),
                   ),
@@ -103,14 +104,17 @@ class _AuctionRoomScreenState extends ConsumerState<AuctionRoomScreen>
             : IconButton(
                 tooltip: context.l10n.auction_home,
                 onPressed: () => AppRoute.main.go(context),
-                icon: Icon(CupertinoIcons.house,
-                    color: context.colorScheme.textPrimary,),
+                icon: Icon(
+                  CupertinoIcons.house,
+                  color: context.colorScheme.textPrimary,
+                ),
               ),
         actions: [
           IconButton(
             tooltip: context.l10n.auction_share,
             onPressed: () => _copyLink(auction),
-            icon: Icon(CupertinoIcons.link, color: context.colorScheme.textPrimary),
+            icon: Icon(CupertinoIcons.link,
+                color: context.colorScheme.textPrimary),
           ),
           if (isAdmin) _menu(context, auction, uid),
         ],
@@ -119,7 +123,8 @@ class _AuctionRoomScreenState extends ConsumerState<AuctionRoomScreen>
             TabBar(
               isScrollable: true,
               tabAlignment: TabAlignment.start,
-              labelStyle: AppTextStyle.subtitle2.copyWith(fontWeight: FontWeight.w700),
+              labelStyle:
+                  AppTextStyle.subtitle2.copyWith(fontWeight: FontWeight.w700),
               tabs: [
                 Tab(text: context.l10n.auction_tab_live),
                 Tab(text: context.l10n.auction_tab_teams),
@@ -149,7 +154,8 @@ class _AuctionRoomScreenState extends ConsumerState<AuctionRoomScreen>
             AuctionPhoto(
               photoId: auction.bannerPhotoId,
               hasPhoto: true,
-              fallback: auction.name.isEmpty ? '?' : auction.name[0].toUpperCase(),
+              fallback:
+                  auction.name.isEmpty ? '?' : auction.name[0].toUpperCase(),
               size: 34,
               radius: 8,
             ),
@@ -169,8 +175,10 @@ class _AuctionRoomScreenState extends ConsumerState<AuctionRoomScreen>
       );
 
   Future<void> _copyLink(Auction auction) async {
-    final origin = kIsWeb ? Uri.base.origin : 'https://khelo-hexshankar.web.app';
-    await Clipboard.setData(ClipboardData(text: '$origin/#/auction/${auction.id}'));
+    final origin =
+        kIsWeb ? Uri.base.origin : 'https://khelo-hexshankar.web.app';
+    await Clipboard.setData(
+        ClipboardData(text: '$origin/#/auction/${auction.id}'));
     if (mounted) showSnackBar(context, context.l10n.auction_link_copied);
   }
 

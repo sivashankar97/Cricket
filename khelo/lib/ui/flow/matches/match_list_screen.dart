@@ -9,6 +9,7 @@ import 'package:khelo/ui/app_route.dart';
 import 'package:style/callback/on_visible_callback.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:khelo/components/mascot/mascot_on_appear.dart';
 import 'package:khelo/components/mascot/mascot_reactions.dart';
 
@@ -55,7 +56,7 @@ class _MatchListScreenState extends ConsumerState<MatchListScreen>
     MatchListViewState state,
   ) {
     if (state.loading && state.matches.isEmpty) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonCards();
     }
     if (state.error != null && state.matches.isEmpty) {
       return ErrorScreen(

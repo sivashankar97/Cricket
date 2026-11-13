@@ -16,6 +16,7 @@ import 'package:khelo/ui/flow/team/tournament_teams/components/tournament_teams_
 import 'package:style/callback/on_visible_callback.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 
 import '../../../domain/extensions/widget_extension.dart';
@@ -62,7 +63,7 @@ class _TeamListScreenState extends ConsumerState<TeamListScreen>
   Widget _body(BuildContext context) {
     final state = ref.watch(teamListViewStateProvider);
     if (state.loading && state.teams.isEmpty) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonList();
     }
     if (state.error != null && state.teams.isEmpty) {
       return ErrorScreen(

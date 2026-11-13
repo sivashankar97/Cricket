@@ -11,7 +11,7 @@ import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:style/button/action_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/text/search_text_field.dart';
 
@@ -54,7 +54,8 @@ class _TeamPoolListScreenState extends ConsumerState<TeamPoolListScreen> {
         actionButton(
           context,
           onPressed: () => TeamPoolFormSheet.show(context),
-          icon: Icon(CupertinoIcons.add, color: context.colorScheme.textPrimary),
+          icon:
+              Icon(CupertinoIcons.add, color: context.colorScheme.textPrimary),
         ),
       ],
       body: Builder(builder: (context) => _body(context, state)),
@@ -64,7 +65,7 @@ class _TeamPoolListScreenState extends ConsumerState<TeamPoolListScreen> {
   Widget _body(BuildContext context, TeamPoolListState state) {
     final hasData = state.pools.isNotEmpty || state.teams.isNotEmpty;
     if (state.loading && !hasData) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonCards(height: 96);
     }
     if (state.error != null && !hasData) {
       return ErrorScreen(error: state.error, onRetryTap: _notifier.load);
@@ -121,7 +122,8 @@ class _TeamPoolListScreenState extends ConsumerState<TeamPoolListScreen> {
     );
   }
 
-  Widget _poolTile(BuildContext context, TeamPoolListState state, TeamPool pool) {
+  Widget _poolTile(
+      BuildContext context, TeamPoolListState state, TeamPool pool) {
     final cs = context.colorScheme;
     final teams = state.teamsIn(pool.id);
     return TeamPoolTile(

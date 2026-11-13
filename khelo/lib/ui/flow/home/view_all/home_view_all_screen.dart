@@ -10,6 +10,7 @@ import 'package:khelo/ui/flow/home/view_all/home_view_all_view_model.dart';
 import 'package:style/callback/on_visible_callback.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 
 import '../../../../components/error_screen.dart';
 import '../components/tournament_item.dart';
@@ -57,7 +58,7 @@ class _HomeViewAllScreenState extends ConsumerState<HomeViewAllScreen> {
     final state = ref.watch(homeViewAllViewProvider);
 
     if (state.loading) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonCards();
     }
     if (state.error != null) {
       return ErrorScreen(

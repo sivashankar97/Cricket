@@ -10,7 +10,7 @@ import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 import 'package:style/theme/shadows.dart';
@@ -75,9 +75,11 @@ class AuctionScreen extends ConsumerWidget {
                 ...completed.map((a) => AuctionTile(auction: a)),
               ],
               if (publishedAsync.isLoading && published.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.all(32),
-                  child: Center(child: AppProgressIndicator()),
+                const SkeletonCards(
+                  itemCount: 3,
+                  height: 88,
+                  shrinkWrap: true,
+                  padding: EdgeInsets.symmetric(vertical: 12),
                 )
               else if (mine.isEmpty && published.isEmpty)
                 Container(

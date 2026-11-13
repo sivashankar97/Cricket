@@ -9,7 +9,7 @@ import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/error_snackbar.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_field.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/shadows.dart';
@@ -55,7 +55,7 @@ class _AuctionRetainedScreenState extends ConsumerState<AuctionRetainedScreen> {
   Widget build(BuildContext context) {
     final auction = ref.watch(auctionProvider(widget.auctionId)).valueOrNull;
     if (auction == null) {
-      return const AppPage(body: Center(child: AppProgressIndicator()));
+      return const AppPage(body: SkeletonList());
     }
     final cs = context.colorScheme;
     final editable = auction.status.isSetup;
@@ -154,8 +154,13 @@ class _AuctionRetainedScreenState extends ConsumerState<AuctionRetainedScreen> {
                   ? TextButton(
                       onPressed: _busy
                           ? null
-                          : () => _run(() => _service.release(
-                              auction.id, _userId, player.id,),),
+                          : () => _run(
+                                () => _service.release(
+                                  auction.id,
+                                  _userId,
+                                  player.id,
+                                ),
+                              ),
                       child: Text(
                         context.l10n.auction_release,
                         style: TextStyle(color: cs.alert),
@@ -207,12 +212,14 @@ class _AuctionRetainedScreenState extends ConsumerState<AuctionRetainedScreen> {
       ),
     ).whenComplete(controller.dispose);
     if (price == null) return;
-    await _run(() => _service.retain(
-          auctionId: auction.id,
-          userId: _userId,
-          playerId: player.id,
-          teamId: team.id,
-          price: price,
-        ),);
+    await _run(
+      () => _service.retain(
+        auctionId: auction.id,
+        userId: _userId,
+        playerId: player.id,
+        teamId: team.id,
+        price: price,
+      ),
+    );
   }
 }

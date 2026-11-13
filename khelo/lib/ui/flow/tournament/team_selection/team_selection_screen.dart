@@ -9,6 +9,7 @@ import 'package:khelo/ui/flow/tournament/team_selection/team_selection_view_mode
 import 'package:style/button/action_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/text/search_text_field.dart';
 import 'package:style/widgets/rounded_check_box.dart';
@@ -112,7 +113,7 @@ class _TeamSelectionScreenState extends ConsumerState<TeamSelectionScreen> {
 
   Widget _teamList(BuildContext context, TeamSelectionViewState state) {
     if (state.loading) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonList();
     }
 
     if (state.error != null) {

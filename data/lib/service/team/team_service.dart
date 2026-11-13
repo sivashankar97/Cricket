@@ -7,6 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import '../../api/team/team_model.dart';
 import '../../api/user/user_models.dart';
 import '../../errors/app_error.dart';
+import '../../extensions/list_extensions.dart';
 import '../../extensions/string_extensions.dart';
 import '../../utils/constant/firestore_constant.dart';
 import '../../utils/dummy_deactivated_account.dart';
@@ -314,16 +315,19 @@ class TeamService {
 
   Future<List<TeamModel>> getTeamsByIds(List<String> teamIds) async {
     try {
-      return await _teamsCollection
-          .where(FieldPath.documentId, whereIn: teamIds)
-          .get()
-          .then((snapshot) async {
-        final teams = await Future.wait(
-          snapshot.docs.map((mainDoc) => fetchDetailsOfTeam(mainDoc.data())),
-        );
-
-        return teams;
-      });
+      if (teamIds.isEmpty) return [];
+      final snapshots = await Future.wait(
+        teamIds.toSet().toList().chunked(30).map(
+              (ids) => _teamsCollection
+                  .where(FieldPath.documentId, whereIn: ids)
+                  .get(),
+            ),
+      );
+      return await Future.wait(
+        snapshots
+            .expand((snapshot) => snapshot.docs)
+            .map((mainDoc) => fetchDetailsOfTeam(mainDoc.data())),
+      );
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }

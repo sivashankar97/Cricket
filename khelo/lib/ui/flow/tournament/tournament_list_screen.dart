@@ -11,7 +11,7 @@ import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/tournament/tournament_list_view_model.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 import 'package:style/theme/shadows.dart';
@@ -59,7 +59,7 @@ class _TournamentListScreenState extends ConsumerState<TournamentListScreen>
   Widget _body(BuildContext context) {
     final state = ref.watch(tournamentListViewStateProvider);
     if (state.loading) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonCards(height: 180);
     }
     if (state.error != null) {
       return ErrorScreen(

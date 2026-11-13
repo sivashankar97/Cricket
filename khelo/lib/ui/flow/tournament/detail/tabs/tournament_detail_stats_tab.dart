@@ -5,7 +5,7 @@ import 'package:style/animations/app_animations.dart';
 import 'package:style/animations/motion.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 
 import '../../../../../components/empty_screen.dart';
@@ -44,19 +44,18 @@ class _TournamentDetailStatsTabState
 
     if (summary.batting.isEmpty && summary.bowling.isEmpty) {
       if (loading) {
-        return Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const AppProgressIndicator(),
-              const SizedBox(height: 12),
-              Text(
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Text(
                 context.l10n.tournament_stats_loading,
                 style: AppTextStyle.body2
                     .copyWith(color: context.colorScheme.textSecondary),
               ),
-            ],
-          ),
+            ),
+            const Expanded(child: SkeletonList(itemCount: 6)),
+          ],
         );
       }
       return EmptyScreen(

@@ -20,7 +20,7 @@ import 'package:style/button/bottom_sticky_overlay.dart';
 import 'package:style/button/primary_button.dart';
 import 'package:style/button/secondary_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/text/search_text_field.dart';
 import 'package:style/widgets/rounded_check_box.dart';
@@ -122,7 +122,7 @@ class _TournamentTeamPickerScreenState
 
   Widget _body(BuildContext context, TournamentTeamPickerState state) {
     if (state.loading && !state.hasAnything) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonList();
     }
     if (state.error != null && !state.hasAnything) {
       return ErrorScreen(error: state.error, onRetryTap: _notifier.load);

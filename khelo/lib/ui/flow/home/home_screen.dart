@@ -22,7 +22,7 @@ import 'package:khelo/ui/flow/home/global_cricket/global_cricket_section.dart';
 import 'package:khelo/ui/flow/home/home_view_model.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 import 'package:style/theme/shadows.dart';
@@ -171,13 +171,73 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  Widget _loadingSkeleton(BuildContext context) {
+    Widget header() => const Padding(
+          padding: EdgeInsets.fromLTRB(16, 20, 16, 12),
+          child: Row(
+            children: [
+              SkeletonBox(width: 140, height: 18),
+              Spacer(),
+              SkeletonBox(width: 56, height: 14),
+            ],
+          ),
+        );
+    Widget cardRow(double height) => SizedBox(
+          height: height,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: 3,
+            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            itemBuilder: (_, __) =>
+                SkeletonBox(width: 260, height: height, radius: 16),
+          ),
+        );
+
+    return AppShimmer(
+      child: ListView(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: context.mediaQueryPadding + const EdgeInsets.only(top: 4),
+        children: [
+          header(),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: SkeletonBox(height: 168, radius: 20),
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: List.generate(
+                4,
+                (_) => const Column(
+                  children: [
+                    SkeletonBox.circle(size: 52),
+                    SizedBox(height: 8),
+                    SkeletonBox(width: 48, height: 10),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          header(),
+          cardRow(140),
+          header(),
+          cardRow(160),
+        ],
+      ),
+    );
+  }
+
   Widget _body(
     BuildContext context,
     HomeViewNotifier notifier,
     HomeViewState state,
   ) {
     if (state.loading && state.matches.isEmpty && state.tournaments.isEmpty) {
-      return const Center(child: AppProgressIndicator());
+      return _loadingSkeleton(context);
     }
     if (state.error != null && state.matches.isEmpty) {
       return ErrorScreen(

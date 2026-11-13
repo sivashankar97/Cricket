@@ -6,7 +6,7 @@ import 'package:khelo/components/error_screen.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/formatter/date_formatter.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 
 import 'global_cricket_providers.dart';
@@ -42,7 +42,7 @@ class GlobalCricketScreen extends ConsumerWidget {
             ),
             Expanded(
               child: feed.when(
-                loading: () => const Center(child: AppProgressIndicator()),
+                loading: () => const SkeletonCards(),
                 error: (error, _) => ErrorScreen(
                   error: error,
                   onRetryTap: () => ref.invalidate(globalCricketFeedProvider),

@@ -15,7 +15,7 @@ import 'package:khelo/domain/auction/auction_import.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:style/button/primary_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_field.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/shadows.dart';
@@ -81,7 +81,7 @@ class _AuctionPlayersScreenState extends ConsumerState<AuctionPlayersScreen> {
   Widget build(BuildContext context) {
     final auction = ref.watch(auctionProvider(widget.auctionId)).valueOrNull;
     if (auction == null) {
-      return const AppPage(body: Center(child: AppProgressIndicator()));
+      return const AppPage(body: SkeletonList());
     }
     final players = _visible(auction);
     final cs = context.colorScheme;

@@ -21,6 +21,7 @@ import 'package:style/button/action_button.dart';
 import 'package:style/button/primary_button.dart';
 import 'package:style/extensions/context_extensions.dart';
 import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/pickers/date_and_time_picker.dart';
 import 'package:style/text/app_text_field.dart';
 import 'package:style/text/app_text_style.dart';
@@ -77,7 +78,8 @@ class _MatchSelectionScreenState extends ConsumerState<MatchSelectionScreen> {
         if (unscheduledCount > 0)
           actionButton(
             context,
-            onPressed: () => _openScheduleAllSheet(context, state, unscheduledCount),
+            onPressed: () =>
+                _openScheduleAllSheet(context, state, unscheduledCount),
             icon: Icon(
               CupertinoIcons.calendar_badge_plus,
               color: context.colorScheme.primary,
@@ -116,7 +118,7 @@ class _MatchSelectionScreenState extends ConsumerState<MatchSelectionScreen> {
     int unscheduledCount,
   ) {
     if (state.loading) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonCards();
     }
 
     return Column(
@@ -188,7 +190,8 @@ class _MatchSelectionScreenState extends ConsumerState<MatchSelectionScreen> {
             context.l10n.tournament_schedule_all_matches_btn,
             expanded: false,
             edgeInsets: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-            onPressed: () => _openScheduleAllSheet(context, state, unscheduledCount),
+            onPressed: () =>
+                _openScheduleAllSheet(context, state, unscheduledCount),
           ),
         ],
       ),
@@ -577,12 +580,14 @@ class _ScheduleWholeTournamentSheetState
                     children: [
                       Text(
                         context.l10n.tournament_schedule_whole_title,
-                        style: AppTextStyle.header3.copyWith(color: cs.textPrimary),
+                        style: AppTextStyle.header3
+                            .copyWith(color: cs.textPrimary),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         'Scheduling all ${widget.unscheduledCount} pending matches at once',
-                        style: AppTextStyle.caption.copyWith(color: cs.textSecondary),
+                        style: AppTextStyle.caption
+                            .copyWith(color: cs.textSecondary),
                       ),
                     ],
                   ),
@@ -723,7 +728,8 @@ class _ScheduleWholeTournamentSheetState
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
-              children: [BallType.leather, BallType.tennis, BallType.other].map((b) {
+              children:
+                  [BallType.leather, BallType.tennis, BallType.other].map((b) {
                 final isSelected = _ballType == b;
                 return ChoiceChip(
                   label: Text(b.name.toUpperCase()),
@@ -750,7 +756,8 @@ class _ScheduleWholeTournamentSheetState
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
-              children: [PitchType.rough, PitchType.turf, PitchType.cement].map((p) {
+              children:
+                  [PitchType.rough, PitchType.turf, PitchType.cement].map((p) {
                 final isSelected = _pitchType == p;
                 return ChoiceChip(
                   label: Text(p.name.toUpperCase()),
@@ -784,11 +791,13 @@ class _ScheduleWholeTournamentSheetState
                       children: [
                         Text(
                           context.l10n.tournament_schedule_spacing,
-                          style: AppTextStyle.subtitle2.copyWith(color: cs.textPrimary),
+                          style: AppTextStyle.subtitle2
+                              .copyWith(color: cs.textPrimary),
                         ),
                         Text(
                           context.l10n.tournament_schedule_spacing_same_day,
-                          style: AppTextStyle.caption.copyWith(color: cs.textSecondary),
+                          style: AppTextStyle.caption
+                              .copyWith(color: cs.textSecondary),
                         ),
                       ],
                     ),
@@ -823,7 +832,8 @@ class _ScheduleWholeTournamentSheetState
                   );
                   if (context.mounted) {
                     Navigator.pop(context);
-                    showSnackBar(context, 'Successfully scheduled $count matches!');
+                    showSnackBar(
+                        context, 'Successfully scheduled $count matches!');
                   }
                 } catch (e) {
                   if (context.mounted) {

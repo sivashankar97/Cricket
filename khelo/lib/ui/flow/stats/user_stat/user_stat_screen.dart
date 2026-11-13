@@ -11,7 +11,7 @@ import 'package:khelo/ui/flow/team/user_detail/component/user_detail_fielding_co
 import 'package:style/animations/app_animations.dart';
 import 'package:style/button/tab_button.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 
 import '../../team/user_detail/component/user_detail_batting_content.dart';
 import '../../team/user_detail/component/user_detail_bowling_content.dart';
@@ -65,7 +65,7 @@ class _UserStatScreenState extends ConsumerState<UserStatScreen>
   Widget _body(BuildContext context) {
     final state = ref.watch(userStatViewStateProvider);
     if (state.loading) {
-      return const Center(child: AppProgressIndicator());
+      return const SkeletonDetail();
     }
     if (state.error != null) {
       return ErrorScreen(

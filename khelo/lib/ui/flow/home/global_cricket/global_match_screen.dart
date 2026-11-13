@@ -7,7 +7,7 @@ import 'package:khelo/components/app_page.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/formatter/date_formatter.dart';
 import 'package:style/extensions/context_extensions.dart';
-import 'package:style/indicator/progress_indicator.dart';
+import 'package:style/indicator/shimmer.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 import 'package:style/theme/shadows.dart';
@@ -166,7 +166,7 @@ class _ScorecardTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final card = scorecard;
     if (card == null || card.innings.isEmpty) {
-      if (loading) return const Center(child: AppProgressIndicator());
+      if (loading) return const SkeletonDetail();
       return _message(
           context,
           switch (block) {
