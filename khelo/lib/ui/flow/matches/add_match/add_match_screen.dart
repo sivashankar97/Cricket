@@ -1,4 +1,5 @@
 import 'package:data/api/match/match_model.dart';
+import 'package:khelo/domain/permissions/match_access.dart';
 import 'package:data/api/team/team_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -76,6 +77,17 @@ class _AddMatchScreenState extends ConsumerState<AddMatchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.matchId != null) {
+      final access = ref.watch(matchPermissionsProvider(widget.matchId!));
+      if (access.valueOrNull?.manage != true) {
+        return Scaffold(
+            appBar: AppBar(title: const Text('Match')),
+            body: Center(
+                child: Text(access.isLoading
+                    ? 'Loading…'
+                    : 'Only the owner can edit this match.')));
+      }
+    }
     final state = ref.watch(addMatchViewStateProvider);
 
     _observeActionError(context, ref);

@@ -33,9 +33,7 @@ class TournamentDetailTeamsTab extends ConsumerWidget {
       return EmptyScreen(
         title: context.l10n.tournament_detail_teams_empty_title,
         description: context.l10n.tournament_detail_teams_empty_description,
-        isShowButton: state.tournament!.created_by == state.currentUserId ||
-            state.tournament!.members
-                .any((element) => element.id == state.currentUserId),
+        isShowButton: state.tournament!.created_by == state.currentUserId,
         buttonTitle: context.l10n.tournament_detail_teams_select_btn,
         onTap: () async {
           final result = await AppRoute.tournamentTeamPicker(

@@ -76,13 +76,15 @@ class _MatchListScreenState extends ConsumerState<MatchListScreen>
                 final match = state.matches[index];
                 return MatchDetailCell(
                   match: match,
-                  showActionButtons: match.created_by == state.currentUserId,
+                  showActionButtons: match.canScore(state.currentUserId),
                   onTap: () =>
                       AppRoute.matchDetailTab(matchId: match.id).push(context),
                   onActionTap: () {
-                    if (match.match_status == MatchStatus.yetToStart) {
+                    if (match.match_status == MatchStatus.yetToStart &&
+                        match.canManage(state.currentUserId)) {
                       AppRoute.addMatch(matchId: match.id).push(context);
-                    } else if (match.match_status == MatchStatus.running) {
+                    } else if (match.match_status == MatchStatus.running ||
+                        match.match_status == MatchStatus.yetToStart) {
                       if (match.toss_decision == null ||
                           match.toss_winner_id == null) {
                         AppRoute.addTossDetail(matchId: match.id).push(context);

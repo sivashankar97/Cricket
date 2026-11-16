@@ -97,9 +97,7 @@ class _AddTournamentScreenState extends ConsumerState<AddTournamentScreen> {
 
     final state = ref.watch(addTournamentStateProvider);
     final isOrganizer = widget.editTournament == null ||
-        (state.currentUserId == widget.editTournament?.created_by ||
-            widget.editTournament!.members
-                .any((e) => e.id == state.currentUserId && e.role.isOrganizer));
+        state.currentUserId == widget.editTournament?.created_by;
 
     return AppPage(
       title: widget.editTournament == null

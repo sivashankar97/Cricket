@@ -1,7 +1,6 @@
 import 'package:data/api/match/match_model.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:khelo/domain/permissions/match_access.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:khelo/components/app_page.dart';
@@ -43,6 +42,15 @@ class _AddTossDetailScreenState extends ConsumerState<AddTossDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final access = ref.watch(matchPermissionsProvider(widget.matchId));
+    if (access.valueOrNull?.score != true) {
+      return Scaffold(
+          appBar: AppBar(title: const Text('Toss')),
+          body: Center(
+              child: Text(access.isLoading
+                  ? 'Loading…'
+                  : 'You do not have scoring access.')));
+    }
     final state = ref.watch(addTossDetailStateProvider);
 
     _observeActionError(context, ref);

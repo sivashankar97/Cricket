@@ -46,9 +46,7 @@ class _TournamentDetailMatchesTabState
     final extras = ref.watch(tournamentMatchExtrasProvider);
 
     final canManage = state.tournament != null &&
-        (state.tournament!.created_by == state.currentUserId ||
-            state.tournament!.members
-                .any((element) => element.id == state.currentUserId));
+        state.tournament!.created_by == state.currentUserId;
 
     if (state.matches.isEmpty) {
       return EmptyScreen(
@@ -116,16 +114,24 @@ class _TournamentDetailMatchesTabState
                               match: shown[i],
                               number: number(shown[i]),
                               extras: extras,
-                              onTap: () => _handleMatchTap(context, shown[i]),
-                              actionLabel: switch (shown[i].match_status) {
-                                MatchStatus.yetToStart =>
-                                  context.l10n.common_edit,
-                                MatchStatus.running => context
-                                    .l10n.tournament_match_continue_scoring,
-                                _ => null,
-                              },
-                              onAction: () =>
-                                  _handleMatchActionTap(context, shown[i]),
+                              onTap: () =>
+                                  AppRoute.matchDetailTab(matchId: shown[i].id)
+                                      .push(context),
+                              actionLabel: !shown[i].canScore(
+                                      state.currentUserId,
+                                      tournamentOwnerId:
+                                          state.tournament!.created_by)
+                                  ? null
+                                  : switch (shown[i].match_status) {
+                                      MatchStatus.yetToStart => canManage
+                                          ? context.l10n.common_edit
+                                          : "Start scoring",
+                                      MatchStatus.running => context.l10n
+                                          .tournament_match_continue_scoring,
+                                      _ => null,
+                                    },
+                              onAction: () => _handleMatchActionTap(
+                                  context, shown[i], canManage),
                             ),
                           ),
                         ),
@@ -257,18 +263,12 @@ class _TournamentDetailMatchesTabState
     );
   }
 
-  void _handleMatchTap(BuildContext context, MatchModel match) {
-    if (match.match_status == MatchStatus.running) {
-      _openScoring(context, match);
-    } else {
-      AppRoute.matchDetailTab(matchId: match.id).push(context);
-    }
-  }
-
-  void _handleMatchActionTap(BuildContext context, MatchModel match) {
-    if (match.match_status == MatchStatus.yetToStart) {
+  void _handleMatchActionTap(
+      BuildContext context, MatchModel match, bool canManage) {
+    if (match.match_status == MatchStatus.yetToStart && canManage) {
       AppRoute.addMatch(matchId: match.id).push(context);
-    } else if (match.match_status == MatchStatus.running) {
+    } else if (match.match_status == MatchStatus.running ||
+        match.match_status == MatchStatus.yetToStart) {
       _openScoring(context, match);
     }
   }

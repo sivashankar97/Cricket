@@ -152,6 +152,7 @@ class MatchService {
     final filter = Filter.or(
       Filter(FireStoreConst.createdBy, isEqualTo: userId),
       Filter(FireStoreConst.players, arrayContains: userId),
+      Filter("scorer_ids", arrayContains: userId),
       Filter(FireStoreConst.teamCreatorIds, arrayContains: userId),
     );
 
@@ -608,7 +609,9 @@ class MatchService {
   }) async {
     try {
       await _matchCollection.doc(matchId).update(
-        {FireStoreConst.createdBy: ownerId},
+        {
+          'scorer_ids': [ownerId],
+        },
       );
     } catch (error, stack) {
       throw AppError.fromError(error, stack);

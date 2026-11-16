@@ -137,9 +137,7 @@ class _TournamentDetailScreenState
                 onShareTap: () => Share.shareUri(Uri.parse(
                     "$appBaseUrl/tournament/${state.tournament!.id}")),
               ),
-              if (state.tournament!.created_by == state.currentUserId ||
-                  state.tournament!.members
-                      .any((element) => element.id == state.currentUserId)) ...[
+              if (state.tournament!.created_by == state.currentUserId) ...[
                 moreOptionButton(
                   context,
                   size: 20,
@@ -270,9 +268,7 @@ class _TournamentDetailScreenState
   }
 
   bool _isOrganizer(TournamentDetailState state) =>
-      state.tournament!.created_by == state.currentUserId ||
-      state.tournament!.members.any((member) =>
-          member.id == state.currentUserId && member.role.isOrganizer);
+      state.tournament!.created_by == state.currentUserId;
 
   Future<void> _deleteTournament(
     BuildContext context,

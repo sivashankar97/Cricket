@@ -30,11 +30,12 @@ class TeamDetailMatchContent extends ConsumerWidget {
             final match = state.matches[index];
             return MatchDetailCell(
               match: match,
-              showActionButtons: isAdminOrOwner,
+              showActionButtons: match.canScore(state.currentUserId),
               onTap: () =>
                   AppRoute.matchDetailTab(matchId: match.id).push(context),
               onActionTap: () {
-                if (match.match_status == MatchStatus.yetToStart) {
+                if (match.match_status == MatchStatus.yetToStart &&
+                    match.canManage(state.currentUserId)) {
                   AppRoute.addMatch(matchId: match.id).push(context);
                 } else {
                   if (match.toss_decision == null ||

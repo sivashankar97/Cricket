@@ -1,10 +1,15 @@
+import 'dart:async';
 import 'package:collection/collection.dart';
+import 'package:data/storage/app_preferences.dart';
+import 'package:khelo/domain/permissions/match_access.dart';
 import 'package:data/api/ball_score/ball_score_model.dart';
 import 'package:data/api/match/match_model.dart';
 import 'package:data/api/user/user_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:style/extensions/context_extensions.dart';
+import 'package:style/text/app_text_style.dart';
 import 'package:khelo/components/action_bottom_sheet.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/confirmation_dialog.dart';
@@ -46,16 +51,63 @@ class ScoreBoardScreen extends ConsumerStatefulWidget {
 
 class _ScoreBoardScreenState extends ConsumerState<ScoreBoardScreen> {
   late ScoreBoardViewNotifier notifier;
+  bool _started = false;
+  Timer? _heartbeatTimer;
 
   @override
   void initState() {
     super.initState();
     notifier = ref.read(scoreBoardStateProvider.notifier);
-    runPostFrame(() => notifier.setData(widget.matchId));
+  }
+
+  @override
+  void dispose() {
+    _heartbeatTimer?.cancel();
+    final uid = ref.read(currentUserPod)?.id;
+    if (uid != null) {
+      releaseActiveScorer(matchId: widget.matchId, userId: uid);
+    }
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final currentUserId = ref.watch(currentUserPod)?.id;
+    final currentUserName = ref.watch(currentUserPod)?.name ?? 'Scorer';
+    final access = ref.watch(matchPermissionsProvider(widget.matchId)).valueOrNull;
+
+    if (access == null || !access.score) {
+      return Scaffold(
+          appBar: AppBar(title: const Text('Scoring')),
+          body: Center(
+              child: Text(ref.watch(matchPermissionsProvider(widget.matchId)).isLoading
+                  ? 'Loading…'
+                  : 'Only the owner or an assigned scorer can score this match.')));
+    }
+
+    final isLocked = access.isLockedByOther(currentUserId);
+
+    if (!_started) {
+      _started = true;
+      runPostFrame(() {
+        notifier.setData(widget.matchId);
+        if (!isLocked && currentUserId != null) {
+          claimActiveScorer(
+            matchId: widget.matchId,
+            userId: currentUserId,
+            userName: currentUserName,
+          );
+          _heartbeatTimer?.cancel();
+          _heartbeatTimer = Timer.periodic(const Duration(seconds: 45), (_) {
+            claimActiveScorer(
+              matchId: widget.matchId,
+              userId: currentUserId,
+              userName: currentUserName,
+            );
+          });
+        }
+      });
+    }
     final state = ref.watch(scoreBoardStateProvider);
 
     _observeActionError(context, ref);
@@ -91,7 +143,7 @@ class _ScoreBoardScreenState extends ConsumerState<ScoreBoardScreen> {
         automaticallyImplyLeading: false,
         resizeToAvoidBottomInset: false,
         body: Builder(builder: (context) {
-          return _body(context, state);
+          return _body(context, state, access, currentUserId, currentUserName);
         }),
       ),
     );
@@ -102,6 +154,17 @@ class _ScoreBoardScreenState extends ConsumerState<ScoreBoardScreen> {
     ScoreBoardViewState state,
   ) {
     final matchOptions = MatchOption.values.toList();
+    if (ref
+            .watch(matchPermissionsProvider(widget.matchId))
+            .valueOrNull
+            ?.manage !=
+        true) {
+      matchOptions.removeWhere((option) => const [
+            MatchOption.editMatch,
+            MatchOption.replacePlayer,
+            MatchOption.handOverScoring
+          ].contains(option));
+    }
     if (!(state.match?.isRevisedTargetApplicable ?? true)) {
       matchOptions.remove(MatchOption.reviseTarget);
     }
@@ -154,6 +217,9 @@ class _ScoreBoardScreenState extends ConsumerState<ScoreBoardScreen> {
   Widget _body(
     BuildContext context,
     ScoreBoardViewState state,
+    MatchPermissions access,
+    String? currentUserId,
+    String currentUserName,
   ) {
     if (state.loading) {
       return const Center(child: AppProgressIndicator());
@@ -165,16 +231,124 @@ class _ScoreBoardScreenState extends ConsumerState<ScoreBoardScreen> {
       );
     }
 
+    final isLocked = access.isLockedByOther(currentUserId);
+    final cs = context.colorScheme;
+
     return Column(
       children: [
+        if (isLocked)
+          _lockBanner(context, access, currentUserId, currentUserName),
         ScoreDisplayView(
           currentOverBall: notifier.getCurrentOverBall(),
           overCountString: notifier.getOverCount(),
           battingTeamName: notifier.getTeamName(),
           bowlingTeamName: notifier.getTeamName(isBattingTeam: false),
         ),
-        ScoreBoardButtons(onTap: notifier.onScoreButtonTap),
+        if (isLocked)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: cs.containerLowOnSurface,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  Icon(Icons.lock_outline, size: 32, color: cs.textSecondary),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Scoring Controls Paused',
+                    style: AppTextStyle.subtitle2.copyWith(
+                      color: cs.textPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${access.activeScorerName ?? 'Another user'} is actively entering scores. Controls are locked to prevent conflicting balls.',
+                    textAlign: TextAlign.center,
+                    style: AppTextStyle.caption.copyWith(color: cs.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          )
+        else
+          ScoreBoardButtons(onTap: (button, isLongTap) {
+            if (currentUserId != null) {
+              claimActiveScorer(
+                matchId: widget.matchId,
+                userId: currentUserId,
+                userName: currentUserName,
+              );
+            }
+            notifier.onScoreButtonTap(button, isLongTap);
+          }),
       ],
+    );
+  }
+
+  Widget _lockBanner(
+    BuildContext context,
+    MatchPermissions access,
+    String? currentUserId,
+    String currentUserName,
+  ) {
+    final cs = context.colorScheme;
+    final scorerName = access.activeScorerName ?? 'Another scorer';
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: cs.alert.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: cs.alert.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.lock_clock, color: cs.alert, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '$scorerName is currently scoring.',
+              style: AppTextStyle.caption.copyWith(
+                color: cs.textPrimary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          if (access.manage) ...[
+            const SizedBox(width: 8),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: cs.alert,
+                foregroundColor: cs.surface,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () {
+                if (currentUserId != null) {
+                  claimActiveScorer(
+                    matchId: widget.matchId,
+                    userId: currentUserId,
+                    userName: currentUserName,
+                  );
+                }
+              },
+              child: const Text(
+                'Take over',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 

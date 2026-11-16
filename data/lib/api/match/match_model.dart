@@ -448,8 +448,8 @@ extension SingleMatchTeamStatExtension on MatchModel {
         : 0.0;
 
     final matchOvers = team.over;
-    final updatedOvers = totalOvers
-        .add(matchOvers.toBalls(ballsPerOver: rules.balls_per_over));
+    final updatedOvers =
+        totalOvers.add(matchOvers.toBalls(ballsPerOver: rules.balls_per_over));
 
     return TeamStat(
       played: currentStat.played + 1,
@@ -493,4 +493,17 @@ extension SingleMatchTeamStatExtension on MatchModel {
   double _computeOvers(int runs, double runRate) {
     return runRate > 0 ? runs / runRate : 0.0;
   }
+}
+
+/// Match management belongs to its creator or its tournament owner.
+extension MatchAccess on MatchModel {
+  bool canManage(String? uid, {String? tournamentOwnerId}) =>
+      uid != null &&
+      (tournament_id != null && tournamentOwnerId != null
+          ? uid == tournamentOwnerId
+          : uid == created_by);
+  bool canScore(String? uid, {String? tournamentOwnerId}) =>
+      uid != null &&
+      (canManage(uid, tournamentOwnerId: tournamentOwnerId) ||
+          (scorer_ids?.contains(uid) ?? false));
 }

@@ -1,3 +1,7 @@
+import 'package:khelo/domain/permissions/match_access.dart';
+import 'package:khelo/ui/app_route.dart';
+import 'package:data/api/match/match_model.dart';
+import 'assign_scorer_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -58,6 +62,34 @@ class _MatchDetailTabScreenState extends ConsumerState<MatchDetailTabScreen> {
     return AppPage(
       title: _getScreenTitle(context, state),
       actions: [
+        if (ref
+                .watch(matchPermissionsProvider(widget.matchId))
+                .valueOrNull
+                ?.manage ==
+            true)
+          IconButton(
+              tooltip: 'Assign scorer',
+              icon: const Icon(Icons.person_add),
+              onPressed: () => showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (_) => AssignScorerSheet(matchId: widget.matchId))),
+        if (ref
+                    .watch(matchPermissionsProvider(widget.matchId))
+                    .valueOrNull
+                    ?.score ==
+                true &&
+            state.match != null &&
+            state.match!.match_status != MatchStatus.finish &&
+            state.match!.match_status != MatchStatus.abandoned)
+          IconButton(
+              tooltip: 'Start / resume scoring',
+              icon: const Icon(Icons.sports_cricket),
+              onPressed: () => (state.match!.toss_decision == null ||
+                          state.match!.toss_winner_id == null
+                      ? AppRoute.addTossDetail(matchId: widget.matchId)
+                      : AppRoute.scoreBoard(matchId: widget.matchId))
+                  .push(context)),
         actionButton(
           context,
           icon: Icon(

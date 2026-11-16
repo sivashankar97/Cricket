@@ -379,11 +379,20 @@ class TournamentService {
   Future<void> _updateTeamStats(
     String tournamentId,
     TournamentTeamStat teamStat,
+    String matchId,
   ) async {
     try {
       final teamStatRef =
           _tournamentTeamStatCollection(tournamentId).doc(teamStat.team_id);
-      await teamStatRef.set(teamStat, SetOptions(merge: true));
+      await teamStatRef
+          .withConverter<Map<String, dynamic>>(
+            fromFirestore: (s, _) => s.data()!,
+            toFirestore: (d, _) => d,
+          )
+          .set(
+            {...teamStat.toJson(), 'source_match_id': matchId},
+            SetOptions(merge: true),
+          );
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
@@ -392,11 +401,20 @@ class TournamentService {
   Future<void> _updatePlayerKeyStats(
     String tournamentId,
     PlayerKeyStat keyStat,
+    String matchId,
   ) async {
     try {
       final keyStatRef = _tournamentPlayerKeyStatCollection(tournamentId)
           .doc(keyStat.player_id);
-      await keyStatRef.set(keyStat, SetOptions(merge: true));
+      await keyStatRef
+          .withConverter<Map<String, dynamic>>(
+            fromFirestore: (s, _) => s.data()!,
+            toFirestore: (d, _) => d,
+          )
+          .set(
+            {...keyStat.toJson(), 'source_match_id': matchId},
+            SetOptions(merge: true),
+          );
     } catch (error, stack) {
       throw AppError.fromError(error, stack);
     }
@@ -426,7 +444,7 @@ class TournamentService {
           currentTeamStat: currentTeamStat,
         );
 
-        await _updateTeamStats(tournamentId, newTeamStat);
+        await _updateTeamStats(tournamentId, newTeamStat, match.id);
 
         // Update player stats
         for (final player in team.squad) {
@@ -453,7 +471,7 @@ class TournamentService {
             stats: newStats,
           );
 
-          await _updatePlayerKeyStats(tournamentId, updatedKeyStat);
+          await _updatePlayerKeyStats(tournamentId, updatedKeyStat, match.id);
         }
       }
     } catch (error, stack) {
