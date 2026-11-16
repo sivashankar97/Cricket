@@ -502,7 +502,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: recent
-                .take(_homeRowLimit)
+                .take(10)
                 .map((t) => TournamentItem(
                       tournament: t,
                       size: const Size.fromWidth(320),

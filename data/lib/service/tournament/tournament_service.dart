@@ -183,17 +183,14 @@ class TournamentService {
     String? lastMatchId,
     int limit = 10,
   }) async {
-    final DateTime now = DateTime.now();
-    final DateTime thirtyDaysAgo = now.subtract(Duration(days: 30));
-
-    final Timestamp timestamp = Timestamp.fromDate(thirtyDaysAgo);
-
     var query = _tournamentCollection
-        .where(Filter(FireStoreConst.startDate, isGreaterThan: timestamp))
-        .orderBy(FireStoreConst.startDate);
+        .orderBy(FireStoreConst.startDate, descending: true);
 
     if (lastMatchId != null) {
-      query = query.startAfter([lastMatchId]);
+      final lastDoc = await _tournamentCollection.doc(lastMatchId).get();
+      if (lastDoc.exists) {
+        query = query.startAfterDocument(lastDoc);
+      }
     }
 
     final snapshot = await query.limit(limit).get();
@@ -287,14 +284,10 @@ class TournamentService {
     }).catchError((error, stack) => throw AppError.fromError(error, stack));
   }
 
-  Stream<List<TournamentModel>> streamActiveTournaments() {
-    final DateTime now = DateTime.now();
-    final DateTime thirtyDaysAgo = now.subtract(Duration(days: 30));
-
-    final Timestamp timestamp = Timestamp.fromDate(thirtyDaysAgo);
-
+  Stream<List<TournamentModel>> streamActiveTournaments({int limit = 10}) {
     return _tournamentCollection
-        .where(Filter(FireStoreConst.startDate, isGreaterThan: timestamp))
+        .orderBy(FireStoreConst.startDate, descending: true)
+        .limit(limit)
         .snapshots()
         .asyncMap(
       (event) async {
