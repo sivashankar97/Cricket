@@ -180,64 +180,6 @@
   "home_screen_create_team_btn": "Create team",
   "home_screen_set_up_tournament_title": "Set up a tournament in minutes.",
   "home_screen_create_tournament_btn": "Create tournament",
-  "home_global_cricket_title": "Global cricket",
-  "home_global_cricket_updated": "Updated {time} · CricketData.org",
-  "@home_global_cricket_updated": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "home_global_cricket_live": "LIVE",
-  "global_cricket_international": "International",
-  "global_cricket_leagues": "Premier leagues",
-  "global_cricket_no_matches": "No matches right now",
-  "global_cricket_live": "Live",
-  "global_cricket_recent": "Recent",
-  "global_cricket_upcoming": "Upcoming",
-  "global_cricket_scorecard": "Scorecard",
-  "global_cricket_info": "Info",
-  "global_cricket_batter": "Batter",
-  "global_cricket_bowler": "Bowler",
-  "global_cricket_batting": "batting",
-  "global_cricket_info_match": "Match",
-  "global_cricket_info_series": "Series",
-  "global_cricket_info_date": "Date & time",
-  "global_cricket_info_venue": "Venue",
-  "global_cricket_info_toss": "Toss",
-  "global_cricket_info_format": "Format",
-  "global_cricket_toss_text": "{team} won the toss and chose to {choice}",
-  "@global_cricket_toss_text": {
-    "placeholders": {
-      "team": {
-        "type": "String"
-      },
-      "choice": {
-        "type": "String"
-      }
-    }
-  },
-  "global_cricket_starts": "Starts {time}",
-  "@global_cricket_starts": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "global_cricket_scorecard_updated": "Scorecard updated {time} · refreshes hourly while live",
-  "@global_cricket_scorecard_updated": {
-    "placeholders": {
-      "time": {
-        "type": "String"
-      }
-    }
-  },
-  "global_cricket_scorecard_not_started": "The scorecard will appear once the match starts.",
-  "global_cricket_scorecard_sign_in": "Sign in to load the full scorecard.",
-  "global_cricket_scorecard_limit": "The full scorecard isn't available right now (free data limit). The live score above still updates every 30 minutes.",
-  "global_cricket_scorecard_loading": "Loading scorecard…",
   "home_screen_no_matches_title": "No Matches in this area!",
   "home_screen_no_matches_description_text": "Enjoy the freedom of creating your own cricket matches or teams.",
   "home_greeting_morning": "Good morning!",

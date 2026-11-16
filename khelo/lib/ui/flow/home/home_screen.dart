@@ -18,7 +18,6 @@ import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/home/components/live_match_card.dart';
 import 'package:khelo/ui/flow/home/components/match_item.dart';
 import 'package:khelo/ui/flow/home/components/tournament_item.dart';
-import 'package:khelo/ui/flow/home/global_cricket/global_cricket_section.dart';
 import 'package:khelo/ui/flow/home/home_view_model.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
@@ -286,16 +285,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (state.tournaments.isNotEmpty) ...[
           _tournamentSection(context, state.tournaments),
         ],
-
-        // ── Global cricket (CricketData.org) ─────────────────────────────────
-        GlobalCricketSection(
-          header: (title, onViewAll) => _sectionHeader(
-            context,
-            title: title,
-            showViewAll: true,
-            onViewAll: onViewAll,
-          ),
-        ),
 
         // ── Recent results ───────────────────────────────────────────────────
         if (finished.isNotEmpty)

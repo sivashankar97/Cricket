@@ -139,10 +139,6 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
     }
-    // Shared CricketData.org cache for the Home "Global cricket" section.
-    match /global_cricket/{document=**} {
-      allow read: if true;
-    }
     match /users/{userId}/user_stat/{document=**} {
       allow read: if true;
     }

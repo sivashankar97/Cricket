@@ -52,10 +52,6 @@ import 'flow/auction/retained/auction_retained_screen.dart';
 import 'flow/auction/room/auction_room_screen.dart';
 import 'flow/stats/user_stat/user_stat_screen.dart';
 import 'package:data/api/auction/auction_models.dart';
-import 'package:data/api/global_cricket/global_cricket_models.dart';
-
-import 'flow/home/global_cricket/global_cricket_screen.dart';
-import 'flow/home/global_cricket/global_match_screen.dart';
 
 class AppRoute {
   static const pathPhoneNumberVerification = '/phone-number-verification';
@@ -93,8 +89,6 @@ class AppRoute {
   static const pathAuctionRetained = "/auction-retained";
   static const pathAuctionRoom = "/auction/:id";
   static const pathUserStats = "/user-stats";
-  static const pathGlobalCricket = "/global-cricket";
-  static const pathGlobalCricketMatch = "/global-cricket-match";
 
   final String path;
   final String? name;
@@ -288,19 +282,6 @@ class AppRoute {
   static AppRoute userStats() => AppRoute(
         pathUserStats,
         builder: (_) => const UserStatScreen(showTitle: true),
-      );
-
-  static AppRoute globalCricket({
-    GlobalMatchCategory category = GlobalMatchCategory.international,
-  }) =>
-      AppRoute(
-        pathGlobalCricket,
-        builder: (_) => GlobalCricketScreen(initialCategory: category),
-      );
-
-  static AppRoute globalCricketMatch(GlobalMatch match) => AppRoute(
-        pathGlobalCricketMatch,
-        builder: (_) => GlobalMatchScreen(match: match),
       );
 
   static AppRoute memberSelection({required TournamentModel tournament}) =>
@@ -570,16 +551,6 @@ class AppRoute {
     ),
     GoRoute(
       path: pathUserStats,
-      pageBuilder: (context, state) =>
-          adaptivePage(state: state, child: state.widget(context)),
-    ),
-    GoRoute(
-      path: pathGlobalCricket,
-      pageBuilder: (context, state) =>
-          adaptivePage(state: state, child: state.widget(context)),
-    ),
-    GoRoute(
-      path: pathGlobalCricketMatch,
       pageBuilder: (context, state) =>
           adaptivePage(state: state, child: state.widget(context)),
     ),
