@@ -12,7 +12,7 @@ import 'package:style/theme/colors.dart';
 /// Big red hero card for a running match: both teams, the chase and the
 /// run rates.
 class LiveMatchCard extends StatelessWidget {
-  static const height = 268.0;
+  static const height = 296.0;
 
   final MatchModel match;
 
@@ -32,7 +32,15 @@ class LiveMatchCard extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            gradient: liveCardGradient,
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                brandNavyColor,
+                Color(0xFF141448),
+                brandRedDeepColor,
+              ],
+            ),
             borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
@@ -52,7 +60,7 @@ class LiveMatchCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _header(context),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 12),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -69,8 +77,10 @@ class LiveMatchCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     _status(context, summary),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _rates(context, summary),
+                    const SizedBox(height: 8),
+                    _scorecardBar(context),
                   ],
                 ),
               ),
@@ -191,15 +201,42 @@ class LiveMatchCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        Text(
-          team.team.name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: end ? TextAlign.end : TextAlign.start,
-          style: AppTextStyle.subtitle3.copyWith(
-            color: _white,
-            fontWeight: FontWeight.w600,
-          ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment:
+              end ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            Flexible(
+              child: Text(
+                team.team.name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: end ? TextAlign.end : TextAlign.start,
+                style: AppTextStyle.subtitle3.copyWith(
+                  color: _white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            if (batting) ...[
+              const SizedBox(width: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                decoration: BoxDecoration(
+                  color: brandRedColor,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  'BAT',
+                  style: AppTextStyle.caption.copyWith(
+                    color: _white,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 8,
+                  ),
+                ),
+              ),
+            ],
+          ],
         ),
         const SizedBox(height: 2),
         FittedBox(
@@ -255,33 +292,68 @@ class LiveMatchCard extends StatelessWidget {
         .where((t) => t.team_id == match.toss_winner_id)
         .map((t) => t.team.name)
         .firstOrNull;
-    final text = summary.isChasing
-        ? context.l10n.home_live_need(
-            summary.second.team.name,
-            summary.runsNeeded ?? 0,
-            summary.ballsLeft ?? 0,
-          )
-        : batting != null
-            ? context.l10n.home_live_batting(batting.team.name)
-            : tossWinner != null
-                ? context.l10n.home_live_toss(tossWinner)
-                : context.l10n.home_live_starting;
+    final isChasing = summary.isChasing;
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: _white.withValues(alpha: 0.16),
+        color: _white.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: _white.withValues(alpha: 0.1)),
       ),
-      child: Text(
-        text,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        textAlign: TextAlign.center,
-        style: AppTextStyle.subtitle3.copyWith(
-          color: _white,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
+      child: isChasing
+          ? Row(
+              children: [
+                const Text('🔥', style: TextStyle(fontSize: 12)),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    context.l10n.home_live_need(
+                      summary.second.team.name,
+                      summary.runsNeeded ?? 0,
+                      summary.ballsLeft ?? 0,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyle.caption.copyWith(
+                      color: const Color(0xFFFFD54F),
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (summary.target != null)
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: _white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      'Target ${summary.target}',
+                      style: AppTextStyle.caption.copyWith(
+                        color: _white,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ),
+              ],
+            )
+          : Text(
+              batting != null
+                  ? context.l10n.home_live_batting(batting.team.name)
+                  : tossWinner != null
+                      ? context.l10n.home_live_toss(tossWinner)
+                      : context.l10n.home_live_starting,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.subtitle3.copyWith(
+                color: _white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
     );
   }
 
@@ -321,6 +393,37 @@ class LiveMatchCard extends StatelessWidget {
                 ),
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _scorecardBar(BuildContext context) {
+    return Container(
+      height: 30,
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        color: _white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Flexible(
+            child: Text(
+              'Scorecard & Commentary',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.caption.copyWith(
+                color: _white,
+                fontWeight: FontWeight.w700,
+                fontSize: 11,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(CupertinoIcons.chevron_right, size: 12, color: _white),
         ],
       ),
     );

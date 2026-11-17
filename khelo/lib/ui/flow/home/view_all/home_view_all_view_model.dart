@@ -33,6 +33,15 @@ class HomeViewAllViewNotifier extends StateNotifier<HomeViewAllViewState> {
   void setData(List<MatchStatus> status, bool isTournament) {
     _status = status;
     _isTournament = isTournament;
+    if (_isTournament) {
+      if (state.tournaments.isEmpty) {
+        loadTournaments();
+      }
+    } else {
+      if (state.matches.isEmpty) {
+        loadMatches();
+      }
+    }
   }
 
   void loadMatches() async {

@@ -128,16 +128,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final name = ref.watch(currentUserPod)?.name?.trim();
     return Row(
       children: [
-        Container(
-          width: 40,
-          height: 40,
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: cs.card,
-            shape: BoxShape.circle,
-            boxShadow: cs.cardShadow,
-          ),
-          child: SvgPicture.asset(Assets.images.appLogoMark),
+        Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: cs.card,
+                shape: BoxShape.circle,
+                boxShadow: cs.cardShadow,
+              ),
+              child: SvgPicture.asset(Assets.images.appLogoMark),
+            ),
+            Positioned(
+              right: -2,
+              bottom: -2,
+              child: Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFB800),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: cs.card, width: 2),
+                ),
+                alignment: Alignment.center,
+                child: const Text('🐯',
+                    style: TextStyle(fontSize: 10, height: 1),),
+              ),
+            ),
+          ],
         ),
         const SizedBox(width: 10),
         Flexible(
@@ -145,12 +166,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                greeting,
-                maxLines: 1,
-                style: AppTextStyle.caption.copyWith(
-                  color: cs.textSecondary,
-                ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    greeting,
+                    maxLines: 1,
+                    style: AppTextStyle.caption.copyWith(
+                      color: cs.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('✨', style: TextStyle(fontSize: 10)),
+                ],
               ),
               Text(
                 name == null || name.isEmpty
@@ -322,83 +350,110 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ── Quick-action horizontal strip ───────────────────────────────────────────
+  // ── Quick-action launchpad dock ───────────────────────────────────────────────
 
   Widget _quickActionsRow(BuildContext context) {
-    return SizedBox(
-      height: 72,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 6, 16, 10),
+      child: Row(
         children: [
-          _actionChip(
-            context,
-            label: context.l10n.common_create_team_title,
-            icon: CupertinoIcons.person_3_fill,
-            onTap: () => _pushWhenSignedIn(context, AppRoute.addTeam()),
+          Expanded(
+            child: _dockItem(
+              context,
+              label: context.l10n.home_screen_create_match_btn,
+              icon: CupertinoIcons.sportscourt_fill,
+              isPrimary: true,
+              onTap: () => _pushWhenSignedIn(context, AppRoute.addMatch()),
+            ),
           ),
-          const SizedBox(width: 10),
-          _actionChip(
-            context,
-            label: context.l10n.home_screen_create_match_btn,
-            icon: CupertinoIcons.sportscourt_fill,
-            onTap: () => _pushWhenSignedIn(context, AppRoute.addMatch()),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _dockItem(
+              context,
+              label: context.l10n.home_screen_create_team_btn,
+              icon: CupertinoIcons.shield_fill,
+              onTap: () => _pushWhenSignedIn(context, AppRoute.addTeam()),
+            ),
           ),
-          const SizedBox(width: 10),
-          _actionChip(
-            context,
-            label: context.l10n.home_screen_create_tournament_btn,
-            icon: CupertinoIcons.rosette,
-            onTap: () => _pushWhenSignedIn(context, AppRoute.addTournament()),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _dockItem(
+              context,
+              label: context.l10n.common_tournaments,
+              icon: CupertinoIcons.rosette,
+              onTap: () => _pushWhenSignedIn(context, AppRoute.addTournament()),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: _dockItem(
+              context,
+              label: context.l10n.tab_auction_title,
+              icon: CupertinoIcons.hammer_fill,
+              onTap: () => _pushWhenSignedIn(context, AppRoute.auctionForm()),
+            ),
           ),
         ],
       ),
     );
   }
 
-  /// Card chip with a glowing mint icon circle, like the concept's
-  /// Fixtures / Results / Tours rows.
-  Widget _actionChip(
+  Widget _dockItem(
     BuildContext context, {
     required String label,
     required IconData icon,
     required VoidCallback onTap,
+    bool isPrimary = false,
   }) {
     final cs = context.colorScheme;
     return OnTapScale(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(6, 6, 16, 6),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
         decoration: BoxDecoration(
-          color: cs.card,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: cs.cardShadow,
+          gradient: isPrimary
+              ? const LinearGradient(
+                  colors: [brandRedColor, brandRedDeepColor],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                )
+              : null,
+          color: isPrimary ? null : cs.card,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            if (isPrimary)
+              BoxShadow(
+                color: brandRedColor.withValues(alpha: 0.35),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              )
+            else
+              ...cs.cardShadow,
+          ],
+          border: Border.all(
+            color: isPrimary
+                ? const Color(0x00000000)
+                : cs.outline.withValues(alpha: 0.3),
+          ),
         ),
-        child: Row(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              height: 32,
-              width: 32,
-              decoration: BoxDecoration(
-                color: brandRedColor,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: brandRedColor.withValues(alpha: 0.4),
-                    blurRadius: 8,
-                  ),
-                ],
-              ),
-              child: Icon(icon, size: 16, color: textPrimaryDarkColor),
+            Icon(
+              icon,
+              size: 20,
+              color: isPrimary ? textPrimaryDarkColor : cs.primary,
             ),
-            const SizedBox(width: 10),
+            const SizedBox(height: 6),
             Text(
               label,
-              style: AppTextStyle.subtitle2.copyWith(
-                color: cs.textPrimary,
-                fontWeight: FontWeight.w600,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: AppTextStyle.caption.copyWith(
+                color: isPrimary ? textPrimaryDarkColor : cs.textPrimary,
+                fontWeight: FontWeight.w700,
+                fontSize: 10.5,
               ),
             ),
           ],
@@ -602,6 +657,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _playerCell(UserModel? user, int? rank) {
     final cs = context.colorScheme;
+    final rankColor = rank == 1
+        ? const Color(0xFFFFB800) // Gold
+        : rank == 2
+            ? const Color(0xFF94A3B8) // Silver
+            : rank == 3
+                ? const Color(0xFFCD7F32) // Bronze
+                : cs.primary;
     return Column(
       children: [
         Stack(
@@ -619,16 +681,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   width: 18,
                   height: 18,
                   decoration: BoxDecoration(
-                    color: cs.primary,
+                    color: rankColor,
                     shape: BoxShape.circle,
+                    border: Border.all(color: cs.card, width: 1.5),
                   ),
                   alignment: Alignment.center,
                   child: Text(
                     '$rank',
                     style: AppTextStyle.caption.copyWith(
-                      color: cs.onPrimary,
+                      color: textPrimaryDarkColor,
                       fontSize: 10,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                 ),
