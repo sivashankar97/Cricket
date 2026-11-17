@@ -2786,6 +2786,33 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get player_claim_confirm_merge => 'Confirm & Merge';
+
+  @override
+  String get player_claim_merged_success =>
+      'Profile merged! All matches and stats are now linked to your account.';
+
+  @override
+  String get player_claim_teams_title => 'Teams';
+
+  @override
+  String get player_claim_matches_title => 'Matches';
+
+  @override
+  String get player_claim_unclaimed_title => 'Existing Player Profile Found';
+
+  @override
+  String player_claim_unclaimed_subtitle(String name, int teams, int matches) {
+    return '$name in $teams teams and $matches matches';
+  }
+
+  @override
+  String get player_claim_check_and_merge => 'Check & Merge';
+
+  @override
+  String get player_claim_loading_details => 'Checking player history...';
+
+  @override
   String get profile_complete_add_profile_picture => 'Add profile picture';
 
   @override

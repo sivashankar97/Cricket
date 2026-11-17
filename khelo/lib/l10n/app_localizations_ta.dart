@@ -2738,18 +2738,18 @@ class AppLocalizationsTa extends AppLocalizations {
   String get profile_section_player_links => 'Player links';
 
   @override
-  String get player_claim_title => 'Is this you?';
+  String get player_claim_title => 'இது நீங்களா?';
 
   @override
   String player_claim_body(String name, int teams, int matches) {
-    return 'An organizer added $name with your mobile number, in $teams teams and $matches matches. Link this player to your account to get those matches and stats.';
+    return '$name என்ற பெயரில் $teams அணிகள் மற்றும் $matches போட்டிகள் இந்த மொபைல் எண்ணில் பதிவு செய்யப்பட்டுள்ளன. உங்கள் கணக்கில் இணைக்க சரிபார்க்கவும்.';
   }
 
   @override
   String get player_claim_yes => 'Yes, that\'s me';
 
   @override
-  String get player_claim_no => 'Not me';
+  String get player_claim_no => 'நான் இல்லை';
 
   @override
   String get player_claim_sent =>
@@ -2784,6 +2784,34 @@ class AppLocalizationsTa extends AppLocalizations {
   String player_claim_declined(String player) {
     return 'The organizer didn\'t confirm $player';
   }
+
+  @override
+  String get player_claim_confirm_merge => 'உறுதிசெய்து இணைக்கவும்';
+
+  @override
+  String get player_claim_merged_success =>
+      'விவரங்கள் வெற்றிகரமாக இணைக்கப்பட்டன! உங்கள் போட்டிகள் மற்றும் புள்ளிவிவரங்கள் இப்போது உங்கள் கணக்கில் உள்ளன.';
+
+  @override
+  String get player_claim_teams_title => 'அணிகள்';
+
+  @override
+  String get player_claim_matches_title => 'போட்டிகள்';
+
+  @override
+  String get player_claim_unclaimed_title => 'வீரர் சுயவிவரம் கண்டறியப்பட்டது';
+
+  @override
+  String player_claim_unclaimed_subtitle(String name, int teams, int matches) {
+    return '$name • $teams அணிகள், $matches போட்டிகள்';
+  }
+
+  @override
+  String get player_claim_check_and_merge => 'சரிபார்த்து இணைக்கவும்';
+
+  @override
+  String get player_claim_loading_details =>
+      'போட்டி விவரங்கள் சரிபார்க்கப்படுகின்றன...';
 
   @override
   String get profile_complete_add_profile_picture => 'Add profile picture';

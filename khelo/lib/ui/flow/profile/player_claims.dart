@@ -120,26 +120,71 @@ class PlayerClaimSheet extends ConsumerStatefulWidget {
 
 class _PlayerClaimSheetState extends ConsumerState<PlayerClaimSheet> {
   bool? _sending;
+  List<String>? _teamNames;
+  List<String>? _recentMatches;
+  bool _loadingDetails = true;
 
-  Future<void> _answer(bool isMe) async {
-    setState(() => _sending = isMe);
+  @override
+  void initState() {
+    super.initState();
+    _loadDetails();
+  }
+
+  Future<void> _loadDetails() async {
+    try {
+      final service = ref.read(playerLinkServiceProvider);
+      final teams = await service.getPlayerTeamNames(widget.player.playerId);
+      final matches =
+          await service.getPlayerRecentMatches(widget.player.playerId);
+      if (mounted) {
+        setState(() {
+          _teamNames = teams;
+          _recentMatches = matches;
+          _loadingDetails = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _loadingDetails = false);
+      }
+    }
+  }
+
+  Future<void> _confirmMerge() async {
+    setState(() => _sending = true);
     final messenger = ScaffoldMessenger.of(context);
-    final message = context.l10n.player_claim_sent;
+    final successMessage = context.l10n.player_claim_merged_success;
+    try {
+      await ref.read(playerLinkServiceProvider).claimAndMerge(
+            player: widget.player,
+            claimant: widget.user,
+            e164: widget.e164,
+          );
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      messenger.showSnackBar(SnackBar(
+        content: Text(successMessage),
+        backgroundColor: positiveGreenColor,
+        behavior: SnackBarBehavior.floating,
+      ));
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _sending = null);
+      showErrorSnackBar(context: context, error: e);
+    }
+  }
+
+  Future<void> _dismiss() async {
+    setState(() => _sending = false);
     try {
       await ref.read(playerLinkServiceProvider).answerClaim(
             player: widget.player,
             claimant: widget.user,
             e164: widget.e164,
-            isMe: isMe,
+            isMe: false,
           );
       if (!mounted) return;
       Navigator.of(context).pop();
-      if (isMe) {
-        messenger.showSnackBar(SnackBar(
-          content: Text(message),
-          behavior: SnackBarBehavior.floating,
-        ));
-      }
     } catch (e) {
       if (!mounted) return;
       setState(() => _sending = null);
@@ -189,18 +234,82 @@ class _PlayerClaimSheetState extends ConsumerState<PlayerClaimSheet> {
               textAlign: TextAlign.center,
               style: AppTextStyle.body2.copyWith(color: cs.textSecondary),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: cs.containerLow,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: cs.outline.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(CupertinoIcons.shield_fill,
+                          size: 16, color: cs.primary,),
+                      const SizedBox(width: 8),
+                      Text(
+                        context.l10n.player_claim_teams_title,
+                        style: AppTextStyle.subtitle2.copyWith(
+                          color: cs.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _loadingDetails
+                        ? context.l10n.player_claim_loading_details
+                        : (_teamNames != null && _teamNames!.isNotEmpty
+                            ? _teamNames!.join(', ')
+                            : '${player.teams} ${context.l10n.player_claim_teams_title.toLowerCase()}'),
+                    style: AppTextStyle.body2.copyWith(color: cs.textSecondary),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Icon(CupertinoIcons.sportscourt_fill,
+                          size: 16, color: cs.primary,),
+                      const SizedBox(width: 8),
+                      Text(
+                        '${context.l10n.player_claim_matches_title} (${player.matches})',
+                        style: AppTextStyle.subtitle2.copyWith(
+                          color: cs.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!_loadingDetails &&
+                      _recentMatches != null &&
+                      _recentMatches!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _recentMatches!.take(3).join('\n'),
+                      style: AppTextStyle.caption
+                          .copyWith(color: cs.textSecondary),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
             PrimaryButton(
-              context.l10n.player_claim_yes,
+              context.l10n.player_claim_confirm_merge,
               progress: _sending == true,
               enabled: _sending == null,
-              onPressed: () => _answer(true),
+              background: brandRedColor,
+              onPressed: _confirmMerge,
             ),
             const SizedBox(height: 10),
             SecondaryButton(
               context.l10n.player_claim_no,
               enabled: _sending == null,
-              onPressed: () => _answer(false),
+              onPressed: _dismiss,
             ),
           ],
         ),
@@ -209,8 +318,8 @@ class _PlayerClaimSheetState extends ConsumerState<PlayerClaimSheet> {
   }
 }
 
-/// Profile section: requests to approve, and the user's own waiting or
-/// declined requests. Hidden when there's nothing to show.
+/// Profile section: displays any existing unclaimed player profile found for
+/// the user's mobile number, allowing them to review and merge it directly.
 class PlayerLinksSection extends ConsumerStatefulWidget {
   const PlayerLinksSection({super.key});
 
@@ -219,186 +328,101 @@ class PlayerLinksSection extends ConsumerStatefulWidget {
 }
 
 class _PlayerLinksSectionState extends ConsumerState<PlayerLinksSection> {
-  final _busy = <String>{};
+  ClaimablePlayer? _unclaimedPlayer;
 
-  Future<void> _decide(PlayerClaim claim, {required bool approve}) async {
-    setState(() => _busy.add(claim.id));
-    final service = ref.read(playerLinkServiceProvider);
+  @override
+  void initState() {
+    super.initState();
+    _checkClaimable();
+  }
+
+  Future<void> _checkClaimable() async {
+    final user = ref.read(currentUserPod);
+    final phone = ref.read(currentUserPhoneProvider).valueOrNull;
+    if (user == null || phone == null || phone.isEmpty) return;
     try {
-      if (approve) {
-        await service.approveClaim(claim);
-        if (mounted) {
-          showSnackBar(
-            context,
-            context.l10n.player_claim_approved_toast(
-              claim.playerName,
-              claim.claimantName,
-            ),
-            length: SnackBarLength.long,
-          );
-        }
-      } else {
-        await service.declineClaim(claim);
+      final player = await ref
+          .read(playerLinkServiceProvider)
+          .findClaimable(userId: user.id, e164: phone);
+      if (mounted) {
+        setState(() {
+          _unclaimedPlayer = player;
+        });
       }
-    } catch (e) {
-      if (mounted) showErrorSnackBar(context: context, error: e);
-    } finally {
-      if (mounted) setState(() => _busy.remove(claim.id));
-    }
+    } catch (_) {}
   }
 
   @override
   Widget build(BuildContext context) {
-    final requests = ref.watch(playerClaimRequestsProvider).valueOrNull ?? [];
-    final mine = (ref.watch(myPlayerClaimsProvider).valueOrNull ?? [])
-        .where((c) => c.status != PlayerClaimStatus.approved)
-        .toList();
-    if (requests.isEmpty && mine.isEmpty) return const SizedBox.shrink();
-
-    final cs = context.colorScheme;
-    final rows = <Widget>[
-      for (final claim in requests) _requestRow(context, claim),
-      for (final claim in mine) _myClaimRow(context, claim),
-    ];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionCaption(context.l10n.profile_section_player_links),
-        Container(
-          clipBehavior: Clip.antiAlias,
-          decoration: BoxDecoration(
-            color: cs.surface,
-            borderRadius: BorderRadius.circular(14),
-          ),
-          child: Column(
-            children: [
-              for (var i = 0; i < rows.length; i++) ...[
-                if (i > 0)
-                  Divider(
-                    height: 0.5,
-                    thickness: 0.5,
-                    indent: 58,
-                    color: cs.outline,
-                  ),
-                rows[i],
-              ],
-            ],
-          ),
-        ),
-      ],
+    ref.listenManual(
+      currentUserPhoneProvider,
+      (_, next) => _checkClaimable(),
     );
-  }
 
-  Widget _requestRow(BuildContext context, PlayerClaim claim) {
+    final player = _unclaimedPlayer;
+    if (player == null) return const SizedBox.shrink();
+
+    final user = ref.watch(currentUserPod);
+    final phone = ref.watch(currentUserPhoneProvider).valueOrNull;
+    if (user == null || phone == null) return const SizedBox.shrink();
+
     final cs = context.colorScheme;
-    final busy = _busy.contains(claim.id);
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      child: Row(
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: cs.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: brandRedColor.withValues(alpha: 0.3)),
+      ),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const IconTile(CupertinoIcons.link, brandRedColor),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  context.l10n.player_claim_request_row(
-                    claim.claimantName,
-                    claim.playerName,
-                  ),
-                  style: AppTextStyle.subtitle2.copyWith(color: cs.textPrimary),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  context.l10n.player_claim_request_hint,
-                  style: AppTextStyle.caption.copyWith(color: cs.textSecondary),
-                ),
-                const SizedBox(height: 10),
-                busy
-                    ? const SizedBox(
-                        height: 32,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: SizedBox.square(
-                            dimension: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                        ),
-                      )
-                    : Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _pill(
-                            context.l10n.player_claim_approve,
-                            background: brandRedColor,
-                            foreground: Colors.white,
-                            onTap: () => _decide(claim, approve: true),
-                          ),
-                          _pill(
-                            context.l10n.player_claim_decline,
-                            background: cs.containerLow,
-                            foreground: cs.textPrimary,
-                            onTap: () => _decide(claim, approve: false),
-                          ),
-                        ],
+          Row(
+            children: [
+              const IconTile(CupertinoIcons.link, brandRedColor),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.l10n.player_claim_unclaimed_title,
+                      style: AppTextStyle.subtitle1.copyWith(
+                        color: cs.textPrimary,
+                        fontWeight: FontWeight.bold,
                       ),
-              ],
-            ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      context.l10n.player_claim_unclaimed_subtitle(
+                        player.playerName,
+                        player.teams,
+                        player.matches,
+                      ),
+                      style: AppTextStyle.caption
+                          .copyWith(color: cs.textSecondary),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          PrimaryButton(
+            context.l10n.player_claim_check_and_merge,
+            background: brandRedColor,
+            onPressed: () async {
+              await PlayerClaimSheet.show(
+                context,
+                player: player,
+                user: user,
+                e164: phone,
+              );
+              _checkClaimable();
+            },
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _myClaimRow(BuildContext context, PlayerClaim claim) {
-    final cs = context.colorScheme;
-    final declined = claim.status == PlayerClaimStatus.declined;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      child: Row(
-        children: [
-          IconTile(
-            declined ? CupertinoIcons.xmark : CupertinoIcons.hourglass,
-            declined ? cs.textSecondary : cs.warning,
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Text(
-              declined
-                  ? context.l10n.player_claim_declined(claim.playerName)
-                  : context.l10n.player_claim_waiting(claim.playerName),
-              style: AppTextStyle.subtitle2.copyWith(color: cs.textPrimary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _pill(
-    String label, {
-    required Color background,
-    required Color foreground,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: background,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Text(
-          label,
-          style: AppTextStyle.caption.copyWith(
-            color: foreground,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
     );
   }

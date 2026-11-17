@@ -289,6 +289,62 @@ class PlayerLinkService {
     }
   }
 
+  /// Merges the added player directly into the signed-in claimant's account
+  /// without requiring organizer approval.
+  Future<void> claimAndMerge({
+    required ClaimablePlayer player,
+    required UserModel claimant,
+    required String e164,
+  }) async {
+    try {
+      final key = phoneKey(e164);
+      final claimId = PlayerClaim.idFor(player.playerId, claimant.id);
+      await mergePlayer(
+        from: player.playerId,
+        to: claimant.id,
+        phoneKey: key,
+        claimId: claimId,
+      );
+    } catch (error, stack) {
+      throw AppError.fromError(error, stack);
+    }
+  }
+
+  /// Gets the names of teams the player belongs to.
+  Future<List<String>> getPlayerTeamNames(String playerId) async {
+    try {
+      final teams = await _teamsWithPlayer(playerId).get();
+      return teams.docs
+          .map((doc) => doc.data()[FireStoreConst.name] as String? ?? '')
+          .where((name) => name.isNotEmpty)
+          .toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// Gets summary strings of recent matches the player participated in.
+  Future<List<String>> getPlayerRecentMatches(String playerId) async {
+    try {
+      final snapshot = await _db
+          .collection(FireStoreConst.matchesCollection)
+          .where(FireStoreConst.players, arrayContains: playerId)
+          .limit(5)
+          .get();
+      return snapshot.docs.map((doc) {
+        final teams = doc.data()['teams'] as List? ?? [];
+        if (teams.length >= 2) {
+          final t1 = teams[0]['name'] as String? ?? 'Team 1';
+          final t2 = teams[1]['name'] as String? ?? 'Team 2';
+          return '$t1 vs $t2';
+        }
+        return doc.data()['tournament_name'] as String? ?? 'Match';
+      }).toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
   // ── Merge ────────────────────────────────────────────────────────────────
 
   /// Folds [duplicateId], a player [organizerId] added, into [playerId], the
@@ -480,10 +536,17 @@ class PlayerLinkService {
 
     final finish = _db.batch();
     if (claimId != null) {
-      finish.update(_db.collection(_claims).doc(claimId), {
-        'status': PlayerClaimStatus.approved.name,
-        'updated_at': FieldValue.serverTimestamp(),
-      });
+      finish.set(
+        _db.collection(_claims).doc(claimId),
+        {
+          'id': claimId,
+          'player_id': from,
+          'claimant_id': to,
+          'status': PlayerClaimStatus.approved.name,
+          'updated_at': FieldValue.serverTimestamp(),
+        },
+        SetOptions(merge: true),
+      );
     }
     if (phoneKey != null) {
       finish.update(_db.collection(_phoneIndex).doc(phoneKey), {

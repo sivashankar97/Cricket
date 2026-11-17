@@ -4800,6 +4800,54 @@ abstract class AppLocalizations {
   /// **'The organizer didn\'t confirm {player}'**
   String player_claim_declined(String player);
 
+  /// No description provided for @player_claim_confirm_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm & Merge'**
+  String get player_claim_confirm_merge;
+
+  /// No description provided for @player_claim_merged_success.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile merged! All matches and stats are now linked to your account.'**
+  String get player_claim_merged_success;
+
+  /// No description provided for @player_claim_teams_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get player_claim_teams_title;
+
+  /// No description provided for @player_claim_matches_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Matches'**
+  String get player_claim_matches_title;
+
+  /// No description provided for @player_claim_unclaimed_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Existing Player Profile Found'**
+  String get player_claim_unclaimed_title;
+
+  /// No description provided for @player_claim_unclaimed_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} in {teams} teams and {matches} matches'**
+  String player_claim_unclaimed_subtitle(String name, int teams, int matches);
+
+  /// No description provided for @player_claim_check_and_merge.
+  ///
+  /// In en, this message translates to:
+  /// **'Check & Merge'**
+  String get player_claim_check_and_merge;
+
+  /// No description provided for @player_claim_loading_details.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking player history...'**
+  String get player_claim_loading_details;
+
   /// No description provided for @profile_complete_add_profile_picture.
   ///
   /// In en, this message translates to:

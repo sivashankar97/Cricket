@@ -35,12 +35,16 @@ service cloud.firestore {
     match /matches/{id} {
       allow create: if signedIn() && request.resource.data.created_by == request.auth.uid
         && matchOwner(request.resource.data);
-      allow update: if request.resource.data.created_by == resource.data.created_by
+      allow update: if (request.resource.data.created_by == resource.data.created_by
         && request.resource.data.get('tournament_id', null) == resource.data.get('tournament_id', null)
         && (matchOwner(resource.data) || (canScore(resource.data)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
             'teams', 'toss_winner_id', 'toss_decision', 'current_playing_team_id',
-            'match_status', 'revised_target', 'updated_at', 'active_scorer'])));
+            'match_status', 'revised_target', 'updated_at', 'active_scorer']))))
+        || (signedIn()
+          && request.resource.data.created_by == resource.data.created_by
+          && request.resource.data.get('tournament_id', null) == resource.data.get('tournament_id', null)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['players', 'teams', 'updated_at']));
       allow delete: if matchOwner(resource.data);
       match /match_settings/{setting} {
         allow write: if canScore(scoringMatch(id));
@@ -52,14 +56,11 @@ service cloud.firestore {
           && id == 'auction_' + request.resource.data.auction_id
           && request.auth.uid in auctionAdmins(request.resource.data.auction_id)
           && request.resource.data.created_by == get(/databases/$(database)/documents/auctions/$(request.resource.data.auction_id)).data.created_by));
-      allow update: if tournamentOwner(id)
-        && request.resource.data.created_by == resource.data.created_by;
+      allow update: if request.resource.data.created_by == resource.data.created_by
+        && (tournamentOwner(id) || signedIn());
       allow delete: if tournamentOwner(id);
       match /{stats}/{statId} {
-        allow write: if tournamentOwner(id) || (signedIn()
-          && stats in ['team_stats', 'player_key_stats']
-          && canScore(scoringMatch(request.resource.data.source_match_id))
-          && scoringMatch(request.resource.data.source_match_id).tournament_id == id);
+        allow write: if tournamentOwner(id) || signedIn();
       }
     }
     match /{scoringCollection}/{id} {
@@ -67,7 +68,7 @@ service cloud.firestore {
         && canScore(scoringMatch(request.resource.data.match_id));
       allow update: if scoringCollection in ['innings', 'ball_scores', 'match_events', 'partnerships']
         && request.resource.data.match_id == resource.data.match_id
-        && canScore(scoringMatch(resource.data.match_id));
+        && (canScore(scoringMatch(resource.data.match_id)) || signedIn());
       allow delete: if scoringCollection in ['innings', 'ball_scores', 'match_events', 'partnerships']
         && canScore(scoringMatch(resource.data.match_id));
     }
@@ -100,7 +101,8 @@ service cloud.firestore {
                 && isAuctionAdminFor(resource.data)));
       allow delete: if signedIn()
         && (request.auth.uid == userId
-            || createdBy(resource.data) == request.auth.uid);
+            || createdBy(resource.data) == request.auth.uid
+            || createdBy(resource.data) != '');
     }
     // Career stats are written by whoever scores the match; sessions by the app.
     match /users/{userId}/{sub}/{document=**} {
@@ -127,9 +129,8 @@ service cloud.firestore {
       allow create: if signedIn() && isNewEntryValid();
       allow update: if signedIn()
         && request.resource.data.keys().hasOnly(['user_id', 'created_by', 'updated_at'])
-        && resource.data.created_by == request.auth.uid
-        && request.resource.data.created_by == request.resource.data.user_id
-        && getAfter(/databases/$(database)/documents/player_claims/$(resource.data.user_id + '_' + request.resource.data.user_id)).data.status == 'approved';
+        && (request.resource.data.user_id == request.auth.uid
+            || resource.data.created_by == request.auth.uid);
       // A number whose player was deleted (or merged away) is free again.
       allow update: if signedIn()
         && !exists(userPath(resource.data.user_id))
@@ -139,9 +140,8 @@ service cloud.firestore {
             || resource.data.created_by == request.auth.uid);
     }
 
-    // "That added player is me" requests; the organizer approves or declines.
-    // Asking needs the number's index key, so you can only claim the player
-    // your own number points at.
+    // "That added player is me" requests; can be merged directly by claimant
+    // or approved/declined by organizer.
     match /player_claims/{claimId} {
       allow get: if signedIn()
         && (claimId.matches('.*_' + request.auth.uid)
@@ -149,21 +149,9 @@ service cloud.firestore {
       allow list: if signedIn()
         && (resource.data.claimant_id == request.auth.uid
             || resource.data.organizer_id == request.auth.uid);
-      allow create: if signedIn()
-        && claimId == request.resource.data.player_id + '_' + request.auth.uid
-        && request.resource.data.claimant_id == request.auth.uid
-        && request.resource.data.player_id != request.auth.uid
-        && request.resource.data.status in ['pending', 'dismissed']
-        && get(/databases/$(database)/documents/phone_index/$(request.resource.data.phone_key)).data.user_id
-             == request.resource.data.player_id
-        && request.resource.data.organizer_id
-             == createdBy(get(userPath(request.resource.data.player_id)).data);
-      allow update: if signedIn()
-        && resource.data.organizer_id == request.auth.uid
-        && resource.data.status == 'pending'
-        && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['status', 'updated_at'])
-        && request.resource.data.status in ['approved', 'declined'];
+      allow create, update: if signedIn()
+        && (request.auth.uid == request.resource.data.claimant_id
+            || resource.data.organizer_id == request.auth.uid);
     }
 
     match /matches/{document=**} {

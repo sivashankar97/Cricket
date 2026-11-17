@@ -82,5 +82,16 @@
   "mascot_movie_dialogue_hint": "ஒரு Mass Dialogue வேணுமா? Tiger ரெடியா இருக்கு!",
   "mascot_movie_cool_attitude": "அமைதியா ஆடுவோம்... பதிலை Scoreboard சொல்லட்டும்!",
   "mascot_movie_youth_energy": "விசில் ரெடியா? அடுத்த Shot-ல மைதானமே அதிரட்டும்!",
-  "mascot_movie_mass_punch": "நம்ம ஆட்டத்துக்கு சத்தம் தேவையில்லை... Scoreboard போதும்!"
+  "mascot_movie_mass_punch": "நம்ம ஆட்டத்துக்கு சத்தம் தேவையில்லை... Scoreboard போதும்!",
+  "player_claim_title": "இது நீங்களா?",
+  "player_claim_body": "{name} என்ற பெயரில் {teams} அணிகள் மற்றும் {matches} போட்டிகள் இந்த மொபைல் எண்ணில் பதிவு செய்யப்பட்டுள்ளன. உங்கள் கணக்கில் இணைக்க சரிபார்க்கவும்.",
+  "player_claim_confirm_merge": "உறுதிசெய்து இணைக்கவும்",
+  "player_claim_merged_success": "விவரங்கள் வெற்றிகரமாக இணைக்கப்பட்டன! உங்கள் போட்டிகள் மற்றும் புள்ளிவிவரங்கள் இப்போது உங்கள் கணக்கில் உள்ளன.",
+  "player_claim_no": "நான் இல்லை",
+  "player_claim_teams_title": "அணிகள்",
+  "player_claim_matches_title": "போட்டிகள்",
+  "player_claim_unclaimed_title": "வீரர் சுயவிவரம் கண்டறியப்பட்டது",
+  "player_claim_unclaimed_subtitle": "{name} • {teams} அணிகள், {matches} போட்டிகள்",
+  "player_claim_check_and_merge": "சரிபார்த்து இணைக்கவும்",
+  "player_claim_loading_details": "போட்டி விவரங்கள் சரிபார்க்கப்படுகின்றன..."
 }

@@ -228,6 +228,37 @@ void main() {
         throwsA(anything),
       );
     });
+
+    test('claimAndMerge directly merges everything without organizer approval',
+        () async {
+      final claimable =
+          await service.findClaimable(userId: 'me', e164: _number);
+      expect(claimable, isNotNull);
+
+      await service.claimAndMerge(
+        player: claimable!,
+        claimant: me,
+        e164: _number,
+      );
+
+      final match = (await db.collection('matches').doc('m1').get()).data()!;
+      expect(match['players'], ['me', 'organizer']);
+      expect(match['teams'][0]['squad'][0]['id'], 'me');
+
+      final ball =
+          (await db.collection('ball_scores').doc('b1').get()).data()!;
+      expect(ball['player_out_id'], 'me');
+      expect(ball['runs_scored'], 4);
+
+      expect((await db.collection('users').doc(playerId).get()).exists, false);
+      expect(await service.playerIdForPhone(_number), 'me');
+
+      final claim = await db
+          .collection('player_claims')
+          .doc(PlayerClaim.idFor(playerId, 'me'))
+          .get();
+      expect(claim.data()!['status'], 'approved');
+    });
   });
 
   group('AddTeamMemberViewNotifier phone input', () {
