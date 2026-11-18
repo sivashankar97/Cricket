@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:style/theme/colors.dart';
 
 import '../../../../domain/play/cricket_game.dart';
+import '../../../../domain/play/play_quality.dart';
 
 /// Night stadium seen from behind the bowler's arm: floodlights and crowd at
 /// the top, the bowler running in, batter and stumps at the bottom, the ball
@@ -28,6 +29,9 @@ class CricketFieldPainter extends CustomPainter {
   /// Crowd celebration 0..1 (boundaries and wins): camera flashes, waving.
   final double celebrate;
 
+  final PlayQuality quality;
+  final bool effectsOn;
+
   CricketFieldPainter({
     required this.delivery,
     required this.ballProgress,
@@ -36,6 +40,8 @@ class CricketFieldPainter extends CustomPainter {
     required this.shot,
     this.runUp = 1,
     this.celebrate = 0,
+    this.quality = PlayQuality.medium,
+    this.effectsOn = true,
   });
 
   static const _skyTop = Color(0xFF060B1F);
@@ -217,19 +223,21 @@ class CricketFieldPainter extends CustomPainter {
         RRect.fromRectAndRadius(panel, const Radius.circular(2)),
         Paint()..color = const Color(0xFFFFF7D6),
       );
-      canvas.drawCircle(
-        panel.center,
-        coreWidth(size) * 0.16,
-        Paint()
-          ..blendMode = BlendMode.plus
-          ..shader = RadialGradient(
-            colors: [
-              const Color(0xFFFFF3C4).withValues(alpha: 0.55),
-              Colors.transparent,
-            ],
-          ).createShader(Rect.fromCircle(
-              center: panel.center, radius: coreWidth(size) * 0.16)),
-      );
+      if (quality.showFloodlightBeams && effectsOn) {
+        canvas.drawCircle(
+          panel.center,
+          coreWidth(size) * 0.16,
+          Paint()
+            ..blendMode = BlendMode.plus
+            ..shader = RadialGradient(
+              colors: [
+                const Color(0xFFFFF3C4).withValues(alpha: 0.55),
+                Colors.transparent,
+              ],
+            ).createShader(Rect.fromCircle(
+                center: panel.center, radius: coreWidth(size) * 0.16)),
+        );
+      }
     }
   }
 
@@ -553,11 +561,13 @@ class CricketFieldPainter extends CustomPainter {
       ballPos = ground.translate(0, -airAt(t));
       radius = radiusAt(t);
       if (shot != null) opacity = (1 - after).clamp(0.0, 1.0);
-      canvas.drawOval(
-        Rect.fromCenter(
-            center: ground, width: radius * 2.2, height: radius * 0.8),
-        Paint()..color = Colors.black.withValues(alpha: 0.25 * opacity),
-      );
+      if (quality.showBallShadow) {
+        canvas.drawOval(
+          Rect.fromCenter(
+              center: ground, width: radius * 2.2, height: radius * 0.8),
+          Paint()..color = Colors.black.withValues(alpha: 0.25 * opacity),
+        );
+      }
     }
 
     canvas.drawCircle(
@@ -580,5 +590,7 @@ class CricketFieldPainter extends CustomPainter {
       old.after != after ||
       old.shot != shot ||
       old.celebrate != celebrate ||
-      old.delivery != delivery;
+      old.delivery != delivery ||
+      old.quality != quality ||
+      old.effectsOn != effectsOn;
 }

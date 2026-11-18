@@ -19,6 +19,7 @@ import '../../../../domain/play/cricket_game.dart';
 import '../play_providers.dart';
 import 'play_arena.dart';
 import 'play_layout.dart';
+import 'play_settings.dart';
 import 'play_sounds.dart';
 
 /// A single-innings game: Quick play, the Daily challenge, or replying to an
@@ -262,25 +263,35 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen> {
       child: Row(
         children: [
           IconButton(
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+            padding: EdgeInsets.zero,
             icon: const Icon(CupertinoIcons.xmark, color: textPrimaryDarkColor),
             onPressed: () => Navigator.of(context).maybePop(),
           ),
           const Spacer(),
           if (target != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              decoration: BoxDecoration(
-                color: awarenessWarningColor.withValues(alpha: 0.18),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                context.l10n.play_hud_target(target),
-                style: AppTextStyle.caption.copyWith(
-                  color: awarenessWarningColor,
-                  fontWeight: FontWeight.w700,
+            Flexible(
+              child: Container(
+                margin: const EdgeInsets.only(right: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: awarenessWarningColor.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  context.l10n.play_hud_target(target),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.caption.copyWith(
+                    color: awarenessWarningColor,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ),
             ),
+          const PlayQualityButton(),
           const PlaySoundToggle(),
         ],
       ),

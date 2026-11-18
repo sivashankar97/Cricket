@@ -21,6 +21,7 @@ import '../../../../domain/play/cricket_game.dart';
 import '../game/play_arena.dart';
 import '../game/play_game_screen.dart';
 import '../game/play_layout.dart';
+import '../game/play_settings.dart';
 import '../game/play_sounds.dart';
 import '../play_opponent_sheet.dart';
 import '../play_providers.dart';
@@ -538,6 +539,9 @@ class _PlayMatchScreenState extends ConsumerState<PlayMatchScreen> {
       child: Row(
         children: [
           IconButton(
+            visualDensity: VisualDensity.compact,
+            constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+            padding: EdgeInsets.zero,
             icon: const Icon(CupertinoIcons.xmark, color: textPrimaryDarkColor),
             onPressed: () => Navigator.of(context).maybePop(),
           ),
@@ -555,6 +559,7 @@ class _PlayMatchScreenState extends ConsumerState<PlayMatchScreen> {
               ),
             ),
           ),
+          const PlayQualityButton(),
           const PlaySoundToggle(),
         ],
       ),

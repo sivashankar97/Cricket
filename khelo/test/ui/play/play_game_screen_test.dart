@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:khelo/components/mascot/mascot_controller.dart';
 import 'package:khelo/domain/play/cricket_game.dart';
+import 'package:khelo/domain/play/play_quality.dart';
 import 'package:khelo/l10n/app_localizations.dart';
 import 'package:khelo/ui/flow/play/game/play_arena.dart';
 import 'package:khelo/ui/flow/play/game/play_game_screen.dart';
@@ -17,6 +18,10 @@ Widget gameApp(PlayGameArgs args) => ProviderScope(
         mascotProvider.overrideWith((ref) => MascotController(() => false)),
         playSoundsProvider.overrideWithValue(PlaySounds.silent()),
         playSoundOnPod
+            .overrideWith((ref) => PreferenceNotifier<bool>(false, null)),
+        playQualityPrefPod
+            .overrideWith((ref) => PreferenceNotifier<String>('medium', null)),
+        playEffectsOnPod
             .overrideWith((ref) => PreferenceNotifier<bool>(false, null)),
       ],
       child: MaterialApp(

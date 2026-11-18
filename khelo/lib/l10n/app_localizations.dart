@@ -6001,6 +6001,54 @@ abstract class AppLocalizations {
   /// **'Sound off'**
   String get play_sound_off;
 
+  /// No description provided for @play_how_to_aim.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap or swipe sideways to aim as the ball arrives.'**
+  String get play_how_to_aim;
+
+  /// No description provided for @play_quality_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Graphics'**
+  String get play_quality_title;
+
+  /// No description provided for @play_quality_auto.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto'**
+  String get play_quality_auto;
+
+  /// No description provided for @play_quality_low.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get play_quality_low;
+
+  /// No description provided for @play_quality_medium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get play_quality_medium;
+
+  /// No description provided for @play_quality_high.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get play_quality_high;
+
+  /// No description provided for @play_effects_on.
+  ///
+  /// In en, this message translates to:
+  /// **'Effects on'**
+  String get play_effects_on;
+
+  /// No description provided for @play_effects_off.
+  ///
+  /// In en, this message translates to:
+  /// **'Effects off'**
+  String get play_effects_off;
+
   /// No description provided for @play_this_over.
   ///
   /// In en, this message translates to:

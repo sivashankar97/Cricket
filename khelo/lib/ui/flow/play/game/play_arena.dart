@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
@@ -10,7 +11,9 @@ import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 import 'package:khelo/components/app_image_provider.dart';
 
+import '../../../../domain/play/ball_flight.dart';
 import '../../../../domain/play/cricket_game.dart';
+import '../../../../domain/play/play_quality.dart';
 import 'cricket_field_painter.dart';
 import 'play_sounds.dart';
 
@@ -51,20 +54,23 @@ class PlayArena extends ConsumerStatefulWidget {
 }
 
 class _PlayArenaState extends ConsumerState<PlayArena>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late final AnimationController _runUp = AnimationController(
     vsync: this,
     duration: PlayArena.runUpDuration,
   )..addStatusListener(_onRunUpStatus);
-  late final AnimationController _ball = AnimationController(vsync: this)
-    ..addListener(_onBallTick)
-    ..addStatusListener(_onBallStatus);
   late final AnimationController _swing = AnimationController(
       vsync: this, duration: const Duration(milliseconds: 260));
   late final AnimationController _after = AnimationController(
       vsync: this, duration: const Duration(milliseconds: 700));
   late final AnimationController _celebrate = AnimationController(
       vsync: this, duration: const Duration(milliseconds: 1600));
+
+  late final Ticker _physicsTicker;
+  final BallFlight _flight = BallFlight();
+  final ValueNotifier<int> _flightFrame = ValueNotifier(0);
+  Duration? _prevTick;
+  final Set<AnimationController> _pausedAnims = {};
 
   _Phase _phase = _Phase.ready;
   Delivery? _delivery;
@@ -79,14 +85,34 @@ class _PlayArenaState extends ConsumerState<PlayArena>
   ShotResult? _replayResult;
   int? _replayOffset;
 
+  Offset? _pointerDown;
+  double _panDx = 0;
+  double _fieldWidth = 360;
+  bool _appInactive = false;
+
   PlaySounds get _sounds => ref.read(playSoundsProvider);
 
   int get _totalMs => (_delivery?.travelMs ?? 1200) + GameRules.lateWindowMs;
 
+  bool get _engineShouldRun => mounted && !_appInactive && !widget.paused;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _physicsTicker = createTicker(_onPhysicsTick);
     _shownBalls = widget.innings.balls;
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final inactive = state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached;
+    if (inactive == _appInactive) return;
+    _appInactive = inactive;
+    _syncEngine();
   }
 
   @override
@@ -97,24 +123,68 @@ class _PlayArenaState extends ConsumerState<PlayArena>
       _reset();
       _shownBalls = widget.innings.balls;
     }
+    if (widget.paused != old.paused) _syncEngine();
     if (!widget.interactive && _phase == _Phase.ready) _replayNext();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _next?.cancel();
+    _physicsTicker.dispose();
+    _flightFrame.dispose();
     _runUp.dispose();
-    _ball.dispose();
     _swing.dispose();
     _after.dispose();
     _celebrate.dispose();
     super.dispose();
   }
 
+  void _syncEngine() {
+    if (_engineShouldRun) {
+      _resumeAnims();
+      if (_phase == _Phase.bowling && !_physicsTicker.isActive) {
+        _prevTick = null;
+        _physicsTicker.start();
+      }
+    } else {
+      _pauseAnims();
+      if (_physicsTicker.isActive) {
+        _physicsTicker.stop();
+        _prevTick = null;
+      }
+      _next?.cancel();
+    }
+  }
+
+  void _pauseAnims() {
+    for (final c in [_runUp, _swing, _after, _celebrate]) {
+      if (c.isAnimating) {
+        _pausedAnims.add(c);
+        c.stop(canceled: false);
+      }
+    }
+  }
+
+  void _resumeAnims() {
+    for (final c in _pausedAnims.toList()) {
+      if (c.value < 1) c.forward();
+    }
+    _pausedAnims.clear();
+    // Between-ball timer may have been cancelled while paused.
+    if (_phase == _Phase.shot &&
+        _engineShouldRun &&
+        (_next == null || !_next!.isActive)) {
+      _next = Timer(PlayArena.betweenBalls, _afterBall);
+    }
+  }
+
   void _reset() {
     _next?.cancel();
+    _physicsTicker.stop();
+    _prevTick = null;
+    _flight.reset();
     _runUp.reset();
-    _ball.reset();
     _swing.reset();
     _after.reset();
     _phase = _Phase.ready;
@@ -126,6 +196,9 @@ class _PlayArenaState extends ConsumerState<PlayArena>
   // ── Bowling ──────────────────────────────────────────────────────────────
 
   void _startDelivery(Delivery delivery, int index) {
+    if (!_engineShouldRun && widget.paused) {
+      // Still set up state; engine stays paused until resume.
+    }
     setState(() {
       _phase = _Phase.runUp;
       _delivery = delivery;
@@ -136,63 +209,115 @@ class _PlayArenaState extends ConsumerState<PlayArena>
     });
     _swing.reset();
     _after.reset();
-    _ball.reset();
-    _runUp.forward(from: 0);
+    _flight.reset();
+    _physicsTicker.stop();
+    _prevTick = null;
+    if (_engineShouldRun) {
+      _runUp.forward(from: 0);
+    } else {
+      _pausedAnims.add(_runUp);
+      _runUp.value = 0;
+    }
   }
 
   void _onRunUpStatus(AnimationStatus status) {
     if (status != AnimationStatus.completed || _phase != _Phase.runUp) return;
     setState(() => _phase = _Phase.bowling);
-    _ball.duration = Duration(milliseconds: _totalMs);
-    _ball.forward(from: 0);
-  }
-
-  void _onBallTick() {
-    if (widget.interactive || _phase != _Phase.bowling) return;
-    final offset = _replayOffset;
-    if (offset == null || _swung) return;
-    final elapsed = _ball.value * _totalMs;
-    if (elapsed >= _delivery!.travelMs + offset) {
-      _swung = true;
-      _swing.forward(from: 0);
-      _showResult(_replayResult!, offset);
+    _flight.reset();
+    _prevTick = null;
+    if (_engineShouldRun) {
+      _physicsTicker.start();
     }
   }
 
-  void _onBallStatus(AnimationStatus status) {
-    if (status != AnimationStatus.completed || _phase != _Phase.bowling) return;
-    if (widget.interactive) {
-      _resolve(null);
-    } else if (_replayResult != null) {
-      _showResult(_replayResult!, null);
+  void _onPhysicsTick(Duration elapsed) {
+    if (_phase != _Phase.bowling || !_engineShouldRun) return;
+    // First tick: treat [elapsed] as dt so a single tester.pump(duration)
+    // still advances flight (prev==elapsed would yield dt 0).
+    final dtDuration =
+        _prevTick == null ? elapsed : elapsed - _prevTick!;
+    _prevTick = elapsed;
+    final dt = dtDuration.inMicroseconds / 1e6;
+    if (dt <= 0) return;
+    _flight.advance(dt);
+    _flightFrame.value++;
+
+    if (!widget.interactive && !_swung) {
+      final offset = _replayOffset;
+      if (offset != null &&
+          _flight.elapsedMs() >= _delivery!.travelMs + offset) {
+        _swung = true;
+        _swing.forward(from: 0);
+        _showResult(_replayResult!, offset);
+        return;
+      }
+    }
+
+    if (_flight.elapsedMs() >= _totalMs) {
+      _physicsTicker.stop();
+      if (widget.interactive) {
+        if (!_swung) _resolve(null);
+      } else if (_replayResult != null && !_swung) {
+        _showResult(_replayResult!, null);
+      }
     }
   }
 
   // ── Batting ──────────────────────────────────────────────────────────────
 
-  void _onTap() {
-    if (!widget.interactive || widget.paused) return;
+  void _onPointerDown(Offset local) {
+    _pointerDown = local;
+    _panDx = 0;
+  }
+
+  void _onPointerMove(Offset local) {
+    final down = _pointerDown;
+    if (down == null) return;
+    _panDx = local.dx - down.dx;
+  }
+
+  void _onPointerUp() {
+    if (!_engineShouldRun) {
+      _pointerDown = null;
+      return;
+    }
     switch (_phase) {
       case _Phase.ready:
-        final delivery = widget.innings.nextDelivery;
-        if (delivery != null) _startDelivery(delivery, widget.innings.balls);
+        if (widget.interactive) {
+          final delivery = widget.innings.nextDelivery;
+          if (delivery != null) _startDelivery(delivery, widget.innings.balls);
+        }
       case _Phase.bowling:
-        if (_swung) return;
-        _swung = true;
-        _swing.forward(from: 0);
-        final elapsed = (_ball.value * _totalMs).round();
-        _resolve(elapsed - _delivery!.travelMs);
+        if (!widget.interactive || _swung) break;
+        final aim = _panDx.abs() < 16
+            ? null
+            : (_panDx / (_fieldWidth * 0.4)).clamp(-1.0, 1.0);
+        _swingAt(aim);
       case _Phase.runUp:
       case _Phase.shot:
         break;
     }
+    _pointerDown = null;
   }
 
-  void _resolve(int? offsetMs) {
+  void _swingAt(double? swingLine) {
+    if (_swung || _phase != _Phase.bowling) return;
+    _swung = true;
+    _swing.forward(from: 0);
+    final elapsed = _flight.elapsedMs();
+    _resolve(elapsed - _delivery!.travelMs, swingLine: swingLine);
+  }
+
+  void _resolve(int? offsetMs, {double? swingLine}) {
     final delivery = _delivery;
     if (delivery == null) return;
-    final result = judgeShot(delivery, tapOffsetMs: offsetMs);
-    if (result != ShotResult.dot || offsetMs != null) {
+    final result =
+        judgeShot(delivery, tapOffsetMs: offsetMs, swingLine: swingLine);
+    final quality = ref.read(playQualityProvider);
+    final effects = ref.read(playEffectsOnPod);
+    if (quality.haptics &&
+        effects &&
+        (result != ShotResult.dot || offsetMs != null)) {
       HapticFeedback.mediumImpact();
     }
     _showResult(result, offsetMs);
@@ -200,24 +325,29 @@ class _PlayArenaState extends ConsumerState<PlayArena>
   }
 
   void _showResult(ShotResult result, int? offsetMs) {
-    _ball.stop();
+    _physicsTicker.stop();
+    _prevTick = null;
     setState(() {
       _phase = _Phase.shot;
       _shot = result;
       _offset = offsetMs;
     });
     _sounds.shot(result, swung: offsetMs != null);
-    if (result == ShotResult.six || result == ShotResult.four) {
+    final effects = ref.read(playEffectsOnPod);
+    if (effects &&
+        (result == ShotResult.six || result == ShotResult.four)) {
       _celebrate.forward(from: 0);
     }
     _after.forward(from: 0);
     _next?.cancel();
-    _next = Timer(PlayArena.betweenBalls, _afterBall);
+    if (_engineShouldRun) {
+      _next = Timer(PlayArena.betweenBalls, _afterBall);
+    }
     if (!widget.interactive) widget.onReplayed?.call(_ballIndex + 1);
   }
 
   void _afterBall() {
-    if (!mounted) return;
+    if (!mounted || !_engineShouldRun) return;
     if (widget.interactive) {
       final delivery = widget.innings.nextDelivery;
       if (delivery == null) return;
@@ -233,6 +363,7 @@ class _PlayArenaState extends ConsumerState<PlayArena>
   void _replayNext() {
     final innings = widget.innings;
     if (_phase != _Phase.ready || _shownBalls >= innings.balls) return;
+    if (!_engineShouldRun) return;
     final index = _shownBalls;
     _replayResult = innings.results[index];
     _replayOffset =
@@ -245,7 +376,7 @@ class _PlayArenaState extends ConsumerState<PlayArena>
   double get _ballProgress {
     final delivery = _delivery;
     if (delivery == null || _phase == _Phase.runUp) return 0;
-    return _ball.value * _totalMs / delivery.travelMs;
+    return _flight.progress(delivery.travelMs);
   }
 
   @override
@@ -254,9 +385,12 @@ class _PlayArenaState extends ConsumerState<PlayArena>
     return Column(
       children: [
         Expanded(
-          child: GestureDetector(
+          child: Listener(
             behavior: HitTestBehavior.opaque,
-            onTapDown: (_) => _onTap(),
+            onPointerDown: (e) => _onPointerDown(e.localPosition),
+            onPointerMove: (e) => _onPointerMove(e.localPosition),
+            onPointerUp: (_) => _onPointerUp(),
+            onPointerCancel: (_) => _pointerDown = null,
             child: ColoredBox(
               color: _skyColor,
               child: LayoutBuilder(
@@ -267,6 +401,7 @@ class _PlayArenaState extends ConsumerState<PlayArena>
                   final width = constraints.maxWidth;
                   final height =
                       min(constraints.maxHeight, constraints.maxWidth * 1.9);
+                  _fieldWidth = width;
                   return Center(
                     child: SizedBox(
                       width: width,
@@ -289,13 +424,15 @@ class _PlayArenaState extends ConsumerState<PlayArena>
 
   Widget _field(BuildContext context, Size size) {
     final showBall = _phase != _Phase.ready;
+    final quality = ref.watch(playQualityProvider);
+    final effectsOn = ref.watch(playEffectsOnPod);
     return Stack(
       alignment: Alignment.center,
       children: [
         Positioned.fill(
           child: AnimatedBuilder(
-            animation:
-                Listenable.merge([_runUp, _ball, _swing, _after, _celebrate]),
+            animation: Listenable.merge(
+                [_runUp, _flightFrame, _swing, _after, _celebrate]),
             builder: (context, _) => CustomPaint(
               painter: CricketFieldPainter(
                 delivery: showBall ? _delivery : null,
@@ -304,7 +441,11 @@ class _PlayArenaState extends ConsumerState<PlayArena>
                 swing: _swing.value,
                 after: _after.value,
                 shot: _shot,
-                celebrate: _celebrate.isAnimating ? _celebrate.value : 0,
+                celebrate: _celebrate.isAnimating || _celebrate.value > 0
+                    ? _celebrate.value
+                    : 0,
+                quality: quality,
+                effectsOn: effectsOn,
               ),
             ),
           ),
@@ -444,6 +585,8 @@ class _PlayArenaState extends ConsumerState<PlayArena>
           : '';
     } else if (ready && widget.innings.balls == 0) {
       text = context.l10n.play_game_tap_to_start;
+    } else if (_phase == _Phase.bowling) {
+      text = context.l10n.play_how_to_aim;
     } else {
       text = context.l10n.play_how_to;
     }

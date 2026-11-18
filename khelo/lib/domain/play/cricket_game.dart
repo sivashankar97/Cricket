@@ -62,6 +62,8 @@ enum ShotResult {
   bool get isOut => this == ShotResult.out;
 }
 
+enum BowlingPace { pace, medium, spin }
+
 class Delivery {
   /// Time from release to reaching the batter.
   final int travelMs;
@@ -72,10 +74,14 @@ class Delivery {
   /// Sideways position at the batter, -1 (off side) to 1 (leg side).
   final double line;
 
+  /// Pace / medium / spin — same seed always picks the same pace.
+  final BowlingPace pace;
+
   const Delivery({
     required this.travelMs,
     required this.onStumps,
     required this.line,
+    this.pace = BowlingPace.medium,
   });
 
   @override
@@ -83,10 +89,11 @@ class Delivery {
       other is Delivery &&
       other.travelMs == travelMs &&
       other.onStumps == onStumps &&
-      other.line == line;
+      other.line == line &&
+      other.pace == pace;
 
   @override
-  int get hashCode => Object.hash(travelMs, onStumps, line);
+  int get hashCode => Object.hash(travelMs, onStumps, line, pace);
 }
 
 /// Every player who gets the same [seed] faces exactly the same balls.
@@ -99,21 +106,85 @@ List<Delivery> deliveriesForSeed(int seed, {int count = GameRules.balls}) {
     final spread = random.nextDouble() * 2 - 1;
     final line =
         onStumps ? spread * 0.25 : spread.sign * (0.45 + spread.abs() * 0.55);
-    return Delivery(travelMs: travelMs, onStumps: onStumps, line: line);
+    // Derive pace from travel time so the RNG stream (and seeded balls)
+    // stays identical to builds that predate BowlingPace.
+    final pace = travelMs <= 1050
+        ? BowlingPace.pace
+        : travelMs >= 1350
+            ? BowlingPace.spin
+            : BowlingPace.medium;
+    return Delivery(
+      travelMs: travelMs,
+      onStumps: onStumps,
+      line: line,
+      pace: pace,
+    );
   });
 }
 
+/// How far a swipe/tap aim can miss the ball line before the shot is edged.
+const _lineMissEdge = 0.55;
+const _lineMissBad = 0.85;
+
 /// [tapOffsetMs] is tap time minus the ball's arrival time (negative = early);
 /// null means the batter did not swing.
-ShotResult judgeShot(Delivery delivery, {required int? tapOffsetMs}) {
+///
+/// Optional [swingLine] (-1..1) is the aimed shot direction from a swipe; when
+/// it misses the ball [Delivery.line] badly, the result is edged down or out.
+ShotResult judgeShot(
+  Delivery delivery, {
+  required int? tapOffsetMs,
+  double? swingLine,
+}) {
   final miss = delivery.onStumps ? ShotResult.out : ShotResult.dot;
   if (tapOffsetMs == null) return miss;
   final offset = tapOffsetMs.abs();
-  if (offset <= GameRules.perfectWindowMs) return ShotResult.six;
-  if (offset <= 100) return ShotResult.four;
-  if (offset <= 160) return ShotResult.two;
-  if (offset <= GameRules.lateWindowMs) return ShotResult.single;
-  return miss;
+  ShotResult timed;
+  if (offset <= GameRules.perfectWindowMs) {
+    timed = ShotResult.six;
+  } else if (offset <= 100) {
+    timed = ShotResult.four;
+  } else if (offset <= 160) {
+    timed = ShotResult.two;
+  } else if (offset <= GameRules.lateWindowMs) {
+    timed = ShotResult.single;
+  } else {
+    return miss;
+  }
+
+  if (swingLine == null) return timed;
+  final lineError = (swingLine - delivery.line).abs();
+  if (lineError >= _lineMissBad) {
+    return delivery.onStumps ? ShotResult.out : ShotResult.dot;
+  }
+  if (lineError >= _lineMissEdge) {
+    // Edge: boundaries become a single; soft contacts stay a single or miss.
+    if (timed == ShotResult.six || timed == ShotResult.four) {
+      return ShotResult.single;
+    }
+    if (timed == ShotResult.two) return ShotResult.single;
+    return delivery.onStumps && offset > 160 ? ShotResult.out : timed;
+  }
+  return timed;
+}
+
+/// Shot family for UI / commentary from aim and timing (pure, no I/O).
+enum ShotFamily { straight, cover, cut, pull, defensive, mistimed }
+
+ShotFamily shotFamily({
+  required Delivery delivery,
+  required int? tapOffsetMs,
+  double? swingLine,
+}) {
+  if (tapOffsetMs == null) return ShotFamily.mistimed;
+  final offset = tapOffsetMs.abs();
+  if (offset > GameRules.lateWindowMs) return ShotFamily.mistimed;
+  final aim = swingLine ?? delivery.line;
+  if (offset > 160) return ShotFamily.defensive;
+  if (aim.abs() < 0.25) return ShotFamily.straight;
+  if (aim > 0.25) return ShotFamily.pull;
+  if (aim < -0.45) return ShotFamily.cut;
+  return ShotFamily.cover;
 }
 
 class Innings {

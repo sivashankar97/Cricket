@@ -38,6 +38,64 @@ void main() {
     });
   });
 
+
+  group('judgeShot swingLine', () {
+    test('leaving swingLine null keeps timing-only results', () {
+      expect(judgeShot(onStumps, tapOffsetMs: 40), ShotResult.six);
+      expect(judgeShot(onStumps, tapOffsetMs: 40, swingLine: null), ShotResult.six);
+    });
+
+    test('a large line miss turns a six into an edge single or miss', () {
+      expect(
+        judgeShot(onStumps, tapOffsetMs: 20, swingLine: 0.7),
+        ShotResult.single,
+      );
+      expect(
+        judgeShot(onStumps, tapOffsetMs: 20, swingLine: 1.0),
+        ShotResult.out,
+      );
+    });
+
+    test('a near-perfect aim keeps the timed result', () {
+      expect(
+        judgeShot(onStumps, tapOffsetMs: 20, swingLine: 0.05),
+        ShotResult.six,
+      );
+    });
+  });
+
+  group('shotFamily', () {
+    test('classifies pull cover cut and straight from aim', () {
+      expect(
+        shotFamily(delivery: onStumps, tapOffsetMs: 20, swingLine: 0),
+        ShotFamily.straight,
+      );
+      expect(
+        shotFamily(delivery: onStumps, tapOffsetMs: 20, swingLine: 0.5),
+        ShotFamily.pull,
+      );
+      expect(
+        shotFamily(delivery: onStumps, tapOffsetMs: 20, swingLine: -0.5),
+        ShotFamily.cut,
+      );
+      expect(
+        shotFamily(delivery: onStumps, tapOffsetMs: 20, swingLine: -0.3),
+        ShotFamily.cover,
+      );
+    });
+  });
+
+  group('BowlingPace', () {
+    test('seeded deliveries expose pace without changing the ball stream', () {
+      final a = deliveriesForSeed(42);
+      final b = deliveriesForSeed(42);
+      expect(a, b);
+      expect(a.every((d) => d.pace == BowlingPace.pace ||
+          d.pace == BowlingPace.medium ||
+          d.pace == BowlingPace.spin), isTrue);
+    });
+  });
+
   group('deliveriesForSeed', () {
     test('the same seed always bowls the same deliveries', () {
       expect(deliveriesForSeed(42), deliveriesForSeed(42));

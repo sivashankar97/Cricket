@@ -3557,6 +3557,31 @@ class AppLocalizationsTa extends AppLocalizations {
   String get play_sound_off => 'Sound off';
 
   @override
+  String get play_how_to_aim =>
+      'Tap or swipe sideways to aim as the ball arrives.';
+
+  @override
+  String get play_quality_title => 'Graphics';
+
+  @override
+  String get play_quality_auto => 'Auto';
+
+  @override
+  String get play_quality_low => 'Low';
+
+  @override
+  String get play_quality_medium => 'Medium';
+
+  @override
+  String get play_quality_high => 'High';
+
+  @override
+  String get play_effects_on => 'Effects on';
+
+  @override
+  String get play_effects_off => 'Effects off';
+
+  @override
   String get play_this_over => 'This over';
 
   @override

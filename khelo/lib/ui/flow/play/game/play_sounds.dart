@@ -99,6 +99,9 @@ class PlaySoundToggle extends ConsumerWidget {
     final isOn = ref.watch(playSoundOnPod);
     return IconButton(
       tooltip: isOn ? context.l10n.play_sound_off : context.l10n.play_sound_on,
+      visualDensity: VisualDensity.compact,
+      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+      padding: EdgeInsets.zero,
       icon: Icon(
         isOn ? Icons.volume_up_rounded : Icons.volume_off_rounded,
         color: textPrimaryDarkColor,
