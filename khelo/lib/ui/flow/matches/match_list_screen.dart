@@ -2,7 +2,9 @@ import 'package:data/api/match/match_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:khelo/components/confirmation_dialog.dart';
 import 'package:khelo/components/error_screen.dart';
+import 'package:khelo/components/error_snackbar.dart';
 import 'package:khelo/components/grouped_list.dart';
 import 'package:khelo/components/match_detail_cell.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
@@ -119,9 +121,24 @@ class _MatchListScreenState extends ConsumerState<MatchListScreen>
                   itemBuilder: (context, index) {
                     if (index < displayMatches.length) {
                       final match = displayMatches[index];
+                      final isIndependent = match.tournament_id == null ||
+                          match.tournament_id!.isEmpty;
+                      final isCreator = state.currentUserId != null &&
+                          match.created_by == state.currentUserId;
                       return MatchDetailCell(
                         match: match,
                         showActionButtons: match.canScore(state.currentUserId),
+                        onEdit: isIndependent && isCreator
+                            ? () => AppRoute.addMatch(matchId: match.id)
+                                .push(context)
+                            : null,
+                        onDelete: isIndependent && isCreator
+                            ? () => _confirmDeleteIndependent(
+                                  context,
+                                  notifier,
+                                  match,
+                                )
+                            : null,
                         onTap: () => AppRoute.matchDetailTab(matchId: match.id)
                             .push(context),
                         onActionTap: () {
@@ -254,6 +271,30 @@ class _MatchListScreenState extends ConsumerState<MatchListScreen>
     );
   }
 
+  void _confirmDeleteIndependent(
+    BuildContext context,
+    MatchListViewNotifier notifier,
+    MatchModel match,
+  ) {
+    final teamA = match.teams.isNotEmpty ? match.teams.first.team.name : '';
+    final teamB = match.teams.length > 1 ? match.teams[1].team.name : '';
+    showConfirmationDialog(
+      context,
+      title: context.l10n.match_delete_title,
+      message: context.l10n.match_delete_message(teamA, teamB),
+      confirmBtnText: context.l10n.common_delete_title,
+      onConfirm: () async {
+        try {
+          await notifier.deleteMatch(match.id);
+        } catch (error) {
+          if (context.mounted) {
+            showErrorSnackBar(context: context, error: error);
+          }
+        }
+      },
+    );
+  }
+
   Widget _emptyCategoryView(BuildContext context) {
     if (_selectedCategoryIndex == 1) {
       return BrandEmptyState(
@@ -271,8 +312,7 @@ class _MatchListScreenState extends ConsumerState<MatchListScreen>
       description:
           'Matches scheduled or played inside tournaments will appear here.',
       buttonTitle: 'View Tournaments',
-      onTap: () =>
-          AppRoute.viewAll(isTournament: true).push(context),
+      onTap: () => AppRoute.viewAll(isTournament: true).push(context),
     );
   }
 }

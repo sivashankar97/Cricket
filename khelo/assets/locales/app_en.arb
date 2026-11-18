@@ -579,6 +579,14 @@
   "match_list_no_match_here_title": "No matches here",
   "match_list_empty_list_description": "Tap on the “ + ” icon to create a match",
   "match_list_overs_title": "{overs, plural, =0{{overs} overs} =1{{overs} over} other{{overs} overs}}",
+  "match_delete_title": "Delete match?",
+  "match_delete_message": "{teamA} vs {teamB} will be removed. This can't be undone.",
+  "@match_delete_message": {
+    "placeholders": {
+      "teamA": {},
+      "teamB": {}
+    }
+  },
   "@match_list_overs_title": {
     "description": "overs, plural, =0{{overs} overs} =1{{overs} over} other{{overs} overs}}",
     "placeholders": {

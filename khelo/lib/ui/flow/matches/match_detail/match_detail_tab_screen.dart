@@ -5,7 +5,10 @@ import 'assign_scorer_sheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:khelo/components/app_page.dart';
+import 'package:khelo/components/confirmation_dialog.dart';
+import 'package:khelo/components/error_snackbar.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/string_extensions.dart';
 import 'package:khelo/domain/extensions/widget_extension.dart';
@@ -66,7 +69,26 @@ class _MatchDetailTabScreenState extends ConsumerState<MatchDetailTabScreen> {
                 .watch(matchPermissionsProvider(widget.matchId))
                 .valueOrNull
                 ?.manage ==
-            true)
+            true) ...[
+          IconButton(
+            tooltip: context.l10n.common_edit,
+            icon: Icon(
+              CupertinoIcons.pencil,
+              size: 20,
+              color: context.colorScheme.textPrimary,
+            ),
+            onPressed: () =>
+                AppRoute.addMatch(matchId: widget.matchId).push(context),
+          ),
+          IconButton(
+            tooltip: context.l10n.common_delete_title,
+            icon: Icon(
+              CupertinoIcons.trash,
+              size: 20,
+              color: context.colorScheme.alert,
+            ),
+            onPressed: () => _confirmDelete(context, state.match),
+          ),
           IconButton(
               tooltip: 'Assign scorer',
               icon: const Icon(Icons.person_add),
@@ -74,6 +96,7 @@ class _MatchDetailTabScreenState extends ConsumerState<MatchDetailTabScreen> {
                   context: context,
                   isScrollControlled: true,
                   builder: (_) => AssignScorerSheet(matchId: widget.matchId))),
+        ],
         if (ref
                     .watch(matchPermissionsProvider(widget.matchId))
                     .valueOrNull
@@ -106,6 +129,28 @@ class _MatchDetailTabScreenState extends ConsumerState<MatchDetailTabScreen> {
           return _content(context, notifier);
         },
       ),
+    );
+  }
+
+  void _confirmDelete(BuildContext context, MatchModel? match) {
+    if (match == null) return;
+    final teamA = match.teams.isNotEmpty ? match.teams.first.team.name : '';
+    final teamB = match.teams.length > 1 ? match.teams[1].team.name : '';
+    showConfirmationDialog(
+      context,
+      title: context.l10n.match_delete_title,
+      message: context.l10n.match_delete_message(teamA, teamB),
+      confirmBtnText: context.l10n.common_delete_title,
+      onConfirm: () async {
+        try {
+          await notifier.deleteMatch();
+          if (context.mounted) context.pop();
+        } catch (error) {
+          if (context.mounted) {
+            showErrorSnackBar(context: context, error: error);
+          }
+        }
+      },
     );
   }
 

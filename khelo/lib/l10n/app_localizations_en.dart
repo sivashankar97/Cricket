@@ -1350,6 +1350,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get match_delete_title => 'Delete match?';
+
+  @override
+  String match_delete_message(Object teamA, Object teamB) {
+    return '$teamA vs $teamB will be removed. This can\'t be undone.';
+  }
+
+  @override
   String get add_match_screen_title => 'Add Match';
 
   @override

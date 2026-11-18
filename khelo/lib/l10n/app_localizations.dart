@@ -2325,6 +2325,18 @@ abstract class AppLocalizations {
   /// **'{overs, plural, =0{{overs} overs} =1{{overs} over} other{{overs} overs}}'**
   String match_list_overs_title(int overs);
 
+  /// No description provided for @match_delete_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete match?'**
+  String get match_delete_title;
+
+  /// No description provided for @match_delete_message.
+  ///
+  /// In en, this message translates to:
+  /// **'{teamA} vs {teamB} will be removed. This can\'t be undone.'**
+  String match_delete_message(Object teamA, Object teamB);
+
   /// No description provided for @add_match_screen_title.
   ///
   /// In en, this message translates to:

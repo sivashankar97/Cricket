@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:data/api/match/match_model.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:khelo/components/image_avatar.dart';
 import 'package:khelo/components/match_status_tag.dart';
 import 'package:khelo/components/tournament_badge.dart';
@@ -25,6 +26,12 @@ class MatchDetailCell extends StatelessWidget {
   final bool showTournamentBadge;
   final bool showActionButtons;
   final VoidCallback? onActionTap;
+
+  /// Creator-only edit for independent matches (any status).
+  final VoidCallback? onEdit;
+
+  /// Creator-only delete for independent matches (any status).
+  final VoidCallback? onDelete;
   final Color? backgroundColor;
 
   const MatchDetailCell({
@@ -36,6 +43,8 @@ class MatchDetailCell extends StatelessWidget {
     this.showTournamentBadge = true,
     this.backgroundColor,
     this.onActionTap,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
@@ -75,6 +84,40 @@ class MatchDetailCell extends StatelessWidget {
             Row(
               children: [
                 Expanded(child: _winnerMessageText(context)),
+                if (onEdit != null || onDelete != null) ...[
+                  if (onEdit != null)
+                    IconButton(
+                      tooltip: context.l10n.common_edit,
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                      icon: Icon(
+                        CupertinoIcons.pencil,
+                        size: 18,
+                        color: cs.textSecondary,
+                      ),
+                      onPressed: onEdit,
+                    ),
+                  if (onDelete != null)
+                    IconButton(
+                      tooltip: context.l10n.common_delete_title,
+                      visualDensity: VisualDensity.compact,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(
+                        minWidth: 36,
+                        minHeight: 36,
+                      ),
+                      icon: Icon(
+                        CupertinoIcons.trash,
+                        size: 18,
+                        color: cs.alert,
+                      ),
+                      onPressed: onDelete,
+                    ),
+                ],
                 if (showStatusTag)
                   StatusTag(
                     matchStatus: match.match_status,

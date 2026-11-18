@@ -132,6 +132,53 @@ await check('list number index', async () => {
   await assertFails(getDocs(collection(m, 'phone_index')));
 });
 
+// ── Independent match owner ACL ──
+const independentMatch = (extra = {}) => ({
+  id: 'im1',
+  created_by: 'alice',
+  teams: [{ team_id: 't1' }, { team_id: 't2' }],
+  players: ['alice'],
+  match_status: 'yet_to_start',
+  scorer_ids: ['bob'],
+  updated_at: serverTimestamp(),
+  ...extra,
+});
+
+await seed();
+await env.withSecurityRulesDisabled(async (ctx) => {
+  await setDoc(doc(ctx.firestore(), 'matches/im1'), independentMatch());
+});
+await check('creator creates independent match', () =>
+  assertSucceeds(setDoc(doc(db('alice'), 'matches/im2'), independentMatch({ id: 'im2' }))));
+await check('creator updates independent match', () =>
+  assertSucceeds(updateDoc(doc(db('alice'), 'matches/im1'), { ground: 'Central', updated_at: serverTimestamp() })));
+await check('creator deletes independent match', async () => {
+  await env.withSecurityRulesDisabled(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'matches/im_del'), independentMatch({ id: 'im_del' }));
+  });
+  await assertSucceeds(deleteDoc(doc(db('alice'), 'matches/im_del')));
+});
+await check('non-owner cannot update independent match', () =>
+  assertFails(updateDoc(doc(db('mallory'), 'matches/im1'), { ground: 'Hack', updated_at: serverTimestamp() })));
+await check('non-owner cannot use old players/teams loophole', () =>
+  assertFails(updateDoc(doc(db('mallory'), 'matches/im1'), {
+    players: ['mallory'],
+    teams: [{ team_id: 't1' }],
+    updated_at: serverTimestamp(),
+  })));
+await check('non-owner cannot delete independent match', () =>
+  assertFails(deleteDoc(doc(db('mallory'), 'matches/im1'))));
+await check('assigned scorer can update scoring fields only', () =>
+  assertSucceeds(updateDoc(doc(db('bob'), 'matches/im1'), {
+    match_status: 'running',
+    updated_at: serverTimestamp(),
+  })));
+await check('assigned scorer cannot edit ground', () =>
+  assertFails(updateDoc(doc(db('bob'), 'matches/im1'), {
+    ground: 'Scorer ground',
+    updated_at: serverTimestamp(),
+  })));
+
 console.log(`\n${passed} passed, ${failed} failed`);
 await env.cleanup();
 process.exit(failed ? 1 : 0);

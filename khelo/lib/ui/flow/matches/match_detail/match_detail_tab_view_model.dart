@@ -10,6 +10,7 @@ import 'package:data/errors/app_error.dart';
 import 'package:data/service/ball_score/ball_score_service.dart';
 import 'package:data/service/innings/inning_service.dart';
 import 'package:data/service/match/match_service.dart';
+import 'package:data/service/tournament/tournament_service.dart';
 import 'package:data/utils/combine_latest.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -31,6 +32,7 @@ final matchDetailTabStateProvider = StateNotifierProvider.autoDispose<
     ref.read(matchServiceProvider),
     ref.read(inningServiceProvider),
     ref.read(ballScoreServiceProvider),
+    ref.read(tournamentServiceProvider),
   ),
 );
 
@@ -38,6 +40,7 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
   final MatchService _matchService;
   final InningsService _inningService;
   final BallScoreService _ballScoreService;
+  final TournamentService _tournamentService;
   late String _matchId;
   StreamSubscription? _matchStreamSubscription;
   StreamSubscription? _ballScoreStreamSubscription;
@@ -46,6 +49,7 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
     this._matchService,
     this._inningService,
     this._ballScoreService,
+    this._tournamentService,
   ) : super(const MatchDetailTabState());
 
   int _ballsLoaded = 0;
@@ -391,6 +395,19 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
   Future<void> onResume() async {
     await _cancelStreamSubscription();
     _loadMatchesAndInning();
+  }
+
+  Future<void> deleteMatch() async {
+    final match = state.match;
+    if (match == null) return;
+    await _matchService.deleteMatch(match.id);
+    final tournamentId = match.tournament_id;
+    if (tournamentId != null && tournamentId.isNotEmpty) {
+      await _tournamentService.removeMatchFromTournament(
+        tournamentId,
+        match.id,
+      );
+    }
   }
 
   @override

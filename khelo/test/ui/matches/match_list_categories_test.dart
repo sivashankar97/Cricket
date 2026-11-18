@@ -5,7 +5,6 @@ import 'package:data/api/team/team_model.dart';
 import 'package:data/api/user/user_models.dart';
 import 'package:data/service/match/match_service.dart';
 import 'package:data/storage/app_preferences.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,6 +37,8 @@ MatchModel _createMatch({
   String? tournamentId,
   required String teamAName,
   required String teamBName,
+  String createdBy = 'user_1',
+  MatchStatus status = MatchStatus.yetToStart,
 }) {
   return MatchModel(
     id: id,
@@ -71,10 +72,36 @@ MatchModel _createMatch({
     start_at: DateTime(2026, 11, 17, 10, 0),
     ball_type: BallType.leather,
     pitch_type: PitchType.turf,
-    created_by: 'user_1',
-    match_status: MatchStatus.yetToStart,
+    created_by: createdBy,
+    match_status: status,
     updated_at: DateTime.now(),
   );
+}
+
+Future<void> _pumpList(
+  WidgetTester tester, {
+  required List<MatchModel> matches,
+  required String userId,
+}) async {
+  await tester.pumpWidget(
+    ProviderScope(
+      overrides: [
+        matchServiceProvider.overrideWithValue(_MockMatchService(matches)),
+        currentUserPod.overrideWith(
+          (ref) => UserModel(id: userId, name: 'Tester'),
+        ),
+      ],
+      child: AppTheme(
+        colorScheme: appColorSchemeLight,
+        child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          home: const Scaffold(body: MatchListScreen()),
+        ),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -102,26 +129,7 @@ void main() {
       ),
     ];
 
-    final mockService = _MockMatchService(matches);
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          matchServiceProvider.overrideWithValue(mockService),
-          currentUserPod.overrideWith((ref) => const UserModel(id: 'user_1', name: 'Tester')),
-        ],
-        child: AppTheme(
-          colorScheme: appColorSchemeLight,
-          child: MaterialApp(
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const Scaffold(body: MatchListScreen()),
-          ),
-        ),
-      ),
-    );
-
-    await tester.pumpAndSettle();
+    await _pumpList(tester, matches: matches, userId: 'user_1');
 
     // Verify tabs with count badges exist:
     // All (3), Independent (2), Tournaments (1)
@@ -156,5 +164,58 @@ void main() {
     expect(find.text('Titans Independent'), findsNothing);
     expect(find.text('Lions Independent'), findsNothing);
     expect(find.text('Super Kings Tourney'), findsOneWidget);
+  });
+
+  testWidgets(
+      'creator sees Edit and Delete on independent matches including finished',
+      (tester) async {
+    final matches = [
+      _createMatch(
+        id: 'm1',
+        tournamentId: null,
+        teamAName: 'Titans Independent',
+        teamBName: 'Warriors Independent',
+        status: MatchStatus.finish,
+      ),
+      _createMatch(
+        id: 'm2',
+        tournamentId: 'tourney_1',
+        teamAName: 'Super Kings Tourney',
+        teamBName: 'Royals Tourney',
+      ),
+    ];
+
+    await _pumpList(tester, matches: matches, userId: 'user_1');
+
+    // Independent finished match: creator gets Edit + Delete.
+    expect(find.byTooltip('Edit'), findsOneWidget);
+    expect(find.byTooltip('Delete'), findsOneWidget);
+
+    await tester.tap(find.text('Tournaments'));
+    await tester.pumpAndSettle();
+
+    // Tournament matches on this list do not get independent Edit/Delete.
+    expect(find.byTooltip('Edit'), findsNothing);
+    expect(find.byTooltip('Delete'), findsNothing);
+  });
+
+  testWidgets('non-creator does not see Edit or Delete on independent matches',
+      (tester) async {
+    final matches = [
+      _createMatch(
+        id: 'm1',
+        tournamentId: null,
+        teamAName: 'Titans Independent',
+        teamBName: 'Warriors Independent',
+        createdBy: 'someone_else',
+        status: MatchStatus.finish,
+      ),
+    ];
+
+    await _pumpList(tester, matches: matches, userId: 'user_1');
+
+    expect(find.text('Titans Independent'), findsOneWidget);
+    expect(find.byTooltip('Edit'), findsNothing);
+    expect(find.byTooltip('Delete'), findsNothing);
   });
 }

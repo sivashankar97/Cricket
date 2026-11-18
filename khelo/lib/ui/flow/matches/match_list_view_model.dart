@@ -81,12 +81,19 @@ class MatchListViewNotifier extends StateNotifier<MatchListViewState> {
   }
 
   Future<void> loadMore() async {
-    if (!_hasMore || _isLoadingMore || state.loading || state.currentUserId == null) {
+    if (!_hasMore ||
+        _isLoadingMore ||
+        state.loading ||
+        state.currentUserId == null) {
       return;
     }
     _isLoadingMore = true;
     _currentLimit += 10;
     loadMatches();
+  }
+
+  Future<void> deleteMatch(String matchId) async {
+    await _matchService.deleteMatch(matchId);
   }
 
   @override
