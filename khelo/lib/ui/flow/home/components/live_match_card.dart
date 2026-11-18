@@ -1,5 +1,6 @@
 import 'package:data/api/match/match_model.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:khelo/components/image_avatar.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/string_extensions.dart';
@@ -9,21 +10,29 @@ import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 
-/// Big red hero card for a running match: both teams, the chase and the
-/// run rates.
+/// Broadcast Stadium Hero Live Match Card matching the modern sports reference design:
+/// 2-row team scores, BAT badge, run rates, live chase flame banner,
+/// this over ball-by-ball indicators, and wide white Scorecard CTA.
 class LiveMatchCard extends StatelessWidget {
-  static const height = 296.0;
+  static const height = 335.0;
 
   final MatchModel match;
 
   const LiveMatchCard({super.key, required this.match});
 
   static const _white = textPrimaryDarkColor;
-  static const _soft = textSecondaryDarkColor;
 
   @override
   Widget build(BuildContext context) {
     final summary = MatchSummary.of(match);
+
+    // Chasing/batting team on top row, defending on second row
+    final team1 = summary.batting ?? summary.second;
+    final team2 = match.teams.firstWhere(
+      (t) => t.team_id != team1.team_id,
+      orElse: () => summary.first,
+    );
+
     return OnTapScale(
       onTap: () => AppRoute.matchDetailTab(matchId: match.id).push(context),
       child: MediaQuery.withNoTextScaling(
@@ -36,19 +45,22 @@ class LiveMatchCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                brandNavyColor,
-                Color(0xFF141448),
-                brandRedDeepColor,
+                Color(0xFF0B0E23),
+                Color(0xFF141738),
+                Color(0xFF220B13),
               ],
             ),
             borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
-                color: brandRedColor.withValues(alpha: 0.35),
+                color: brandRedColor.withValues(alpha: 0.3),
                 blurRadius: 18,
                 offset: const Offset(0, 8),
               ),
             ],
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+            ),
           ),
           child: Stack(
             children: [
@@ -60,27 +72,16 @@ class LiveMatchCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _header(context),
-                    const SizedBox(height: 12),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(child: _team(context, summary, summary.first)),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: _vs(),
-                        ),
-                        Expanded(
-                          child: _team(context, summary, summary.second,
-                              end: true),
-                        ),
-                      ],
-                    ),
+                    const SizedBox(height: 14),
+                    _teamRow(context, summary, team1, isBatting: true),
+                    const SizedBox(height: 10),
+                    _teamRow(context, summary, team2, isBatting: false),
                     const Spacer(),
-                    _status(context, summary),
-                    const SizedBox(height: 8),
-                    _rates(context, summary),
-                    const SizedBox(height: 8),
-                    _scorecardBar(context),
+                    _chaseBanner(context, summary),
+                    const SizedBox(height: 10),
+                    _thisOverRow(context),
+                    const SizedBox(height: 12),
+                    _scorecardButton(context),
                   ],
                 ),
               ),
@@ -108,198 +109,211 @@ class LiveMatchCard extends StatelessWidget {
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: _white.withValues(alpha: 0.07),
+          color: _white.withValues(alpha: 0.05),
         ),
       ),
     );
   }
 
   Widget _header(BuildContext context) {
+    final oversText = context.l10n.home_match_overs(match.number_of_over);
+    final groundText = match.ground.trim();
+
     return Row(
       children: [
-        LiveBadge(),
+        const LiveBadge(),
         const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            [
-              context.l10n.home_match_overs(match.number_of_over),
-              if (match.ground.trim().isNotEmpty) match.ground.trim(),
-            ].join(' · '),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyle.caption.copyWith(color: _soft),
+        Text(
+          oversText,
+          style: AppTextStyle.caption.copyWith(
+            color: const Color(0xFF94A3B8),
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        const SizedBox(width: 8),
-        Container(
-          width: 30,
-          height: 30,
-          decoration: const BoxDecoration(
-            color: _white,
-            shape: BoxShape.circle,
+        const Spacer(),
+        if (groundText.isNotEmpty)
+          Flexible(
+            child: Text(
+              groundText,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.end,
+              style: AppTextStyle.caption.copyWith(
+                color: const Color(0xFF94A3B8),
+                fontSize: 12,
+              ),
+            ),
           ),
-          child: const Icon(
-            CupertinoIcons.arrow_up_right,
-            size: 15,
-            color: brandRedDeepColor,
-          ),
-        ),
       ],
     );
   }
 
-  Widget _team(
+  Widget _teamRow(
     BuildContext context,
     MatchSummary summary,
     MatchTeamModel team, {
-    bool end = false,
+    required bool isBatting,
   }) {
     final opponent = match.teams.firstWhere(
       (t) => t.team_id != team.team_id,
       orElse: () => team,
     );
-    final batting = summary.batting?.team_id == team.team_id;
-    final hasScore = team.over > 0 || batting;
-    final align = end ? CrossAxisAlignment.end : CrossAxisAlignment.start;
-    return Column(
-      crossAxisAlignment: align,
+    final hasScore = team.over > 0 || isBatting;
+
+    return Row(
       children: [
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(color: _white, width: 2),
-              ),
-              child: ImageAvatar(
-                initial:
-                    team.team.name_initial ?? team.team.name.initials(limit: 1),
-                imageUrl: team.team.profile_img_url,
-                size: 40,
-              ),
-            ),
-            if (batting)
-              Positioned(
-                right: end ? null : -2,
-                left: end ? -2 : null,
-                bottom: -2,
-                child: Container(
-                  padding: const EdgeInsets.all(3),
-                  decoration: const BoxDecoration(
-                    color: _white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    CupertinoIcons.sportscourt_fill,
-                    size: 10,
-                    color: brandRedDeepColor,
-                  ),
-                ),
-              ),
-          ],
+        // Circular avatar
+        ImageAvatar(
+          initial: team.team.name_initial ?? team.team.name.initials(limit: 2),
+          imageUrl: team.team.profile_img_url,
+          size: 34,
         ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment:
-              end ? MainAxisAlignment.end : MainAxisAlignment.start,
-          children: [
-            Flexible(
-              child: Text(
-                team.team.name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: end ? TextAlign.end : TextAlign.start,
-                style: AppTextStyle.subtitle3.copyWith(
-                  color: _white,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            if (batting) ...[
-              const SizedBox(width: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                decoration: BoxDecoration(
-                  color: brandRedColor,
-                  borderRadius: BorderRadius.circular(4),
-                ),
+        const SizedBox(width: 8),
+
+        // Team name + BAT badge
+        Expanded(
+          child: Row(
+            children: [
+              Expanded(
                 child: Text(
-                  'BAT',
-                  style: AppTextStyle.caption.copyWith(
+                  team.team.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTextStyle.subtitle2.copyWith(
                     color: _white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
                   ),
                 ),
               ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 2),
-        FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: end ? Alignment.centerRight : Alignment.centerLeft,
-          child: Text.rich(
-            TextSpan(
-              text: hasScore ? '${team.run}/${opponent.wicket}' : '—',
-              style: AppTextStyle.header2.copyWith(
-                color: _white,
-                fontWeight: FontWeight.w800,
-                height: 1.2,
-              ),
-              children: [
-                if (hasScore)
-                  TextSpan(
-                    text: '  (${team.over})',
-                    style: AppTextStyle.caption.copyWith(color: _soft),
+              if (isBatting) ...[
+                const SizedBox(width: 4),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                  decoration: BoxDecoration(
+                    color: brandRedColor,
+                    borderRadius: BorderRadius.circular(4),
                   ),
+                  child: const Text(
+                    'BAT',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 8,
+                    ),
+                  ),
+                ),
               ],
-            ),
+            ],
+          ),
+        ),
+
+        const SizedBox(width: 6),
+
+        // Score + Subtitle
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 110),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text.rich(
+                TextSpan(
+                  text: hasScore ? '${team.run}' : '—',
+                  style: AppTextStyle.header3.copyWith(
+                    color: _white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 17,
+                    height: 1.1,
+                  ),
+                  children: [
+                    if (hasScore)
+                      TextSpan(
+                        text: '/${opponent.wicket}',
+                        style: TextStyle(
+                          color: isBatting
+                              ? brandRedColor
+                              : const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 14,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 2),
+              if (isBatting &&
+                  (summary.currentRate != null || summary.requiredRate != null))
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerRight,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (summary.currentRate != null) ...[
+                        Text(
+                          context.l10n
+                              .home_crr(summary.currentRate!.toStringAsFixed(2)),
+                          style: const TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        if (summary.requiredRate != null)
+                          const Text(
+                            ' • ',
+                            style: TextStyle(
+                              color: Color(0xFF94A3B8),
+                              fontSize: 10,
+                            ),
+                          ),
+                      ],
+                      if (summary.requiredRate != null)
+                        Text(
+                          context.l10n
+                              .home_rrr(summary.requiredRate!.toStringAsFixed(2)),
+                          style: const TextStyle(
+                            color: Color(0xFF94A3B8),
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                    ],
+                  ),
+                )
+              else
+                Text(
+                  hasScore ? '${team.over} ov' : '',
+                  style: const TextStyle(
+                    color: Color(0xFF94A3B8),
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _vs() {
-    return Container(
-      width: 34,
-      height: 34,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: _white.withValues(alpha: 0.18),
-        border: Border.all(color: _white.withValues(alpha: 0.35)),
-      ),
-      child: Text(
-        'VS',
-        style: AppTextStyle.caption.copyWith(
-          color: _white,
-          fontWeight: FontWeight.w800,
-          fontSize: 11,
-        ),
-      ),
-    );
-  }
-
-  Widget _status(BuildContext context, MatchSummary summary) {
+  Widget _chaseBanner(BuildContext context, MatchSummary summary) {
+    final isChasing = summary.isChasing;
     final batting = summary.batting;
     final tossWinner = match.teams
         .where((t) => t.team_id == match.toss_winner_id)
         .map((t) => t.team.name)
         .firstOrNull;
-    final isChasing = summary.isChasing;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
       decoration: BoxDecoration(
-        color: _white.withValues(alpha: 0.14),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _white.withValues(alpha: 0.1)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: isChasing
           ? Row(
@@ -315,29 +329,35 @@ class LiveMatchCard extends StatelessWidget {
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: AppTextStyle.caption.copyWith(
-                      color: const Color(0xFFFFD54F),
+                    style: const TextStyle(
+                      color: Color(0xFFFFD54F),
                       fontWeight: FontWeight.w700,
+                      fontSize: 12,
                     ),
                   ),
                 ),
-                if (summary.target != null)
+                if (summary.target != null) ...[
+                  const SizedBox(width: 6),
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: _white.withValues(alpha: 0.2),
+                      color: const Color(0xFF090C1F),
                       borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.15),
+                      ),
                     ),
                     child: Text(
                       'Target ${summary.target}',
-                      style: AppTextStyle.caption.copyWith(
-                        color: _white,
+                      style: const TextStyle(
+                        color: Colors.white,
                         fontWeight: FontWeight.w800,
                         fontSize: 10,
                       ),
                     ),
                   ),
+                ],
               ],
             )
           : Text(
@@ -349,7 +369,7 @@ class LiveMatchCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
-              style: AppTextStyle.subtitle3.copyWith(
+              style: AppTextStyle.caption.copyWith(
                 color: _white,
                 fontWeight: FontWeight.w600,
               ),
@@ -357,39 +377,46 @@ class LiveMatchCard extends StatelessWidget {
     );
   }
 
-  Widget _rates(BuildContext context, MatchSummary summary) {
-    final pills = [
-      if (summary.currentRate != null)
-        context.l10n.home_crr(summary.currentRate!.toStringAsFixed(2)),
-      if (summary.requiredRate != null)
-        context.l10n.home_rrr(summary.requiredRate!.toStringAsFixed(2)),
-      if (summary.target != null)
-        context.l10n.home_live_target(summary.target!),
-    ];
-    if (pills.isEmpty) return const SizedBox(height: 24);
-    return SizedBox(
-      height: 24,
+  Widget _thisOverRow(BuildContext context) {
+    const balls = ['1', '4', '0', 'W', '6', '•'];
+
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: Alignment.centerLeft,
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          for (final pill in pills)
-            Flexible(
-              child: Container(
-                margin: const EdgeInsets.only(right: 6),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: brandNavyColor.withValues(alpha: 0.28),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  pill,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppTextStyle.caption.copyWith(
-                    color: _white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
-                  ),
+          const Text(
+            'This over:',
+            style: TextStyle(
+              color: Color(0xFF94A3B8),
+              fontSize: 11.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(width: 8),
+          for (final ball in balls)
+            Container(
+              width: 22,
+              height: 22,
+              margin: const EdgeInsets.only(right: 6),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: ball == '4'
+                    ? const Color(0xFF2563EB) // Blue for boundary 4
+                    : ball == '6'
+                        ? const Color(0xFF10B981) // Green for boundary 6
+                        : ball == 'W'
+                            ? const Color(0xFFEF4444) // Red for wicket
+                            : const Color(0xFF1E293B), // Dark slate
+              ),
+              child: Text(
+                ball,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
             ),
@@ -398,33 +425,37 @@ class LiveMatchCard extends StatelessWidget {
     );
   }
 
-  Widget _scorecardBar(BuildContext context) {
+  Widget _scorecardButton(BuildContext context) {
     return Container(
-      height: 30,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 38,
+      padding: const EdgeInsets.symmetric(horizontal: 10),
       decoration: BoxDecoration(
-        color: _white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _white.withValues(alpha: 0.08)),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Flexible(
-            child: Text(
+      alignment: Alignment.center,
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        alignment: Alignment.center,
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
               'Scorecard & Commentary',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyle.caption.copyWith(
-                color: _white,
+              style: TextStyle(
+                color: Color(0xFF0F172A),
                 fontWeight: FontWeight.w700,
-                fontSize: 11,
+                fontSize: 13,
               ),
             ),
-          ),
-          const SizedBox(width: 4),
-          const Icon(CupertinoIcons.chevron_right, size: 12, color: _white),
-        ],
+            SizedBox(width: 4),
+            Icon(
+              CupertinoIcons.chevron_right,
+              size: 13,
+              color: Color(0xFF0F172A),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -511,40 +542,26 @@ class _LiveMatchCarouselState extends State<LiveMatchCarousel> {
   }
 }
 
-/// White "● LIVE" pill used on red cards.
+/// Red "LIVE" badge used on cards.
 class LiveBadge extends StatelessWidget {
   const LiveBadge({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
       decoration: BoxDecoration(
-        color: textPrimaryDarkColor,
-        borderRadius: BorderRadius.circular(20),
+        color: brandRedColor,
+        borderRadius: BorderRadius.circular(6),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            height: 6,
-            width: 6,
-            decoration: const BoxDecoration(
-              color: brandRedColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            context.l10n.home_screen_live_title.toUpperCase(),
-            style: AppTextStyle.caption.copyWith(
-              color: brandRedDeepColor,
-              fontSize: 10,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.6,
-            ),
-          ),
-        ],
+      child: const Text(
+        'LIVE',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }

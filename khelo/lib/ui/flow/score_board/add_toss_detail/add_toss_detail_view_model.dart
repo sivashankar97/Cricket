@@ -56,17 +56,24 @@ class AddTossDetailViewNotifier extends StateNotifier<AddTossDetailState> {
   }
 
   Future<void> onNextButtonTap() async {
+    final otherTeam = state.match?.teams.firstWhereOrNull((element) {
+      final id =
+          element.team_id.isNotEmpty ? element.team_id : element.team.id;
+      return id != state.tossWinnerTeamId;
+    });
+    final otherTeamId = (otherTeam != null && otherTeam.team_id.isNotEmpty)
+        ? otherTeam.team_id
+        : otherTeam?.team.id;
+
     final currentPlayingTeamId = state.tossWinnerDecision == TossDecision.bat
         ? state.tossWinnerTeamId
-        : state.match!.teams
-            .firstWhereOrNull(
-                (element) => element.team.id != state.tossWinnerTeamId)
-            ?.team
-            .id;
+        : otherTeamId;
+
     if (state.match?.id == null ||
         state.tossWinnerTeamId == null ||
         state.tossWinnerDecision == null ||
-        currentPlayingTeamId == null) {
+        currentPlayingTeamId == null ||
+        currentPlayingTeamId.isEmpty) {
       return;
     }
     state =

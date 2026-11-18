@@ -279,7 +279,10 @@ class TeamService {
     );
 
     final players = team.players.map((player) {
-      final user = users.firstWhere((element) => element.id == player.id);
+      final user = users.firstWhere(
+        (element) => element.id == player.id,
+        orElse: () => deActiveDummyUserAccount(player.id),
+      );
       return player.copyWith(user: user);
     }).toList();
 
@@ -354,7 +357,10 @@ class TeamService {
           );
 
           final players = team.players.map((player) {
-            final user = users.firstWhere((element) => element.id == player.id);
+            final user = users.firstWhere(
+              (element) => element.id == player.id,
+              orElse: () => deActiveDummyUserAccount(player.id),
+            );
             return player.copyWith(user: user);
           }).toList();
 

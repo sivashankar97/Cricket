@@ -1,4 +1,5 @@
 import 'package:data/api/match/match_model.dart';
+import 'package:data/storage/app_preferences.dart';
 import 'package:khelo/domain/permissions/match_access.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -43,15 +44,25 @@ class _AddTossDetailScreenState extends ConsumerState<AddTossDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final access = ref.watch(matchPermissionsProvider(widget.matchId));
-    if (access.valueOrNull?.score != true) {
-      return Scaffold(
-          appBar: AppBar(title: const Text('Toss')),
-          body: Center(
-              child: Text(access.isLoading
-                  ? 'Loading…'
-                  : 'You do not have scoring access.')));
-    }
     final state = ref.watch(addTossDetailStateProvider);
+    final currentUserId = ref.watch(currentUserPod)?.id;
+
+    final hasScoringAccess = access.valueOrNull?.score == true ||
+        (state.match != null && state.match!.canScore(currentUserId));
+
+    if (access.isLoading && state.loading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Toss')),
+        body: const Center(child: AppProgressIndicator()),
+      );
+    }
+
+    if (!hasScoringAccess && !access.isLoading && !state.loading) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Toss')),
+        body: const Center(child: Text('You do not have scoring access.')),
+      );
+    }
 
     _observeActionError(context, ref);
     _observePushScoreBoard();
@@ -107,16 +118,32 @@ class _AddTossDetailScreenState extends ConsumerState<AddTossDetailScreen> {
           child: Row(
               children: teams
                       ?.map(
-                        (team) => _tossCellView(
-                          context: context,
-                          imageUrl: team.team.profile_img_url,
-                          initial: team.team.name_initial ??
-                              team.team.name.initials(limit: 1),
-                          title: team.team.name,
-                          isSelected: tossWinnerTeamId == team.team.id,
-                          onTap: () =>
-                              notifier.onTossWinnerSelect(team.team.id),
-                        ),
+                        (team) {
+                          final teamId = team.team_id.isNotEmpty
+                              ? team.team_id
+                              : team.team.id;
+                          final teamName = team.team.name.isNotEmpty
+                              ? team.team.name
+                              : (team.team_id.isNotEmpty ? 'Team' : 'Unknown');
+                          final teamInitial = (team.team.name_initial != null &&
+                                  team.team.name_initial!.isNotEmpty)
+                              ? team.team.name_initial
+                              : teamName.initials(limit: 1);
+                          return _tossCellView(
+                            context: context,
+                            imageUrl: team.team.profile_img_url,
+                            initial: teamInitial,
+                            title: teamName,
+                            isSelected: tossWinnerTeamId != null &&
+                                tossWinnerTeamId.isNotEmpty &&
+                                tossWinnerTeamId == teamId,
+                            onTap: () {
+                              if (teamId.isNotEmpty) {
+                                notifier.onTossWinnerSelect(teamId);
+                              }
+                            },
+                          );
+                        },
                       )
                       .toList() ??
                   []),
@@ -175,32 +202,40 @@ class _AddTossDetailScreenState extends ConsumerState<AddTossDetailScreen> {
     required bool isSelected,
     required VoidCallback onTap,
   }) {
+    final cs = context.colorScheme;
     return Expanded(
       child: OnTapScale(
         onTap: onTap,
-        child: Container(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
           constraints: const BoxConstraints(minHeight: 164),
           alignment: Alignment.center,
           padding: const EdgeInsets.all(16),
           margin: const EdgeInsets.only(right: 16),
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              border: isSelected
-                  ? Border.all(color: context.colorScheme.primary)
-                  : null,
-              color: context.colorScheme.containerLow),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? cs.primary : Colors.transparent,
+              width: 2,
+            ),
+            color: isSelected
+                ? cs.primary.withValues(alpha: 0.08)
+                : cs.containerLow,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               _cellImageView(image, imageUrl, initial),
-              const SizedBox(height: 24),
+              const SizedBox(height: 18),
               Text(
                 title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: AppTextStyle.subtitle1
-                    .copyWith(color: context.colorScheme.textPrimary),
+                style: AppTextStyle.subtitle1.copyWith(
+                  color: isSelected ? cs.primary : cs.textPrimary,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                ),
               )
             ],
           ),

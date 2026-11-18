@@ -94,11 +94,33 @@ class MatchDetailCell extends StatelessWidget {
 
   Widget _matchTimeAndGroundView(BuildContext context) {
     final cs = context.colorScheme;
+    final isTournament =
+        match.tournament_id != null && match.tournament_id!.isNotEmpty;
     return Row(
       children: [
-        if (showTournamentBadge && match.tournament_id != null) ...[
-          TournamentBadge(),
-          const SizedBox(width: 8),
+        if (showTournamentBadge) ...[
+          if (isTournament) ...[
+            const TournamentBadge(),
+            const SizedBox(width: 8),
+          ] else ...[
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: cs.containerLowOnSurface,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                'INDEPENDENT',
+                style: TextStyle(
+                  color: cs.textSecondary,
+                  fontSize: 8.5,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+          ],
         ],
         Expanded(
           flex: 2,

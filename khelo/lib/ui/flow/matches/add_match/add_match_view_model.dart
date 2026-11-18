@@ -193,12 +193,14 @@ class AddMatchViewNotifier extends StateNotifier<AddMatchViewState> {
           teams: [
             MatchTeamModel(
               team_id: state.teamA!.id,
+              team: state.teamA!,
               squad: firstSquad,
               captain_id: state.teamACaptainId,
               admin_id: state.teamAAdminId,
             ),
             MatchTeamModel(
               team_id: state.teamB!.id,
+              team: state.teamB!,
               squad: secondSquad,
               captain_id: state.teamBCaptainId,
               admin_id: state.teamBAdminId,

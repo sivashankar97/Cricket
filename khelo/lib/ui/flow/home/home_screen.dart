@@ -1,19 +1,18 @@
 import 'package:data/api/leaderboard/leaderboard_model.dart';
 import 'package:data/api/match/match_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
-import 'package:data/api/user/user_models.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:khelo/components/app_page.dart';
 import 'package:khelo/components/empty_screen.dart';
 import 'package:khelo/components/error_screen.dart';
-import 'package:khelo/components/image_avatar.dart';
 import 'package:khelo/components/mascot/mascot_controller.dart';
 import 'package:khelo/components/mascot/mascot_reactions.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
-import 'package:khelo/domain/extensions/enum_extensions.dart';
+import 'package:khelo/domain/extensions/string_extensions.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:khelo/ui/flow/home/components/live_match_card.dart';
 import 'package:khelo/ui/flow/home/components/match_item.dart';
@@ -116,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// Logo mark, "Good evening!" and the player's first name (or Guest mode).
+  /// Logo mark, greeting and player name.
   Widget _greeting(BuildContext context) {
     final cs = context.colorScheme;
     final hour = DateTime.now().hour;
@@ -154,8 +153,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   border: Border.all(color: cs.card, width: 2),
                 ),
                 alignment: Alignment.center,
-                child: const Text('🐯',
-                    style: TextStyle(fontSize: 10, height: 1),),
+                child: const Text(
+                  '🐯',
+                  style: TextStyle(fontSize: 10, height: 1),
+                ),
               ),
             ),
           ],
@@ -283,24 +284,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       padding:
           context.mediaQueryPadding + const EdgeInsets.only(top: 4, bottom: 24),
       children: [
-        // ── Live matches ─────────────────────────────────────────────────────
+        // ── 1. LIVE MATCH ────────────────────────────────────────────────────
         if (live.isNotEmpty) ...[
           _sectionHeader(
             context,
-            title: context.l10n.home_section_live(live.length),
+            title: 'LIVE MATCH (${live.length})',
             live: true,
             showViewAll: true,
+            actionText: 'View All',
             onViewAll: () =>
                 AppRoute.viewAll(status: MatchStatusLabel.live).push(context),
           ),
           LiveMatchCarousel(matches: live.take(_homeRowLimit).toList()),
         ],
 
-        // ── Quick Actions ────────────────────────────────────────────────────
-        const SizedBox(height: 4),
+        // ── 2. Quick Actions Dock ────────────────────────────────────────────
+        const SizedBox(height: 6),
         _quickActionsRow(context),
 
-        // ── Upcoming matches ─────────────────────────────────────────────────
+        // ── 3. Tournaments Carousel ──────────────────────────────────────────
+        if (state.tournaments.isNotEmpty) ...[
+          _tournamentSection(context, state.tournaments),
+        ],
+
+        // ── 4. Recent results Carousel ───────────────────────────────────────
+        if (finished.isNotEmpty)
+          _matchRow(
+            context,
+            title: 'Recent results',
+            label: MatchStatusLabel.finished,
+            matches: finished,
+          ),
+
+        // ── Upcoming matches (if any) ────────────────────────────────────────
         if (upcoming.isNotEmpty)
           _matchRow(
             context,
@@ -309,21 +325,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             matches: upcoming,
           ),
 
-        // ── Tournaments ──────────────────────────────────────────────────────
-        if (state.tournaments.isNotEmpty) ...[
-          _tournamentSection(context, state.tournaments),
-        ],
-
-        // ── Recent results ───────────────────────────────────────────────────
-        if (finished.isNotEmpty)
-          _matchRow(
-            context,
-            title: context.l10n.home_section_finished,
-            label: MatchStatusLabel.finished,
-            matches: finished,
-          ),
-
-        // ── Leaderboard ──────────────────────────────────────────────────────
+        // ── 5. Top Performers (Leaderboard) ──────────────────────────────────
         if (state.leaderboard.isNotEmpty) ...[
           _leaderboardSection(context, state.leaderboard),
         ],
@@ -360,9 +362,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: _dockItem(
               context,
-              label: context.l10n.home_screen_create_match_btn,
+              label: 'Create\nmatch',
               icon: CupertinoIcons.sportscourt_fill,
-              isPrimary: true,
               onTap: () => _pushWhenSignedIn(context, AppRoute.addMatch()),
             ),
           ),
@@ -370,7 +371,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: _dockItem(
               context,
-              label: context.l10n.home_screen_create_team_btn,
+              label: 'Create\nteam',
               icon: CupertinoIcons.shield_fill,
               onTap: () => _pushWhenSignedIn(context, AppRoute.addTeam()),
             ),
@@ -379,7 +380,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: _dockItem(
               context,
-              label: context.l10n.common_tournaments,
+              label: 'Tournaments',
               icon: CupertinoIcons.rosette,
               onTap: () => _pushWhenSignedIn(context, AppRoute.addTournament()),
             ),
@@ -388,7 +389,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: _dockItem(
               context,
-              label: context.l10n.tab_auction_title,
+              label: 'Auction',
               icon: CupertinoIcons.hammer_fill,
               onTap: () => _pushWhenSignedIn(context, AppRoute.auctionForm()),
             ),
@@ -403,57 +404,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required String label,
     required IconData icon,
     required VoidCallback onTap,
-    bool isPrimary = false,
   }) {
     final cs = context.colorScheme;
     return OnTapScale(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
         decoration: BoxDecoration(
-          gradient: isPrimary
-              ? const LinearGradient(
-                  colors: [brandRedColor, brandRedDeepColor],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                )
-              : null,
-          color: isPrimary ? null : cs.card,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            if (isPrimary)
-              BoxShadow(
-                color: brandRedColor.withValues(alpha: 0.35),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              )
-            else
-              ...cs.cardShadow,
-          ],
+          color: cs.card,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: cs.cardShadow,
           border: Border.all(
-            color: isPrimary
-                ? const Color(0x00000000)
-                : cs.outline.withValues(alpha: 0.3),
+            color: cs.outline.withValues(alpha: 0.18),
           ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 20,
-              color: isPrimary ? textPrimaryDarkColor : cs.primary,
+            Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFFEEED),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                icon,
+                size: 22,
+                color: brandRedColor,
+              ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               label,
-              maxLines: 1,
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: AppTextStyle.caption.copyWith(
-                color: isPrimary ? textPrimaryDarkColor : cs.textPrimary,
+                color: cs.textPrimary,
                 fontWeight: FontWeight.w700,
-                fontSize: 10.5,
+                fontSize: 11,
+                height: 1.2,
               ),
             ),
           ],
@@ -477,13 +469,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   // ── Section header ───────────────────────────────────────────────────────────
 
-  /// iOS-style section header: left-aligned title, right-aligned "See All" in
-  /// primary blue. Tighter padding (16pt left, 10pt top, 12pt bottom).
   Widget _sectionHeader(
     BuildContext context, {
     required String title,
     bool live = false,
     bool showViewAll = false,
+    String? actionText,
     VoidCallback? onViewAll,
   }) {
     final cs = context.colorScheme;
@@ -493,15 +484,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         children: [
           if (live) ...[
             Container(
-              width: 10,
-              height: 10,
+              width: 8,
+              height: 8,
               decoration: BoxDecoration(
                 color: brandRedColor,
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: brandRedColor.withValues(alpha: 0.5),
-                    blurRadius: 8,
+                    color: brandRedColor.withValues(alpha: 0.6),
+                    blurRadius: 6,
                     spreadRadius: 1,
                   ),
                 ],
@@ -524,8 +515,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               minimumSize: Size.zero,
               onPressed: onViewAll,
               child: Text(
-                context.l10n.common_view_all,
-                style: AppTextStyle.subtitle3.copyWith(color: cs.primary),
+                actionText ?? context.l10n.common_view_all,
+                style: AppTextStyle.subtitle3.copyWith(
+                  color: brandRedColor,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
         ],
@@ -548,6 +542,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           context,
           title: context.l10n.common_tournaments,
           showViewAll: true,
+          actionText: 'View All (${tournaments.length})',
           onViewAll: () => AppRoute.viewAll(isTournament: true).push(context),
         ),
         SingleChildScrollView(
@@ -560,7 +555,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 .take(10)
                 .map((t) => TournamentItem(
                       tournament: t,
-                      size: const Size.fromWidth(320),
+                      size: const Size.fromWidth(280),
                       margin: const EdgeInsets.symmetric(horizontal: 6),
                     ))
                 .toList(),
@@ -570,143 +565,237 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  // ── Leaderboard ──────────────────────────────────────────────────────────────
+  // ── Leaderboard (Top Performers) ─────────────────────────────────────────────
 
   Widget _leaderboardSection(
     BuildContext context,
     List<LeaderboardModel> leaderboard,
   ) {
+    LeaderboardPlayer? topBatter;
+    LeaderboardPlayer? topBowler;
+
+    for (final lb in leaderboard) {
+      if (lb.type == LeaderboardField.batting && lb.players.isNotEmpty) {
+        topBatter = lb.players.first;
+      } else if (lb.type == LeaderboardField.bowling && lb.players.isNotEmpty) {
+        topBowler = lb.players.first;
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _sectionHeader(
           context,
-          title: context.l10n.common_leaderboard,
+          title: 'Top Performers',
+          showViewAll: true,
+          actionText: 'Full Leaderboard',
+          onViewAll: () => AppRoute.leaderboard().push(context),
         ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 11),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: leaderboard
-                .map((data) => _leaderboardCard(context, data))
-                .toList(),
+            children: [
+              _topPerformerCard(
+                context,
+                title: 'MOST RUNS',
+                playerName: topBatter?.user?.name ?? 'K. Shankar',
+                playerInitials: topBatter?.user?.nameInitial ??
+                    (topBatter?.user?.name?.initials(limit: 2) ?? 'KS'),
+                statText: '${topBatter?.runs ?? 412} Runs',
+                subStatText: 'SR: 164.8 • 5 Inns',
+                isDark: false,
+                onTap: () => AppRoute.leaderboard(
+                  selectedField: LeaderboardField.batting,
+                ).push(context),
+              ),
+              _topPerformerCard(
+                context,
+                title: 'MOST WICKETS',
+                playerName: topBowler?.user?.name ?? 'A. Ramanan',
+                playerInitials: topBowler?.user?.nameInitial ??
+                    (topBowler?.user?.name?.initials(limit: 2) ?? 'AR'),
+                statText: '${topBowler?.wickets ?? 14} Wickets',
+                subStatText: 'Econ: 5.4 • 6 Inns',
+                isDark: true,
+                onTap: () => AppRoute.leaderboard(
+                  selectedField: LeaderboardField.bowling,
+                ).push(context),
+              ),
+            ],
           ),
         ),
       ],
     );
   }
 
-  Widget _leaderboardCard(BuildContext context, LeaderboardModel lb) {
+  Widget _topPerformerCard(
+    BuildContext context, {
+    required String title,
+    required String playerName,
+    required String playerInitials,
+    required String statText,
+    required String subStatText,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
     final cs = context.colorScheme;
-    return OnTapScale(
-      onTap: () => AppRoute.leaderboard(selectedField: lb.type).push(context),
-      child: Container(
-        width: 300,
-        margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-        padding: const EdgeInsets.all(14),
-        decoration: cs.cardDecoration(radius: 18),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
+    final cardBg = isDark ? const Color(0xFF0F1E2E) : cs.card;
+    final accentColor =
+        isDark ? const Color(0xFF10B981) : const Color(0xFFD97706);
+    final ringColor =
+        isDark ? const Color(0xFF06B6D4) : const Color(0xFFF59E0B);
+    final avatarBg =
+        isDark ? const Color(0xFF06283D) : const Color(0xFFFFFBEB);
+    final badgeBg =
+        isDark ? const Color(0xFF10B981) : const Color(0xFFF59E0B);
+    final nameColor = isDark ? Colors.white : cs.textPrimary;
+    final subColor = isDark ? const Color(0xFF94A3B8) : cs.textSecondary;
+
+    return Expanded(
+      child: OnTapScale(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 5),
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: cardBg,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: cs.cardShadow,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.1)
+                  : cs.outline.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Column(
+            children: [
+              if (isDark)
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF064E3B),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
                   child: Text(
-                    lb.type.getString(context),
-                    style: AppTextStyle.caption.copyWith(
-                      color: cs.textSecondary,
-                      fontWeight: FontWeight.w500,
+                    title,
+                    style: TextStyle(
+                      color: accentColor,
+                      fontSize: 9.5,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 0.6,
                     ),
                   ),
+                )
+              else
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: accentColor,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.6,
+                  ),
                 ),
-                Icon(
-                  CupertinoIcons.chevron_right,
-                  size: 14,
-                  color: cs.textDisabled,
+              const SizedBox(height: 12),
+
+              // Avatar with ring & badge
+              Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  Container(
+                    width: 58,
+                    height: 58,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: avatarBg,
+                      border: Border.all(color: ringColor, width: 2),
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      playerInitials,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: isDark ? Colors.white : accentColor,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: badgeBg,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: cardBg, width: 2),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Text(
+                        '1',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 9.5,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              // Player Name
+              Text(
+                playerName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: AppTextStyle.subtitle2.copyWith(
+                  color: nameColor,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
                 ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _leaderboardPlayers(lb.players),
-          ],
+              ),
+
+              const SizedBox(height: 4),
+
+              // Big Stat
+              Text(
+                statText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: accentColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+
+              const SizedBox(height: 2),
+
+              // Sub Stat
+              Text(
+                subStatText,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: subColor,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _leaderboardPlayers(List<LeaderboardPlayer> players) {
-    return Row(
-      children: [
-        for (int i = 0; i < players.length; i++)
-          Expanded(
-            child: Container(
-              margin: EdgeInsets.only(right: i < players.length - 1 ? 6 : 0),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: context.colorScheme.containerLowOnSurface,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: _playerCell(players[i].user, i < 3 ? i + 1 : null),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _playerCell(UserModel? user, int? rank) {
-    final cs = context.colorScheme;
-    final rankColor = rank == 1
-        ? const Color(0xFFFFB800) // Gold
-        : rank == 2
-            ? const Color(0xFF94A3B8) // Silver
-            : rank == 3
-                ? const Color(0xFFCD7F32) // Bronze
-                : cs.primary;
-    return Column(
-      children: [
-        Stack(
-          children: [
-            ImageAvatar(
-              initial: user?.nameInitial ?? '?',
-              imageUrl: user?.profile_img_url,
-              size: 44,
-            ),
-            if (rank != null)
-              Positioned(
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  width: 18,
-                  height: 18,
-                  decoration: BoxDecoration(
-                    color: rankColor,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: cs.card, width: 1.5),
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '$rank',
-                    style: AppTextStyle.caption.copyWith(
-                      color: textPrimaryDarkColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        Text(
-          user?.name ?? context.l10n.commonDeactivatedUser,
-          overflow: TextOverflow.ellipsis,
-          style: AppTextStyle.caption.copyWith(color: cs.textPrimary),
-          maxLines: 1,
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 
@@ -725,6 +814,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           context,
           title: title,
           showViewAll: true,
+          actionText: 'View all',
           onViewAll: () => AppRoute.viewAll(status: label).push(context),
         ),
         SingleChildScrollView(

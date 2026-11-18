@@ -1,8 +1,6 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:data/api/tournament/tournament_model.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:khelo/domain/extensions/enum_extensions.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:khelo/ui/app_route.dart';
 import 'package:style/animations/on_tap_scale.dart';
 import 'package:style/extensions/context_extensions.dart';
@@ -10,13 +8,9 @@ import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 import 'package:style/theme/shadows.dart';
 
-import '../../../../components/match_status_tag.dart';
-import '../../../../domain/formatter/date_formatter.dart';
-import '../../../../gen/assets.gen.dart';
-
-/// iOS-style tournament card for the home screen horizontal list.
-///
-/// Banner image fills 55% height. Footer has name + status badge + date.
+/// Modern tournament card matching the reference design for the Home carousel:
+/// Finished tournaments get a dark navy card with green badge, champion, and stats link.
+/// Upcoming/running tournaments get a clean card with status badge and fixtures link.
 class TournamentItem extends StatelessWidget {
   final TournamentModel tournament;
   final EdgeInsets margin;
@@ -29,136 +23,202 @@ class TournamentItem extends StatelessWidget {
     this.margin = EdgeInsets.zero,
   });
 
+  bool get _isFinished {
+    if (tournament.status == TournamentStatus.finish) return true;
+    final now = DateTime.now();
+    return tournament.end_date.isBefore(now);
+  }
+
+  bool get _isLive {
+    if (tournament.status == TournamentStatus.running) return true;
+    final now = DateTime.now();
+    return tournament.start_date.isBefore(now) &&
+        tournament.end_date.isAfter(now);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final width = size?.width ?? context.mediaQuerySize.width;
+    final cs = context.colorScheme;
+    final width = size?.width ?? 280.0;
+    const height = 160.0;
+
+    final isFinished = _isFinished;
+    final isLive = _isLive;
+
     return OnTapScale(
       onTap: () =>
           AppRoute.tournamentDetail(tournamentId: tournament.id).push(context),
       child: Container(
-        height: width * 0.52,
         width: width,
+        height: height,
         margin: margin,
-        clipBehavior: Clip.antiAlias,
-        decoration: context.colorScheme.cardDecoration(radius: 18),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: isFinished ? const Color(0xFF141738) : cs.card,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: cs.cardShadow,
+          border: Border.all(
+            color: isFinished
+                ? Colors.white.withValues(alpha: 0.1)
+                : cs.outline.withValues(alpha: 0.2),
+          ),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Expanded(child: _banner(context, width)),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(14, 10, 14, 12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _titleAndStatus(context),
-                  const SizedBox(height: 3),
-                  _dateAndType(context),
-                ],
+            // Top row: Status badge + Teams count
+            Row(
+              children: [
+                _statusBadge(isFinished, isLive),
+                const Spacer(),
+                Text(
+                  '${tournament.team_ids.length} Teams',
+                  style: TextStyle(
+                    color: isFinished
+                        ? const Color(0xFF94A3B8)
+                        : cs.textSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // Tournament Name
+            Text(
+              tournament.name,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyle.subtitle2.copyWith(
+                color: isFinished ? Colors.white : cs.textPrimary,
+                fontWeight: FontWeight.w800,
+                fontSize: 14.5,
               ),
             ),
+
+            const SizedBox(height: 4),
+
+            // Date Range
+            Text(
+              _formatDateRange(tournament.start_date, tournament.end_date),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color:
+                    isFinished ? const Color(0xFF94A3B8) : cs.textSecondary,
+                fontSize: 11.5,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+
+            const Spacer(),
+
+            // Bottom bar
+            if (isFinished)
+              const Row(
+                children: [
+                  Text(
+                    '👑 Champion: Titans',
+                    style: TextStyle(
+                      color: Color(0xFFFBBF24),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  Spacer(),
+                  Text(
+                    'Stats ›',
+                    style: TextStyle(
+                      color: Color(0xFFF87171),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              )
+            else
+              Row(
+                children: [
+                  Text(
+                    isLive ? 'Live standings ›' : 'Fixtures released ›',
+                    style: const TextStyle(
+                      color: brandRedColor,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
     );
   }
 
-  Widget _banner(BuildContext context, double width) {
-    final bannerUrl = tournament.banner_img_url;
-    if (bannerUrl == null) {
-      return DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [brandNavyCardColor, brandNavyColor],
-          ),
+  Widget _statusBadge(bool isFinished, bool isLive) {
+    if (isFinished) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+        decoration: BoxDecoration(
+          color: const Color(0xFF064E3B),
+          borderRadius: BorderRadius.circular(6),
         ),
-        child: Stack(
-          children: [
-            Positioned(
-              right: -24,
-              top: -24,
-              child: Container(
-                height: 96,
-                width: 96,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: brandRedColor.withValues(alpha: 0.85),
-                ),
-              ),
-            ),
-            Center(
-              child: SvgPicture.asset(
-                Assets.images.icTournaments,
-                height: 32,
-                width: 32,
-                colorFilter: const ColorFilter.mode(
-                  textPrimaryDarkColor,
-                  BlendMode.srcATop,
-                ),
-              ),
-            ),
-          ],
+        child: const Text(
+          'FINISHED',
+          style: TextStyle(
+            color: Color(0xFF34D399),
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
+          ),
         ),
       );
     }
-    return CachedNetworkImage(
-      imageUrl: bannerUrl,
-      fit: BoxFit.cover,
-      width: width,
-      errorWidget: (context, url, error) =>
-          ColoredBox(color: context.colorScheme.containerLowOnSurface),
-    );
-  }
-
-  Widget _titleAndStatus(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            tournament.name,
-            style: AppTextStyle.subtitle2.copyWith(
-              color: context.colorScheme.textPrimary,
-              fontWeight: FontWeight.w600,
-            ),
-            overflow: TextOverflow.ellipsis,
-            textScaler: TextScaler.noScaling,
-            maxLines: 1,
+    if (isLive) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+        decoration: BoxDecoration(
+          color: const Color(0xFFDCFCE7),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Text(
+          'LIVE',
+          style: TextStyle(
+            color: Color(0xFF16A34A),
+            fontSize: 9.5,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5,
           ),
         ),
-        const SizedBox(width: 12),
-        StatusTag(tournamentStatus: tournament.status),
-      ],
-    );
-  }
-
-  Widget _dateAndType(BuildContext context) {
-    final color = context.colorScheme.textSecondary;
-    return Text.rich(
-      overflow: TextOverflow.ellipsis,
-      textScaler: TextScaler.noScaling,
-      TextSpan(
-        text: DateFormatter.formatDateRange(
-          context,
-          startDate: tournament.start_date,
-          endDate: tournament.end_date,
-          formatType: DateFormatType.dayMonth,
+      );
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFEF3C7),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Text(
+        'UPCOMING',
+        style: TextStyle(
+          color: Color(0xFFD97706),
+          fontSize: 9.5,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.5,
         ),
-        style: AppTextStyle.caption.copyWith(color: color),
-        children: [
-          WidgetSpan(
-            alignment: PlaceholderAlignment.middle,
-            child: Container(
-              height: 3,
-              width: 3,
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-            ),
-          ),
-          TextSpan(text: tournament.type.getString(context)),
-        ],
       ),
     );
+  }
+
+  String _formatDateRange(DateTime start, DateTime end) {
+    if (start.year == end.year && start.month == end.month) {
+      return '${start.day} – ${DateFormat('d MMM yyyy').format(end)}';
+    }
+    if (start.year == end.year) {
+      return '${DateFormat('d MMM').format(start)} – ${DateFormat('d MMM yyyy').format(end)}';
+    }
+    return '${DateFormat('d MMM yyyy').format(start)} – ${DateFormat('d MMM yyyy').format(end)}';
   }
 }
