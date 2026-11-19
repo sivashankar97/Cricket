@@ -16,7 +16,10 @@ import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 
 import '../../../../domain/play/cricket_game.dart';
+import '../../../../domain/play/play_flame_flag.dart';
 import '../play_providers.dart';
+import 'flame/classic_play_hud.dart';
+import 'flame/flame_play_arena.dart';
 import 'play_arena.dart';
 import 'play_layout.dart';
 import 'play_settings.dart';
@@ -221,6 +224,14 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen> {
         PlayMode.solo => context.l10n.play_quick_play,
       };
 
+  /// Quick Play → Stick Cricket Classic (Flame + reference HUD).
+  /// Graphics → "Flame experiment" off falls back to the navy CustomPaint arena.
+  bool get _useClassic {
+    // Watch so the Graphics toggle rebuilds this screen.
+    final enabled = ref.watch(playFlameSpikePod);
+    return widget.args.mode == PlayMode.solo && enabled;
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(playIdentityProvider);
@@ -228,31 +239,65 @@ class _PlayGameScreenState extends ConsumerState<PlayGameScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
-        backgroundColor: brandNavyColor,
+        backgroundColor:
+            _useClassic ? const Color(0xFF0A1020) : brandNavyColor,
         body: SafeArea(
           child: Stack(
             children: [
-              PlayArenaLayout(
-                topBar: _topBar(context),
-                scoreboard: ArenaScoreboard(
-                  innings: _innings,
-                  batterName: name,
-                  batterImage: user?.imageUrl,
-                  label: _label(context),
+              if (_useClassic)
+                _classicBody(context, name)
+              else
+                PlayArenaLayout(
+                  topBar: _topBar(context),
+                  scoreboard: ArenaScoreboard(
+                    innings: _innings,
+                    batterName: name,
+                    batterImage: user?.imageUrl,
+                    label: _label(context),
+                  ),
+                  arena: PlayArena(
+                    key: ValueKey(_seed),
+                    innings: _innings,
+                    batterName: name,
+                    paused: _finished,
+                    onBall: _onBall,
+                  ),
                 ),
-                arena: PlayArena(
-                  key: ValueKey(_seed),
-                  innings: _innings,
-                  batterName: name,
-                  paused: _finished,
-                  onBall: _onBall,
-                ),
-              ),
               if (_finished) _endOverlay(context),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// Full-bleed arena with floating Classic HUD (matches reference layout).
+  Widget _classicBody(BuildContext context, String name) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        FlamePlayArena(
+          key: ValueKey('flame-$_seed'),
+          innings: _innings,
+          batterName: name,
+          paused: _finished,
+          onBall: _onBall,
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: ClassicPlayHud(
+            innings: _innings,
+            batterName: name,
+            onClose: () => Navigator.of(context).maybePop(),
+            onRestart: _restart,
+            trailing: const [
+              PlaySoundToggle(),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

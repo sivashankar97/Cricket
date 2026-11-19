@@ -4,6 +4,7 @@ import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:style/text/app_text_style.dart';
 import 'package:style/theme/colors.dart';
 
+import '../../../../domain/play/play_flame_flag.dart';
 import '../../../../domain/play/play_quality.dart';
 
 /// Opens graphics / effects settings for the Play arena.
@@ -17,7 +18,8 @@ class PlayQualityButton extends ConsumerWidget {
       visualDensity: VisualDensity.compact,
       constraints: const BoxConstraints.tightFor(width: 40, height: 40),
       padding: EdgeInsets.zero,
-      icon: const Icon(Icons.high_quality_rounded, color: textPrimaryDarkColor),
+      icon: Icon(Icons.high_quality_rounded,
+          color: IconTheme.of(context).color ?? textPrimaryDarkColor),
       onPressed: () => showPlayQualitySheet(context, ref),
     );
   }
@@ -101,6 +103,23 @@ class _PlayQualitySheet extends ConsumerWidget {
               ),
               onChanged: (v) =>
                   ref.read(playEffectsOnPod.notifier).state = v,
+            ),
+            const Divider(color: Colors.white12),
+            SwitchListTile.adaptive(
+              value: ref.watch(playFlameSpikePod),
+              activeTrackColor: positiveGreenColor,
+              title: Text(
+                'Flame experiment (Quick Play)',
+                style:
+                    AppTextStyle.subtitle2.copyWith(color: textPrimaryDarkColor),
+              ),
+              subtitle: Text(
+                'Off = classic CustomPaint arena',
+                style: AppTextStyle.caption
+                    .copyWith(color: textSecondaryDarkColor),
+              ),
+              onChanged: (v) =>
+                  ref.read(playFlameSpikePod.notifier).state = v,
             ),
           ],
         ),

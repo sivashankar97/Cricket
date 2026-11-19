@@ -517,8 +517,13 @@ class AppRoute {
     ),
     GoRoute(
       path: pathPlayGame,
-      pageBuilder: (context, state) =>
-          adaptivePage(state: state, child: state.widget(context)),
+      pageBuilder: (context, state) => adaptivePage(
+        state: state,
+        // Deep link / refresh: open Quick Play (Classic) when no push extra.
+        child: state.extra == null
+            ? PlayGameScreen(args: PlayGameArgs.quick())
+            : state.widget(context),
+      ),
     ),
     GoRoute(
       path: pathPlayMatch,

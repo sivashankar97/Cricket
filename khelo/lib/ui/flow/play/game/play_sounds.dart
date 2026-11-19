@@ -104,7 +104,7 @@ class PlaySoundToggle extends ConsumerWidget {
       padding: EdgeInsets.zero,
       icon: Icon(
         isOn ? Icons.volume_up_rounded : Icons.volume_off_rounded,
-        color: textPrimaryDarkColor,
+        color: IconTheme.of(context).color ?? textPrimaryDarkColor,
       ),
       onPressed: () => ref.read(playSoundOnPod.notifier).state = !isOn,
     );
