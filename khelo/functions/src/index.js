@@ -54,8 +54,10 @@ expressApp.use((req, res, next) => {
   next();
 });
 
+// Disabled: any authenticated caller could create Auth users for arbitrary
+// phones. Clients use Firebase Auth email/password (+ anonymous) instead.
 expressApp.post("/user/create", (req, res) => {
-  authService.onCallCreateAuthUser(req, res);
+  res.status(410).send("endpoint-removed");
 });
 
 exports.teamPlayerChangeObserver = (0, firestore_2.onDocumentUpdated)({region: REGION, document: "teams/{teamId}"}, async (event) => {
@@ -91,4 +93,16 @@ exports.fiveMinuteCron = (0, scheduler.onSchedule)({timeZone: exports.TIMEZONE, 
   await matchRepository.processUpcomingMatches();
 });
 
-exports.apiv1 = (0, callable.onRequest)({region: REGION, concurrency: 100, cors: true}, expressApp);
+const ALLOWED_ORIGINS = [
+  "https://sportstamil.network",
+  "https://www.sportstamil.network",
+  "https://khelo-hexshankar.web.app",
+  "http://127.0.0.1:8090",
+  "http://localhost:8090",
+];
+
+exports.apiv1 = (0, callable.onRequest)({
+  region: REGION,
+  concurrency: 100,
+  cors: ALLOWED_ORIGINS,
+}, expressApp);

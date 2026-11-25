@@ -720,7 +720,7 @@ abstract class AppLocalizations {
   /// No description provided for @sign_in_password_rule.
   ///
   /// In en, this message translates to:
-  /// **'At least 6 characters'**
+  /// **'At least 8 characters'**
   String get sign_in_password_rule;
 
   /// No description provided for @sign_in_mode_label.

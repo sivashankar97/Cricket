@@ -10,14 +10,9 @@ service cloud.firestore {
       return request.auth != null && !isGuest();
     }
 
-    // Everything except auctions, their photos and private contact details:
-    // any signed-in user.
-    match /{collection}/{document=**} {
-      allow read, write: if signedIn()
-        && !(collection in ['auctions', 'photos', 'user_private',
-                            'phone_index', 'player_claims', 'users', 'matches', 'tournaments',
-                            'innings', 'ball_scores', 'match_events', 'partnerships']);
-    }
+    // Default deny. Every collection has an explicit match below.
+    // (No catch-all — that previously let any signed-in user write teams,
+    // sessions, support, play docs, etc.)
 
     function tournamentOwner(id) {
       return signedIn() && get(/databases/$(database)/documents/tournaments/$(id)).data.created_by == request.auth.uid;
@@ -32,6 +27,26 @@ service cloud.firestore {
     function scoringMatch(id) {
       return get(/databases/$(database)/documents/matches/$(id)).data;
     }
+    function userPath(userId) {
+      return /databases/$(database)/documents/users/$(userId);
+    }
+    function createdBy(data) {
+      return data.get('created_by', '');
+    }
+    function isAuctionAdminFor(data) {
+      return data.get('auction_id', '') != ''
+        && request.auth.uid in auctionAdmins(data.auction_id);
+    }
+    function auctionAdmins(auctionId) {
+      return get(/databases/$(database)/documents/auctions/$(auctionId)).data.admin_ids;
+    }
+    function isTeamOwnerOrCreator() {
+      return resource.data.created_by == request.auth.uid;
+    }
+    function isNewTeamOwner() {
+      return request.resource.data.created_by == request.auth.uid;
+    }
+
     match /matches/{id} {
       allow create: if signedIn() && request.resource.data.created_by == request.auth.uid
         && matchOwner(request.resource.data);
@@ -72,20 +87,9 @@ service cloud.firestore {
         && canScore(scoringMatch(resource.data.match_id));
     }
 
-    function userPath(userId) {
-      return /databases/$(database)/documents/users/$(userId);
-    }
-    function createdBy(data) {
-      return data.get('created_by', '');
-    }
-    function isAuctionAdminFor(data) {
-      return data.get('auction_id', '') != ''
-        && request.auth.uid in auctionAdmins(data.auction_id);
-    }
-
     // Profiles. Signed-up accounts (no created_by) only change themselves;
     // players added by an organizer (created_by) or an auction stay editable
-    // by organizers, whose team roles the rules can't check.
+    // by organizers (team-role checks can't be expressed in rules).
     match /users/{userId} {
       allow create: if signedIn()
         && (request.auth.uid == userId
@@ -98,14 +102,26 @@ service cloud.firestore {
             || (request.resource.data.get('auction_id', '')
                   == resource.data.get('auction_id', '')
                 && isAuctionAdminFor(resource.data)));
+      // Only the account owner, or the organizer who created the player.
+      // (Previously `created_by != ''` let ANY signed-in user delete any
+      // organizer-created player.)
       allow delete: if signedIn()
         && (request.auth.uid == userId
-            || createdBy(resource.data) == request.auth.uid
-            || createdBy(resource.data) != '');
+            || createdBy(resource.data) == request.auth.uid);
     }
-    // Career stats are written by whoever scores the match; sessions by the app.
+
+    // Sessions: only the owning user. Career stats: any signed-in scorer
+    // (matches how the scoring app updates player career docs).
+    match /users/{userId}/user_sessions/{sessionId} {
+      allow read, write: if signedIn() && request.auth.uid == userId;
+    }
+    match /users/{userId}/user_stat/{document=**} {
+      allow read: if true;
+      allow write: if signedIn();
+    }
+    // Reject other user subcollections by default (no catch-all).
     match /users/{userId}/{sub}/{document=**} {
-      allow read, write: if signedIn();
+      allow read, write: if false;
     }
 
     // A player's mobile number: only they can read or change it.
@@ -114,8 +130,6 @@ service cloud.firestore {
     }
 
     // Hashed mobile number -> player id. Exact lookups only (no listing).
-    // An entry points at yourself or at a player you added; it only moves to
-    // another account together with an approved claim (same batch).
     match /phone_index/{key} {
       function isNewEntryValid() {
         return request.resource.data.keys().hasOnly(['user_id', 'created_by', 'updated_at'])
@@ -130,7 +144,6 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['user_id', 'created_by', 'updated_at'])
         && (request.resource.data.user_id == request.auth.uid
             || resource.data.created_by == request.auth.uid);
-      // A number whose player was deleted (or merged away) is free again.
       allow update: if signedIn()
         && !exists(userPath(resource.data.user_id))
         && isNewEntryValid();
@@ -139,8 +152,6 @@ service cloud.firestore {
             || resource.data.created_by == request.auth.uid);
     }
 
-    // "That added player is me" requests; can be merged directly by claimant
-    // or approved/declined by organizer.
     match /player_claims/{claimId} {
       allow get: if signedIn()
         && (claimId.matches('.*_' + request.auth.uid)
@@ -153,10 +164,89 @@ service cloud.firestore {
             || resource.data.organizer_id == request.auth.uid);
     }
 
-    match /matches/{document=**} {
+    // Teams: public read; create as self; delete by creator.
+    // Updates stay signedIn-wide so team admins / merge flows keep working
+    // (rules can't scan team_players for role==admin without admin_ids).
+    match /teams/{teamId} {
       allow read: if true;
+      allow create: if signedIn() && isNewTeamOwner();
+      allow update: if signedIn();
+      allow delete: if signedIn() && isTeamOwnerOrCreator();
+      match /team_stat/{statId} {
+        allow read: if true;
+        allow write: if signedIn();
+      }
     }
-    match /teams/{document=**} {
+
+    // Tournament team pools: public read; creator or auction admin writes.
+    match /team_pools/{poolId} {
+      allow read: if true;
+      allow create: if signedIn()
+        && (request.resource.data.created_by == request.auth.uid
+            || (request.resource.data.get('auction_id', '') != ''
+                && request.auth.uid in auctionAdmins(
+                     request.resource.data.auction_id)));
+      allow update: if signedIn()
+        && (resource.data.created_by == request.auth.uid
+            || (resource.data.get('auction_id', '') != ''
+                && request.auth.uid in auctionAdmins(resource.data.auction_id)));
+      allow delete: if signedIn()
+        && resource.data.created_by == request.auth.uid;
+    }
+
+    // Cricket leaderboard: public read; client writes only for player-merge
+    // (Admin SDK / Cloud Functions handle normal updates).
+    match /leaderboard/{doc}/data/{playerId} {
+      allow read: if true;
+      allow write: if signedIn();
+    }
+
+    // Support tickets: create only for yourself; no client list/read.
+    match /contact_support/{ticketId} {
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // Play tab
+    match /play_games/{gameId} {
+      allow read: if request.auth != null;
+      allow create: if isGuest()
+        && request.resource.data.user_id == request.auth.uid
+        && request.resource.data.user_name == 'Guest'
+        && request.resource.data.user_image == null
+        && request.resource.data.challenge_id == null;
+      allow create: if signedIn()
+        && request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if false;
+    }
+    match /play_challenges/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.creator_id == request.auth.uid
+        && request.auth.uid in request.resource.data.participant_ids;
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.participant_ids;
+      allow delete: if signedIn()
+        && resource.data.creator_id == request.auth.uid;
+    }
+    match /play_matches/{id} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.host_id == request.auth.uid
+        && request.auth.uid in request.resource.data.participant_ids;
+      allow update: if signedIn()
+        && request.auth.uid in resource.data.participant_ids;
+      allow delete: if signedIn()
+        && resource.data.host_id == request.auth.uid;
+    }
+    match /play_presence/{userId} {
+      allow read: if signedIn();
+      allow write: if signedIn() && request.auth.uid == userId
+        && request.resource.data.user_id == request.auth.uid;
+    }
+
+    match /matches/{document=**} {
       allow read: if true;
     }
     match /tournaments/{document=**} {
@@ -180,28 +270,8 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if true;
     }
-    match /users/{userId}/user_stat/{document=**} {
-      allow read: if true;
-    }
 
-    // Play tab scores: guests read the leaderboard and save their own solo /
-    // daily games, always under the name "Guest" (no challenges).
-    match /play_games/{gameId} {
-      allow read: if isGuest();
-      allow create: if isGuest()
-        && request.resource.data.user_id == request.auth.uid
-        && request.resource.data.user_name == 'Guest'
-        && request.resource.data.user_image == null
-        && request.resource.data.challenge_id == null;
-    }
-
-    // Player auctions: published ones are public; drafts only for admins.
-    // Only the auction's admins can change it; only the creator can change
-    // the admin list or delete it.
-    function auctionAdmins(auctionId) {
-      return get(/databases/$(database)/documents/auctions/$(auctionId)).data.admin_ids;
-    }
-
+    // Player auctions
     match /auctions/{auctionId} {
       allow read: if resource.data.status in ['upcoming', 'live', 'paused', 'completed']
         || (signedIn() && request.auth.uid in resource.data.admin_ids);
@@ -216,7 +286,6 @@ service cloud.firestore {
             || request.auth.uid == resource.data.created_by);
       allow delete: if signedIn() && request.auth.uid == resource.data.created_by;
 
-      // getAfter: the first entry is written in the batch that creates the auction.
       match /log/{entryId} {
         allow read: if true;
         allow create: if signedIn() && request.auth.uid in
@@ -226,7 +295,6 @@ service cloud.firestore {
       }
     }
 
-    // Compressed player / banner photos for auctions.
     match /photos/{photoId} {
       allow read: if true;
       allow create, update: if signedIn()

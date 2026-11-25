@@ -211,14 +211,20 @@ class UserService {
     required String phone,
     String? email,
   }) async {
-    final trimmedPhone = phone.trim();
+    // Do not put email/phone on the publicly readable users doc.
+    // Phone belongs in user_private; email stays in Firebase Auth.
     final user = UserModel(
       id: userId,
-      phone: trimmedPhone.isEmpty ? null : trimmedPhone,
-      email: email,
       created_at: DateTime.now(),
     );
     await _userRef.doc(userId).set(user);
+    final trimmedPhone = phone.trim();
+    if (trimmedPhone.isNotEmpty) {
+      await firestore
+          .collection(FireStoreConst.userPrivateCollection)
+          .doc(userId)
+          .set({'phone': trimmedPhone}, SetOptions(merge: true));
+    }
     return user;
   }
 

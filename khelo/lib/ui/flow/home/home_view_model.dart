@@ -5,6 +5,7 @@ import 'package:data/api/match/match_model.dart';
 import 'package:data/api/tournament/tournament_model.dart';
 import 'package:data/service/leaderboard/leaderboard_service.dart';
 import 'package:data/service/match/match_service.dart';
+import 'package:data/service/pocketbase/pocketbase_match_service.dart';
 import 'package:data/service/tournament/tournament_service.dart';
 import 'package:data/storage/app_preferences.dart';
 import 'package:data/utils/combine_latest.dart';
@@ -22,6 +23,7 @@ final homeViewStateProvider =
       ref.read(matchServiceProvider),
       ref.read(tournamentServiceProvider),
       ref.read(leaderboardServiceProvider),
+      ref.read(pocketBaseMatchServiceProvider),
     );
     ref.listen(
         hasUserSession, (_, next) => notifier._onUserSessionUpdate(next));
@@ -33,12 +35,16 @@ class HomeViewNotifier extends StateNotifier<HomeViewState> {
   final MatchService _matchService;
   final TournamentService _tournamentService;
   final LeaderboardService _leaderboardService;
+  final PocketBaseMatchService _pocketBaseMatchService;
   StreamSubscription? _streamSubscription;
+  StreamSubscription? _pocketBaseSubscription;
+  List<MatchModel> _pocketBaseLive = const [];
 
   HomeViewNotifier(
     this._matchService,
     this._tournamentService,
     this._leaderboardService,
+    this._pocketBaseMatchService,
   ) : super(const HomeViewState()) {
     loadData();
   }
@@ -47,7 +53,16 @@ class HomeViewNotifier extends StateNotifier<HomeViewState> {
 
   void loadData() async {
     _streamSubscription?.cancel();
+    _pocketBaseSubscription?.cancel();
     state = state.copyWith(loading: state.matches.isEmpty);
+
+    _pocketBaseSubscription =
+        _pocketBaseMatchService.streamLiveMatches().listen((pbLive) {
+      _pocketBaseLive = pbLive;
+      _applyPocketBaseLive();
+    }, onError: (e) {
+      debugPrint("HomeViewNotifier: PocketBase live stream error -> $e");
+    });
 
     final combineFutures = combineLatest5(
       _matchService.streamActiveRunningMatches(),
@@ -59,10 +74,11 @@ class HomeViewNotifier extends StateNotifier<HomeViewState> {
 
     _streamSubscription = combineFutures.listen(
       (results) {
+        final live = _mergeLive(results.$1);
         state = state.copyWith(
-          matches: [...results.$1, ...results.$2, ...results.$3],
+          matches: [...live, ...results.$2, ...results.$3],
           groupMatches: {
-            MatchStatusLabel.live: results.$1,
+            MatchStatusLabel.live: live,
             MatchStatusLabel.upcoming: results.$2,
             MatchStatusLabel.finished: results.$3,
           },
@@ -73,15 +89,53 @@ class HomeViewNotifier extends StateNotifier<HomeViewState> {
         );
       },
       onError: (e) {
-        state = state.copyWith(error: e, loading: false);
+        // Firestore Spark 429: still show PocketBase live if we have any.
+        final live = _mergeLive(const []);
+        state = state.copyWith(
+          matches: live.isEmpty ? state.matches : live,
+          groupMatches: {
+            ...state.groupMatches,
+            if (live.isNotEmpty) MatchStatusLabel.live: live,
+          },
+          error: live.isEmpty ? e : null,
+          loading: false,
+        );
         debugPrint("HomeViewNotifier: error while load matches -> $e");
       },
+    );
+  }
+
+  List<MatchModel> _mergeLive(List<MatchModel> firestoreLive) {
+    final withoutPb = firestoreLive
+        .where((m) => !PocketBaseMatchService.isPocketBaseMatchId(m.id))
+        .toList();
+    return [..._pocketBaseLive, ...withoutPb];
+  }
+
+  void _applyPocketBaseLive() {
+    final currentLive =
+        state.groupMatches[MatchStatusLabel.live] ?? const <MatchModel>[];
+    final live = _mergeLive(currentLive);
+    final upcoming =
+        state.groupMatches[MatchStatusLabel.upcoming] ?? const <MatchModel>[];
+    final finished =
+        state.groupMatches[MatchStatusLabel.finished] ?? const <MatchModel>[];
+    state = state.copyWith(
+      matches: [...live, ...upcoming, ...finished],
+      groupMatches: {
+        MatchStatusLabel.live: live,
+        MatchStatusLabel.upcoming: upcoming,
+        MatchStatusLabel.finished: finished,
+      },
+      loading: false,
+      error: live.isNotEmpty ? null : state.error,
     );
   }
 
   @override
   void dispose() {
     _streamSubscription?.cancel();
+    _pocketBaseSubscription?.cancel();
     super.dispose();
   }
 }

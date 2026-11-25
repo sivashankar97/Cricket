@@ -23,7 +23,7 @@ import 'package:style/text/app_text_style.dart';
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
-  static const _minPasswordLength = 6;
+  static const _minPasswordLength = 8;
 
   @override
   ConsumerState<SignInScreen> createState() => _SignInScreenState();

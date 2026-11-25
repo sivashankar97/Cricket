@@ -47,9 +47,17 @@ final matchPermissionsProvider =
     var owner = data['created_by'];
     final tournamentId = data['tournament_id'];
     if (tournamentId is String && tournamentId.isNotEmpty) {
-      final tournament =
-          await db.collection('tournaments').doc(tournamentId).get();
-      owner = tournament.data()?['created_by'];
+      try {
+        final tournament =
+            await db.collection('tournaments').doc(tournamentId).get();
+        final tournamentOwner = tournament.data()?['created_by'];
+        if (tournamentOwner != null) {
+          owner = tournamentOwner;
+        }
+      } catch (_) {
+        // Quota / network blip: fall back to match created_by so scoring
+        // isn't locked out for the match owner.
+      }
     }
     final manage = owner == uid;
     final active = data['active_scorer'] as Map<String, dynamic>?;

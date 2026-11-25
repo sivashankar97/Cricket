@@ -26,7 +26,7 @@ async function seed() {
     await setDoc(doc(s, 'phone_index/K1'), { user_id: 'p1', created_by: 'org' });
     await setDoc(doc(s, 'auctions/A'), { admin_ids: ['org'], created_by: 'org', status: 'live' });
     await setDoc(doc(s, 'users/auction_A_x'), { id: 'auction_A_x', name: 'Pool', auction_id: 'A' });
-    await setDoc(doc(s, 'teams/t1'), { id: 't1', team_players: [{ id: 'p1', role: 'player' }] });
+    await setDoc(doc(s, 'teams/t1'), { id: 't1', created_by: 'alice', team_players: [{ id: 'p1', role: 'player' }] });
   });
 }
 
@@ -51,9 +51,11 @@ await check('other team admin edits added player', () => assertSucceeds(updateDo
 await check('auction admin writes auction player (set)', () => assertSucceeds(setDoc(doc(db('org'), 'users/auction_A_x'), { id: 'auction_A_x', name: 'Pool 2', auction_id: 'A' })));
 await check('auction admin creates auction player', () => assertSucceeds(setDoc(doc(db('org'), 'users/auction_A_y'), { id: 'auction_A_y', name: 'New', auction_id: 'A' })));
 await check('scorer writes career stats', () => assertSucceeds(setDoc(doc(db('alice'), 'users/p1/user_stat/test'), { matches: 1 })));
-await check('session write', () => assertSucceeds(setDoc(doc(db('alice'), 'users/alice/user_session/s1'), { id: 's1' })));
+await check('session write', () => assertSucceeds(setDoc(doc(db('alice'), 'users/alice/user_sessions/s1'), { id: 's1' })));
 await check('public reads profile signed out', () => assertSucceeds(getDoc(doc(env.unauthenticatedContext().firestore(), 'users/alice'))));
-await check('teams still writable (unchanged)', () => assertSucceeds(updateDoc(doc(db('alice'), 'teams/t1'), { name: 'X' })));
+await check('team owner can update team', () => assertSucceeds(updateDoc(doc(db('alice'), 'teams/t1'), { name: 'X' })));
+await check('non-owner cannot delete team', () => assertFails(deleteDoc(doc(db('mallory'), 'teams/t1'))));
+await check('cannot write another user session', () => assertFails(setDoc(doc(db('mallory'), 'users/alice/user_sessions/x'), { id: 'x' })));
 await check('register own number', () => assertSucceeds(setDoc(doc(db('alice'), 'phone_index/KA'), { user_id: 'alice', created_by: 'alice', updated_at: serverTimestamp() })));
 await check('free own old number', () => assertSucceeds(deleteDoc(doc(db('alice'), 'phone_index/KA'))));
 await check('look up a number', () => assertSucceeds(getDoc(doc(db('alice'), 'phone_index/K1'))));

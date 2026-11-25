@@ -361,7 +361,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sign_in_password_create_placeholder => 'Choose a password';
 
   @override
-  String get sign_in_password_rule => 'At least 6 characters';
+  String get sign_in_password_rule => 'At least 8 characters';
 
   @override
   String get sign_in_mode_label => 'Sign in or create an account';

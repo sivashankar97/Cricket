@@ -6,3 +6,5 @@ vault/
 dart_defines.env
 khelo/secrets/
 *firebase-adminsdk*.json
+# Local Android debug signing (never commit release keystores)
+khelo/android/app/debug.keystore

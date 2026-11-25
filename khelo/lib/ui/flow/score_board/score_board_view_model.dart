@@ -266,32 +266,25 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
         List<BallScoreModel> currentScoreList =
             state.currentScoresList.toList();
         List<BallScoreModel> previousScoreList =
-            state.currentScoresList.toList();
+            state.previousScoresList.toList();
 
         for (var score in scores) {
-          if (score.type == DocumentChangeType.added) {
-            if (score.ballScore.inning_id == state.currentInning?.id &&
-                !currentScoreList
-                    .map((e) => e.id)
-                    .contains(score.ballScore.id)) {
+          if (score.type == DocumentChangeType.added ||
+              score.type == DocumentChangeType.modified) {
+            if (score.ballScore.inning_id == state.currentInning?.id) {
+              currentScoreList
+                  .removeWhere((element) => element.id == score.ballScore.id);
               currentScoreList.add(score.ballScore);
-            } else if (score.ballScore.inning_id == state.otherInning?.id &&
-                !previousScoreList
-                    .map((e) => e.id)
-                    .contains(score.ballScore.id)) {
+            } else if (score.ballScore.inning_id == state.otherInning?.id) {
+              previousScoreList
+                  .removeWhere((element) => element.id == score.ballScore.id);
               previousScoreList.add(score.ballScore);
             }
           } else if (score.type == DocumentChangeType.removed) {
-            if (score.ballScore.inning_id == state.currentInning?.id &&
-                currentScoreList
-                    .map((e) => e.id)
-                    .contains(score.ballScore.id)) {
+            if (score.ballScore.inning_id == state.currentInning?.id) {
               currentScoreList
                   .removeWhere((element) => element.id == score.ballScore.id);
-            } else if (score.ballScore.inning_id == state.otherInning?.id &&
-                previousScoreList
-                    .map((e) => e.id)
-                    .contains(score.ballScore.id)) {
+            } else if (score.ballScore.inning_id == state.otherInning?.id) {
               previousScoreList
                   .removeWhere((element) => element.id == score.ballScore.id);
             }
@@ -316,7 +309,9 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
         return scores;
       });
       _ballScoreStreamSubscription = ballScoreStream.listen((scores) {
-        if (state.isMatchUpdated) {
+        // Configure even when isMatchUpdated is briefly false after addBall —
+        // otherwise the ball lands in the list but overs/striker never refresh.
+        if (state.match != null && state.currentInning != null) {
           _configureScoringDetails(
               isAfterUndo: scores.length == 1 &&
                   scores.elementAt(0).type == DocumentChangeType.removed);
@@ -665,13 +660,25 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
       final bowlingTeamInningId = state.otherInning?.id;
       if (ballInningId == null ||
           bowlerId == null ||
+          bowlerId.isEmpty ||
           strikerId == null ||
+          strikerId.isEmpty ||
           nonStrikerId == null ||
           matchId == null ||
           battingTeamId == null ||
           battingTeamInningId == null ||
           bowlingTeamId == null ||
           bowlingTeamInningId == null) {
+        // Must clear the in-progress lock — otherwise every later tap is ignored.
+        state = state.copyWith(isActionInProgress: false);
+        if (bowlerId == null || bowlerId.isEmpty) {
+          state = state.copyWith(showSelectBowlerSheet: DateTime.now());
+        } else if (strikerId == null ||
+            strikerId.isEmpty ||
+            ((nonStrikerId?.isEmpty ?? true) && !_isLoneBatter) ||
+            (state.batsMans?.length ?? 0) < (_isLoneBatter ? 1 : 2)) {
+          state = state.copyWith(showSelectPlayerSheet: DateTime.now());
+        }
         return;
       }
 
@@ -724,7 +731,6 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
       }
 
       final updatedPlayer = _getUpdatedOutPlayerStatus(wicketType, playerOutId);
-      state = state.copyWith(isMatchUpdated: false);
 
       final otherBattingInning = state.allInnings.firstWhereOrNull((element) =>
           element.team_id == battingTeamId &&
@@ -753,7 +759,8 @@ class ScoreBoardViewNotifier extends StateNotifier<ScoreBoardViewState> {
         updatedPlayer: updatedPlayer,
         ballsPerOver: _ballsPerOver,
       );
-      state = state.copyWith(isActionInProgress: false);
+      state = state.copyWith(
+          isActionInProgress: false, isMatchUpdated: true);
       _reactToBall(ball);
     } catch (e) {
       debugPrint("ScoreBoardViewNotifier: error while adding ball -> $e");

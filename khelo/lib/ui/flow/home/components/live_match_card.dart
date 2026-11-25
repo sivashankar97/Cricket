@@ -1,6 +1,8 @@
 import 'package:data/api/match/match_model.dart';
+import 'package:data/service/pocketbase/pocketbase_match_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:khelo/components/image_avatar.dart';
 import 'package:khelo/domain/extensions/context_extensions.dart';
 import 'package:khelo/domain/extensions/string_extensions.dart';
@@ -34,7 +36,16 @@ class LiveMatchCard extends StatelessWidget {
     );
 
     return OnTapScale(
-      onTap: () => AppRoute.matchDetailTab(matchId: match.id).push(context),
+      onTap: () {
+        if (PocketBaseMatchService.isPocketBaseMatchId(match.id)) {
+          // Scoreboard/detail for PocketBase matches lands in the next slice.
+          Fluttertoast.showToast(
+            msg: 'PocketBase live match — scoring screen coming next',
+          );
+          return;
+        }
+        AppRoute.matchDetailTab(matchId: match.id).push(context);
+      },
       child: MediaQuery.withNoTextScaling(
         child: Container(
           height: height,
@@ -378,51 +389,9 @@ class LiveMatchCard extends StatelessWidget {
   }
 
   Widget _thisOverRow(BuildContext context) {
-    const balls = ['1', '4', '0', 'W', '6', '•'];
-
-    return FittedBox(
-      fit: BoxFit.scaleDown,
-      alignment: Alignment.centerLeft,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Text(
-            'This over:',
-            style: TextStyle(
-              color: Color(0xFF94A3B8),
-              fontSize: 11.5,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: 8),
-          for (final ball in balls)
-            Container(
-              width: 22,
-              height: 22,
-              margin: const EdgeInsets.only(right: 6),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: ball == '4'
-                    ? const Color(0xFF2563EB) // Blue for boundary 4
-                    : ball == '6'
-                        ? const Color(0xFF10B981) // Green for boundary 6
-                        : ball == 'W'
-                            ? const Color(0xFFEF4444) // Red for wicket
-                            : const Color(0xFF1E293B), // Dark slate
-              ),
-              child: Text(
-                ball,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
+    // Placeholder balls were confusing (totals 0/0 while "this over" looked live).
+    // Hide until ball-by-ball for the current over is wired from Firestore.
+    return const SizedBox.shrink();
   }
 
   Widget _scorecardButton(BuildContext context) {

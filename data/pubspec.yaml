@@ -42,6 +42,7 @@ dependencies:
   # state management
   flutter_riverpod: ^2.6.1
   hooks_riverpod: ^2.6.1
+  pocketbase: ^0.26.0
 
 dev_dependencies:
   flutter_test:

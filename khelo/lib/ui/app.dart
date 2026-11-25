@@ -25,6 +25,20 @@ class App extends ConsumerStatefulWidget {
 
 class _AppState extends ConsumerState<App> {
   late GoRouter _router;
+  final _authRefresh = ValueNotifier<int>(0);
+
+  /// Deep-linkable routes that need a real (non-guest) session.
+  /// Firestore rules remain the real ACL; this is UX / deep-link hygiene.
+  static const _authRequiredPrefixes = [
+    AppRoute.pathScoreBoard,
+    AppRoute.pathAddMatch,
+    AppRoute.pathAddMatchOfficials,
+    AppRoute.pathMakeTeamAdmin,
+    AppRoute.pathAuctionForm,
+    AppRoute.pathAuctionPlayers,
+    AppRoute.pathAuctionRetained,
+    AppRoute.pathEditProfile,
+  ];
 
   @override
   void initState() {
@@ -44,12 +58,32 @@ class _AppState extends ConsumerState<App> {
 
     _router = GoRouter(
       initialLocation: initialRoute.path,
+      refreshListenable: _authRefresh,
+      redirect: (context, state) {
+        final loggedIn = ref.read(hasUserSession);
+        final loc = state.matchedLocation;
+        final needsAuth =
+            _authRequiredPrefixes.any((p) => loc == p || loc.startsWith('$p/'));
+        if (!loggedIn && needsAuth) {
+          return AppRoute.signIn.path;
+        }
+        return null;
+      },
       routes: AppRoute.routes,
     );
   }
 
   @override
+  void dispose() {
+    _authRefresh.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ref.listen(currentUserPod, (_, __) {
+      _authRefresh.value++;
+    });
     final isDarkMode = context.brightness == Brightness.dark;
     final colorScheme = isDarkMode ? appColorSchemeDark : appColorSchemeLight;
 

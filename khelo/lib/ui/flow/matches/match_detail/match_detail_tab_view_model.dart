@@ -52,7 +52,11 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
     this._tournamentService,
   ) : super(const MatchDetailTabState());
 
-  int _ballsLoaded = 0;
+  /// Full ball set for this match — scorecard is rebuilt from this, not from
+  /// a single snapshot's docChanges (those only contain deltas after the first
+  /// emission, which was wiping the scorecard while scoring).
+  final Map<String, BallScoreModel> _ballsById = {};
+  String? _ballSubscriptionKey;
 
   void setData(String matchId) {
     _matchId = matchId;
@@ -69,6 +73,13 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
       _matchStreamSubscription = matchInningStream.listen((data) {
         final match = data.$1;
         final innings = data.$2;
+        final previousInningKey =
+            state.allInnings.map((inning) => inning.id).toList()..sort();
+        final nextInningKey = innings.map((inning) => inning.id).toList()
+          ..sort();
+        final inningsChanged =
+            previousInningKey.join(',') != nextInningKey.join(',');
+
         state = state.copyWith(match: match);
 
         // expand by default: winner team's last inning or currently running innings, all innings.first
@@ -90,7 +101,16 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
           error: null,
         );
 
-        loadBallScores();
+        // Re-subscribe only when innings appear/change — every scored ball
+        // also updates the match doc, and re-subscribing on that was clearing
+        // the scorecard via partial docChanges.
+        if (inningsChanged || _ballScoreStreamSubscription == null) {
+          loadBallScores(force: inningsChanged);
+        } else if (state.overList.isEmpty && _ballsById.isNotEmpty) {
+          _rebuildOverListFromBalls();
+        } else if (state.loading) {
+          state = state.copyWith(loading: false);
+        }
       }, onError: (e) {
         debugPrint(
             "MatchDetailTabViewNotifier: error while loading match and inning -> $e");
@@ -103,60 +123,42 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
     }
   }
 
-  void loadBallScores() {
+  void loadBallScores({bool force = false}) {
     if (state.allInnings.isEmpty) {
       state = state.copyWith(loading: false);
       return;
     }
-    if (state.loadingBallScoreMore) return;
-    state = state.copyWith(loadingBallScoreMore: _ballsLoaded > 0);
-    final inningIds = state.allInnings.map((inning) => inning.id).toList();
+    final inningIds = state.allInnings.map((inning) => inning.id).toList()
+      ..sort();
+    final key = inningIds.join(',');
+    if (!force &&
+        key == _ballSubscriptionKey &&
+        _ballScoreStreamSubscription != null) {
+      return;
+    }
+
+    _ballSubscriptionKey = key;
+    if (force) {
+      _ballsById.clear();
+    }
+    _ballScoreStreamSubscription?.cancel();
+    state = state.copyWith(loadingBallScoreMore: false);
+
+    // No limit: scorecard needs every ball. A sliding window + docChanges
+    // removed older balls from the UI while someone was scoring.
     _ballScoreStreamSubscription = _ballScoreService
-        .streamBallScoresByInningIds(
-      inningIds: inningIds,
-      limit: _ballsLoaded + 12,
-    )
+        .streamBallScoresByInningIds(inningIds: inningIds)
         .listen(
       (scores) {
-        _ballsLoaded = scores.length;
-
-        final sortedList = scores.toList();
-        sortedList.sort((a, b) =>
-            (a.ballScore.score_time ?? a.ballScore.time)?.compareTo(
-                b.ballScore.score_time ?? b.ballScore.time ?? DateTime.now()) ??
-            0);
-
-        final List<OverSummary> overList = [];
-        for (final score in sortedList) {
-          if (score.type == DocumentChangeType.added) {
-            final overSummary =
-                _configureOverSummary(overList, score.ballScore);
-            overList.removeWhere((element) =>
-                element.overNumber == overSummary?.overNumber &&
-                element.inning_id == overSummary?.inning_id);
-            if (overSummary != null) {
-              overList.add(overSummary);
-            }
-          } else if (score.type == DocumentChangeType.removed) {
-            final overSummary =
-                _configureOverSummary(overList, score.ballScore, isUndo: true);
-            overList.removeWhere((element) =>
-                element.overNumber == score.ballScore.over_number &&
-                element.inning_id == score.ballScore.inning_id);
-            if (overSummary != null) {
-              overList.add(overSummary);
-            }
+        for (final score in scores) {
+          final ball = score.ballScore;
+          if (score.type == DocumentChangeType.removed) {
+            _ballsById.remove(ball.id);
+          } else {
+            _ballsById[ball.id] = ball;
           }
         }
-
-        overList.sort((a, b) => a.time.compareTo(b.time));
-        state = state.copyWith(
-          overList: overList,
-          loadingBallScoreMore: false,
-          loading: false,
-          error: null,
-        );
-        changeHighlightFilter();
+        _rebuildOverListFromBalls();
       },
       onError: (e, stack) {
         state = state.copyWith(error: e, loading: false);
@@ -164,6 +166,34 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
             "MatchDetailTabViewNotifier: error while load ball scores -> $e");
       },
     );
+  }
+
+  void _rebuildOverListFromBalls() {
+    final sortedBalls = _ballsById.values.toList()
+      ..sort((a, b) =>
+          (a.score_time ?? a.time)
+              ?.compareTo(b.score_time ?? b.time ?? DateTime.now()) ??
+          0);
+
+    final List<OverSummary> overList = [];
+    for (final ball in sortedBalls) {
+      final overSummary = _configureOverSummary(overList, ball);
+      overList.removeWhere((element) =>
+          element.overNumber == overSummary?.overNumber &&
+          element.inning_id == overSummary?.inning_id);
+      if (overSummary != null) {
+        overList.add(overSummary);
+      }
+    }
+
+    overList.sort((a, b) => a.time.compareTo(b.time));
+    state = state.copyWith(
+      overList: overList,
+      loadingBallScoreMore: false,
+      loading: false,
+      error: null,
+    );
+    changeHighlightFilter();
   }
 
   OverSummary? _configureOverSummary(
@@ -394,6 +424,8 @@ class MatchDetailTabViewNotifier extends StateNotifier<MatchDetailTabState> {
 
   Future<void> onResume() async {
     await _cancelStreamSubscription();
+    _ballsById.clear();
+    _ballSubscriptionKey = null;
     _loadMatchesAndInning();
   }
 

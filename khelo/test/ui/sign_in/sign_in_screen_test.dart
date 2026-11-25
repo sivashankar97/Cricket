@@ -56,13 +56,13 @@ void main() {
     expect(_submitButton(tester).enabled, isFalse);
 
     await _type(tester, 'Email', 'player@example');
-    await _type(tester, 'Password', 'secret1');
+    await _type(tester, 'Password', 'secret12');
     expect(_submitButton(tester).enabled, isFalse);
 
     await _type(tester, 'Email', 'player@example.com');
     expect(_submitButton(tester).enabled, isTrue);
 
-    await _type(tester, 'Password', '12345');
+    await _type(tester, 'Password', '1234567');
     expect(_submitButton(tester).enabled, isFalse);
     await tester.pump(const Duration(seconds: 3));
   });
@@ -75,11 +75,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Create your account'), findsOneWidget);
-    expect(find.text('At least 6 characters'), findsOneWidget);
+    expect(find.text('At least 8 characters'), findsOneWidget);
     expect(find.text('Forgot password?'), findsNothing);
     expect(find.byIcon(Icons.radio_button_unchecked), findsOneWidget);
 
-    await _type(tester, 'Password', 'secret1');
+    await _type(tester, 'Password', 'secret12');
     expect(find.byIcon(Icons.check_circle_rounded), findsOneWidget);
     await tester.pump(const Duration(seconds: 1));
   });

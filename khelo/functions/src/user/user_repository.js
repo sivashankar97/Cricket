@@ -68,21 +68,27 @@ const firebaseAuthMiddleware = (userRepository) => {
     let _a;
     const idToken = (_a = req.get("Authorization")) === null || _a === void 0 ? void 0 : _a.split("Bearer ")[1];
     if (!idToken) {
-      res.status(403).send("Unauthorized");
+      res.status(401).send("Unauthorized");
       return;
     }
 
-    const auth = await admin.auth().verifyIdToken(idToken);
+    let auth;
+    try {
+      auth = await admin.auth().verifyIdToken(idToken);
+    } catch (e) {
+      console.error("UserRepository: invalid id token", e.message || e);
+      res.status(401).send("Unauthorized");
+      return;
+    }
     if (!auth) {
-      res.status(403).send("Unauthorized");
+      res.status(401).send("Unauthorized");
       return;
     }
     const user = await userRepository.getUser(auth.uid);
     if (!user) {
-      res.status(403).send("Unauthorized");
+      res.status(401).send("Unauthorized");
       return;
     }
-    console.log("Authenticated user: ", auth.uid);
     req.headers["auth-uid"] = auth.uid;
     next();
   };
