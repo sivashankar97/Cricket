@@ -33,16 +33,20 @@ class PocketBaseMatchService {
     Future<void> refresh() async {
       if (controller.isClosed) return;
       try {
+        // PB 0.40 rejects sort on system `created`/`updated` for this
+        // collection; `start_at` is a real date field and works.
         final result = await _pb.collection('matches').getList(
               page: 1,
               perPage: 50,
               filter: 'match_status = 2',
-              sort: '-updated',
+              sort: '-start_at',
             );
         if (!controller.isClosed) {
           controller.add(result.items.map(_toMatch).toList());
         }
-      } catch (_) {
+      } catch (e) {
+        // ignore: avoid_print
+        print('PocketBaseMatchService.refresh failed: $e');
         if (!controller.isClosed) controller.add(const []);
       }
     }
